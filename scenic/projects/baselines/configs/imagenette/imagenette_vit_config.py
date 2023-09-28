@@ -41,7 +41,7 @@ Note: you can also use ImageNet input pipeline from big transfer pipeline:
 
 import ml_collections
 
-_IMAGENET_TRAIN_SIZE = 1281167
+_IMAGENET_TRAIN_SIZE = 9469
 VARIANT = 'B/16'
 
 
