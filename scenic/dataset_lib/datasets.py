@@ -37,7 +37,7 @@ _IMPORT_TABLE = {
     'imagenet': 'scenic.dataset_lib.imagenet_dataset',
     'tinyImagenet': 'scenic.dataset_lib.tinyImagenet_dataset',
     'fashion_mnist': 'scenic.dataset_lib.fashion_mnist_dataset',
-    'mnist': 'scenic.dataset_lib.mnist_dataset',
+    #'mnist': 'scenic.dataset_lib.mnist_dataset',
     'bair': 'scenic.dataset_lib.bair_dataset',
     'oxford_pets': 'scenic.dataset_lib.oxford_pets_dataset',
     'svhn': 'scenic.dataset_lib.svhn_dataset',
