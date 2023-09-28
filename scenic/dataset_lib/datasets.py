@@ -101,9 +101,12 @@ class DatasetRegistry(object):
     Raises:
       KeyError: If the dataset is not found.
     """
+    logging.info(name not in cls._REGISTRY)
+    logging.info(cls._REGISTRY)
+    logging.info(_IMPORT_TABLE)
     if name not in cls._REGISTRY:
-      print(name)
-      print('--------------------------')
+      logging.info(name)
+      logging.info('--------------------------')
       if name in _IMPORT_TABLE:
         module = _IMPORT_TABLE[name]
         importlib.import_module(module)
