@@ -34,7 +34,7 @@ from scenic.dataset_lib import dataset_utils
 _IMPORT_TABLE = {
     'cifar10': 'scenic.dataset_lib.cifar10_dataset',
     'cityscapes': 'scenic.dataset_lib.cityscapes_dataset',
-    'imagenet': 'scenic.dataset_lib.imagenet_dataset',
+    'tinyImagenet': 'scenic.dataset_lib.tinyImagenet_dataset',
     'tinyImagenet': 'scenic.dataset_lib.tinyImagenet_dataset',
     'fashion_mnist': 'scenic.dataset_lib.fashion_mnist_dataset',
     'mnist': 'scenic.dataset_lib.mnist_dataset',
@@ -101,8 +101,7 @@ class DatasetRegistry(object):
     Raises:
       KeyError: If the dataset is not found.
     """
-    logging.info('result aqui.')
-    logging.info(f'{name}')
+
     if name not in cls._REGISTRY:
       if name in _IMPORT_TABLE:
         module = _IMPORT_TABLE[name]
