@@ -255,7 +255,7 @@ def imagenet_load_split(batch_size,
     label = tf.one_hot(label, NUM_CLASSES) if onehot_labels else label
     return {'inputs': image, 'label': label}
 
-  dataset_builder = tfds.builder('imagenet2012:5.*.*')
+  dataset_builder = tfds.builder('imagenette')
   # Download dataset:
   dataset_builder.download_and_prepare()
   ds = dataset_builder.as_dataset(
