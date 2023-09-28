@@ -35,7 +35,7 @@ _IMPORT_TABLE = {
     'cifar10': 'scenic.dataset_lib.cifar10_dataset',
     'cityscapes': 'scenic.dataset_lib.cityscapes_dataset',
     'imagenet': 'scenic.dataset_lib.imagenet_dataset',
-    'Dimagenette': 'scenic.dataset_lib.imagenette_dataset',
+    'tinyImagenet': 'scenic.dataset_lib.tinyImagenet_dataset',
     'fashion_mnist': 'scenic.dataset_lib.fashion_mnist_dataset',
     'mnist': 'scenic.dataset_lib.mnist_dataset',
     'bair': 'scenic.dataset_lib.bair_dataset',

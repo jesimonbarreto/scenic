@@ -53,7 +53,7 @@ def get_config(runlocal=''):
   config = ml_collections.ConfigDict()
   config.experiment_name = 'imagenette-vit'
   # Dataset.
-  config.dataset_name = 'Dimagenette'
+  config.dataset_name = 'tinyImagenet'
   config.data_dtype_str = 'float32'
   config.dataset_configs = ml_collections.ConfigDict()
 
