@@ -32,7 +32,7 @@ from scenic.dataset_lib import dataset_utils
 #  requires every new dataset to modify this import routing table. Going forward
 #  we should find a way to avoid that.
 _IMPORT_TABLE = {
-    """'cifar10': 'scenic.dataset_lib.cifar10_dataset',
+    'cifar10': 'scenic.dataset_lib.cifar10_dataset',
     'cityscapes': 'scenic.dataset_lib.cityscapes_dataset',
     'imagenet': 'scenic.dataset_lib.imagenet_dataset',
     'tinyImagenet': 'scenic.dataset_lib.tinyImagenet_dataset',
@@ -63,7 +63,7 @@ _IMPORT_TABLE = {
     ),
     'robust_segvit_variants': (
         'scenic.projects.robust_segvit.datasets.segmentation_variants'
-    ),"""
+    ),
 }
 
 
