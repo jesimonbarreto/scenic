@@ -160,7 +160,7 @@ def initialize_model(
   count_flops = config.get(
       'count_flops', ml_collections.ConfigDict({'count_flops': True})
   )
-  if count_flops:
+  """if count_flops:
     variables = {'params': init_params, **init_model_state}
     flops = debug_utils.compute_flops(
         flax_model_apply_fn=functools.partial(
@@ -174,9 +174,9 @@ def initialize_model(
         input_spec=count_flops.get('input_spec', input_spec),
         fuse_multiply_add=count_flops.get('fuse_multiply_add', True),
     )
-    gflops = flops / (10**9)
-  else:
-    gflops = None
+    gflops = flops / (10**9)"""
+  ###else:
+  gflops = None
 
   return init_params, init_model_state, num_trainable_params, gflops
 

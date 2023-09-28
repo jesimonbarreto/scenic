@@ -26,6 +26,7 @@ from scenic.dataset_lib import datasets
 import tensorflow as tf
 import tensorflow_datasets as tfds
 
+
 TRAIN_IMAGES = 9469
 EVAL_IMAGES = 3925
 NUM_CLASSES = 10
