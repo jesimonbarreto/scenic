@@ -101,8 +101,8 @@ class DatasetRegistry(object):
     Raises:
       KeyError: If the dataset is not found.
     """
-    raise KeyError(f'Unknown dataset ({name}). Did you import the dataset '
-                       f'module explicitly?')
+    logging.info('result aqui.')
+    logging.info(f'{name}')
     if name not in cls._REGISTRY:
       if name in _IMPORT_TABLE:
         module = _IMPORT_TABLE[name]
