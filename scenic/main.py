@@ -14,7 +14,7 @@
 
 """Main file for Scenic."""
 
-from absl import flags
+"""from absl import flags
 from absl import logging
 from clu import metric_writers
 from flax.training import checkpoints
@@ -25,7 +25,7 @@ from scenic import app
 from scenic.model_lib import models
 from scenic.train_lib import train_utils
 from scenic.train_lib import trainers
-
+"""
 
 FLAGS = flags.FLAGS
 
