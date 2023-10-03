@@ -26,7 +26,6 @@ from scenic.model_lib import models
 from scenic.train_lib import train_utils
 from scenic.train_lib import trainers
 from jax_smi import initialise_tracking
-initialise_tracking()
 
 FLAGS = flags.FLAGS
 
@@ -34,7 +33,7 @@ FLAGS = flags.FLAGS
 def main(rng: jnp.ndarray, config: ml_collections.ConfigDict, workdir: str,
          writer: metric_writers.MetricWriter) -> None:
   """Main function for Scenic."""
-
+  initialise_tracking()
   model_cls = models.get_model_cls(config.model_name)
   data_rng, rng = jax.random.split(rng)
 
