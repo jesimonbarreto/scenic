@@ -25,7 +25,8 @@ from scenic import app
 from scenic.model_lib import models
 from scenic.train_lib import train_utils
 from scenic.train_lib import trainers
-
+from jax_smi import initialise_tracking
+initialise_tracking()
 
 FLAGS = flags.FLAGS
 
