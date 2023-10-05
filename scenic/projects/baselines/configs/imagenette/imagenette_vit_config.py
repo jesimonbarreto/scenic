@@ -104,7 +104,7 @@ def get_config(runlocal=''):
   config.label_smoothing = None
   config.num_training_epochs = 90
   config.log_eval_steps = 1000
-  config.batch_size = 8 if runlocal else 4096
+  config.batch_size = 8 if runlocal else 2048
   config.rng_seed = 42
   config.init_head_bias = -10.0
 
