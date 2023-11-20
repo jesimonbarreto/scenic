@@ -206,7 +206,7 @@ def train(
   lead_host = jax.process_index() == 0
 
   # Build the loss_fn, metrics, and flax_model.
-  model = vit.ViTLOCAModel(config, dataset.meta_data)
+  model = vit.ViTDinoModel(config, dataset.meta_data)
 
   dino_loss = vit.DINOLoss(config)
 
