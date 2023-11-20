@@ -6,7 +6,7 @@ from typing import Optional
 from absl import logging
 from flax import jax_utils
 import jax.numpy as jnp
-from scenic.dataset_lib import dataset_utils
+import dino_dataset
 from scenic.dataset_lib import datasets
 from scenic.dataset_lib.big_transfer import builder
 

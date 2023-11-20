@@ -32,8 +32,7 @@ def dino_train_step(
     train_state: utils.TrainState,
     batch: Batch,
     *,
-    flax_model_teacher: nn.Module,
-    flax_model_student: nn.Module,
+    flax_model: nn.Module,
     momentum_parameter_scheduler: Callable[[int], float],
     loss_fn: Any,
     metrics_fn: Any,
@@ -79,7 +78,7 @@ def dino_train_step(
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
     
-    _, teacher_out, _, _ = flax_model_teacher.apply(
+    _, teacher_out, _, _ = flax_model.apply(
         {'params': train_state.ema_params},
         batch['x1'][:2],
         seqlen=config.reference_seqlen,
@@ -88,7 +87,7 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    _, student_out, _, _ = flax_model_student.apply(
+    _, student_out, _, _ = flax_model.apply(
         {'params': params},
         batch['x1'],
         seqlen=config.reference_seqlen,
@@ -258,7 +257,7 @@ def train(
       functools.partial(
           dino_train_step,
           flax_model=model.flax_model,
-          loss_fn=model.loss_function,
+          loss_fn=dino_loss.forward,
           metrics_fn=model.get_metrics_fn(),
           momentum_parameter_scheduler=momentum_parameter_scheduler,
           config=config),
