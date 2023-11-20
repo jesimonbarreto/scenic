@@ -257,7 +257,7 @@ def train(
       functools.partial(
           dino_train_step,
           flax_model=model.flax_model,
-          loss_fn=dino_loss.forward,
+          loss_fn=dino_loss,
           metrics_fn=model.get_metrics_fn(),
           momentum_parameter_scheduler=momentum_parameter_scheduler,
           config=config),

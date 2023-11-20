@@ -338,7 +338,7 @@ class ViTDinoModel(base_model.BaseModel):
 
   
   
-class DINOLoss():
+class DINOLoss(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.student_temp = config.student_temp
@@ -354,8 +354,8 @@ class DINOLoss():
                         config.teacher_temp, config.warmup_teacher_temp_epochs),
             jnp.ones(config.num_training_epochs - config.warmup_teacher_temp_epochs) * config.teacher_temp
         ))
-
-    def forward(self, student_output, teacher_output, epoch):
+    @nn.compact
+    def __call__(self, student_output, teacher_output, epoch):
         """
         Cross-entropy between softmax outputs of the teacher and student networks.
         """
