@@ -22,7 +22,7 @@ def get_dataset(*,
                 prefetch_buffer_size=2,
                 dataset_configs=None,
                 dataset_service_address: Optional[str] = None):
-  """Returns a generator for training LOCA on a specified dataset.
+  """Returns a generator for training Dino on a specified dataset.
 
   Args:
     batch_size: int; Determines the training batch size.
@@ -72,7 +72,7 @@ def get_dataset(*,
   train_iter = map(dataset_utils.tf_to_numpy, train_iter)
   train_iter = map(shard_batches, train_iter)
   train_iter = jax_utils.prefetch_to_device(train_iter, prefetch_buffer_size)
-  input_shape = (-1,) + tuple(train_ds.element_spec['reference'].shape[1:])
+  input_shape = (-1,) + tuple(train_ds.element_spec['x1'].shape[1:])
   meta_data = {
       'input_shape': input_shape,
       'num_train_examples': n_train_ex,

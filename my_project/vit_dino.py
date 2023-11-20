@@ -338,22 +338,21 @@ class ViTDinoModel(base_model.BaseModel):
 
   
   
-class DINOLoss(nn.Module):
-    def __init__(self, out_dim, ncrops, warmup_teacher_temp, teacher_temp,
-                 warmup_teacher_temp_epochs, nepochs, student_temp=0.1,
-                 center_momentum=0.9):
+class DINOLoss():
+    def __init__(self, config):
         super().__init__()
-        self.student_temp = student_temp
-        self.center_momentum = center_momentum
-        self.ncrops = ncrops
+        self.student_temp = config.student_temp
+        self.center_momentum = config.center_momentum
+        self.ncrops = config.ncrops
+        out_dim = config.head_output_dim
         #self.register_buffer("center", jnp.zeros(1, out_dim))
         self.center = self.param("center", lambda key, shape: nn.initializers.zeros()(key, shape), shape=(1, out_dim), trainable=False)
         # we apply a warm up for the teacher temperature because
         # a too high temperature makes the training instable at the beginning
         self.teacher_temp_schedule = jnp.concatenate((
-            jnp.linspace(warmup_teacher_temp,
-                        teacher_temp, warmup_teacher_temp_epochs),
-            jnp.ones(nepochs - warmup_teacher_temp_epochs) * teacher_temp
+            jnp.linspace(config.warmup_teacher_temp,
+                        config.teacher_temp, config.warmup_teacher_temp_epochs),
+            jnp.ones(config.num_training_epochs - config.warmup_teacher_temp_epochs) * config.teacher_temp
         ))
 
     def forward(self, student_output, teacher_output, epoch):

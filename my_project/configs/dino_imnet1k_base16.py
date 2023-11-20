@@ -10,7 +10,7 @@ STDDEV_RGB = [0.229, 0.224, 0.225]
 
 
 def get_config():
-  """Returns the default config for a 100 epoch LOCA training on ImageNet2012."""
+  """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
 
   config = ml_collections.ConfigDict()
   config.experiment_name = '100ep_run'
@@ -35,7 +35,7 @@ def get_config():
       '|value_range(0, 1, data_key="x2")' +
       '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
       '|random_grayscale(0.2, data_key="x2")' +
-      '|random_blur(1.0, data_key="x2")' +
+      '|random_blur(0.1, data_key="x2")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")')
   """ +
       ''.join([f'|copy("image", "query{i}")' for i in range(n_queries)]) +
@@ -100,6 +100,15 @@ def get_config():
   steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
   total_steps = config.num_training_epochs * steps_per_epoch
+  config.global_crops_scale = (0.4, 1.0) 
+  config.local_crops_number = 8 #if 0, global scale = 0.14,1.0
+  config.local_crops_scale = (0.05,0.4)
+  config.student_temp = 0.1
+  config.center_momentum = 0.9
+  config.ncrops = 8
+  config.warmup_teacher_temp = 0.04
+  config.teacher_temp = 0.04
+  config.warmup_teacher_temp_epochs = 0
 
   # Learning rate.
   #cosine schedule lr

@@ -18,8 +18,8 @@ import jax.profiler
 import ml_collections
 import optax
 from scenic.dataset_lib import dataset_utils
-from scenic.projects.loca import utils
-from scenic.projects.loca import vit
+import utils_dino as utils
+import vit_dino as vit
 from scenic.train_lib import lr_schedules
 from scenic.train_lib import train_utils
 import math, sys
@@ -78,8 +78,9 @@ def dino_train_step(
     # get features
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
+    
     _, teacher_out, _, _ = flax_model_teacher.apply(
-        {'params': train_state.ema_params if use_ema else params},
+        {'params': train_state.ema_params},
         batch['x1'][:2],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
@@ -88,7 +89,7 @@ def dino_train_step(
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
     _, student_out, _, _ = flax_model_student.apply(
-        {'params': train_state.ema_params if use_ema else params},
+        {'params': params},
         batch['x1'],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
@@ -97,7 +98,7 @@ def dino_train_step(
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
 
     
-    loss_dino = loss_fn(student_out, teacher_out, step)
+    loss_dino = loss_fn(student_out, teacher_out, math.floor(step/config.steps_per_epoch))
 
     if not math.isfinite(loss_dino):
       print("Loss is {}, stopping training".format(jnp.asarray(loss_dino) ), force=True)
@@ -207,6 +208,8 @@ def train(
 
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTLOCAModel(config, dataset.meta_data)
+
+  dino_loss = vit.DINOLoss(config)
 
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
