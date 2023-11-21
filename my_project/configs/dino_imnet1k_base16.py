@@ -53,7 +53,7 @@ def get_config():
   
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.dataset = 'mnist'
+  config.dataset_configs.dataset = 'cifar10'
   config.dataset_configs.train_split = 'train'
 
   # Model.
