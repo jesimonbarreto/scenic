@@ -26,8 +26,6 @@ def get_config():
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "x1")' +
-      '|init_patch_matching_tracker(14, "target_mask")' +
-      '|init_box_tracker("target_box")' +
       f'|cropflip_generatemask({reference_resolution}, 32, flip=False, inkey=("x1", "target_mask", "target_box"), outkey=("x1", "target_mask", "target_box"))' +
       '|value_range(0, 1, data_key="x1")' +
       '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
