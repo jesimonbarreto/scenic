@@ -283,7 +283,7 @@ def imagenet_load_split(batch_size,
   ds = ds.prefetch(prefetch_buffer_size)
   return ds
 
-@datasets.add_dataset('tinyImagenet')
+@datasets.add_dataset('imagenette')
 def get_dataset(*,
                 batch_size,
                 eval_batch_size,
