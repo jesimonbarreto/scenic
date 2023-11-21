@@ -42,11 +42,14 @@ def get_dataset(*,
   del eval_batch_size, rng
   logging.info('Loading train split of the %s for Dino training.',
                dataset_configs.dataset)
+  
+  logging.info('Loading train split of the %s for Dino training.',
+               dataset_configs.get('dataset_dir'))
 
   train_ds = dataset_utils.get_data(
       dataset=dataset_configs.dataset,
       split=dataset_configs.train_split,
-      #data_dir=dataset_configs.get('dataset_dir'),
+      data_dir=dataset_configs.get('dataset_dir'),
       batch_size=batch_size,
       preprocess_fn=builder.get_preprocess_fn(dataset_configs.pp_train),
       shuffle_buffer_size=dataset_configs.shuffle_buffer_size,
