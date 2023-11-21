@@ -346,7 +346,7 @@ class DINOLoss(nn.Module):
         self.ncrops = config.ncrops
         out_dim = config.model.head_output_dim
         shapex = (1,out_dim)
-        self.center =self.register_buffer("center", jnp.zeros(1, out_dim))
+        #self.center =self.register_buffer("center", jnp.zeros(1, out_dim))
         #self.center = self.param('center', lambda rng, shape: jnp.zeros(shapex))
         # we apply a warm up for the teacher temperature because
         # a too high temperature makes the training instable at the beginning
