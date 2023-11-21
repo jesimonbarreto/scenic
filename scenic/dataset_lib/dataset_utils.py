@@ -618,6 +618,9 @@ def get_data(dataset,
              dataset_service_address=None,
              skip_decode=('image',)):
   """API kept for backwards compatibility."""
+  logging.info('Loading train split of the %s for Dino training.',
+               data_dir)
+  logging.info('Aqui Aqui.')
   data = get_dataset_tfds(
       dataset=dataset,
       split=split,
