@@ -634,7 +634,7 @@ def save_examples_images(*, ground_truth_path, pred_path, tfds_name, split,
 
   images = list(
       tfds.load(
-          tfds_name, split=split,
+          tfds_name, split=split, download = True,
           data_dir=tfds_data_dir).take(num_images).as_numpy_iterator())
 
   # Plot and save images:
