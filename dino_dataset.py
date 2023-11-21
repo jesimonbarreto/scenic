@@ -42,9 +42,6 @@ def get_dataset(*,
   del eval_batch_size, rng
   logging.info('Loading train split of the %s for Dino training.',
                dataset_configs.dataset)
-  
-  logging.info('Loading train split of the %s for Dino training.',
-               dataset_configs.get('dataset_dir'))
 
   train_ds = dataset_utils.get_data(
       dataset=dataset_configs.dataset,
@@ -55,7 +52,7 @@ def get_dataset(*,
       shuffle_buffer_size=dataset_configs.shuffle_buffer_size,
       prefetch=dataset_configs.get('prefetch_to_host', 2),
       drop_remainder=True,
-      cache=False,
+      cache=True,
       ignore_errors=True)
 
   if dataset_service_address:

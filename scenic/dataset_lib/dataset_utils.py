@@ -625,6 +625,8 @@ def get_data(dataset,
       data_dir=data_dir,
       skip_decode=skip_decode,
   )
+  logging.info('Loading train split of the %s for Dino training.',
+               data_dir)
   if 'train' not in split:
     dataset_service_address = None
   return make_pipeline(
