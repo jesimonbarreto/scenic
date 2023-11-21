@@ -54,7 +54,7 @@ def get_dataset(*,
       shuffle_buffer_size=dataset_configs.shuffle_buffer_size,
       prefetch=dataset_configs.get('prefetch_to_host', 2),
       drop_remainder=True,
-      cache=True,
+      cache=False,
       ignore_errors=True)
 
   if dataset_service_address:
