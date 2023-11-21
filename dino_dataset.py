@@ -42,6 +42,8 @@ def get_dataset(*,
   del eval_batch_size, rng
   logging.info('Loading train split of the %s for Dino training.',
                dataset_configs.dataset)
+  n_train_ex = dataset_utils.get_num_examples(dataset_configs.dataset,
+                                              dataset_configs.train_split)
 
   train_ds = dataset_utils.get_data(
       dataset=dataset_configs.dataset,
