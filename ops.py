@@ -205,6 +205,16 @@ def cropflip_generatemask(resize_size=224, area_min=5, area_max=100, flip=True,
 
   return _cropflip_generatemask
 
+@registry.Registry.register("preprocess_ops.copy_file", "function")
+@ThreeInKeysThreeOutKeys()
+@BatchedImagePreprocessingWithMaskAndBox()
+def copy_file(resize_size=224):
+  """Crop and flip an image and keep track of these operations with a mask."""
+  def copy_file(image):
+    orig_shape = tf.shape(image)
+    return image
+
+  return copy_file
 
 @registry.Registry.register("preprocess_ops.flip_with_mask", "function")
 @TwoInKeysTwoOutKeys()
