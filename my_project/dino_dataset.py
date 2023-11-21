@@ -11,7 +11,7 @@ from scenic.dataset_lib import datasets
 from scenic.dataset_lib.big_transfer import builder
 
 
-@datasets.add_dataset('dino_dataset')
+@datasets.add_dataset('loca_dataset')
 def get_dataset(*,
                 batch_size,
                 eval_batch_size,
