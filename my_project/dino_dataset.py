@@ -73,6 +73,7 @@ def get_dataset(*,
   train_iter = map(shard_batches, train_iter)
   train_iter = jax_utils.prefetch_to_device(train_iter, prefetch_buffer_size)
   input_shape = (-1,) + tuple(train_ds.element_spec['x1'].shape[1:])
+  logging.info('input_shape details %s', input_shape)
   meta_data = {
       'input_shape': input_shape,
       'num_train_examples': n_train_ex,
