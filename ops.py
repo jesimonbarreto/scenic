@@ -212,7 +212,7 @@ def copy_file(resize_size=224):
   """Crop and flip an image and keep track of these operations with a mask."""
   def copy_file(image):
     orig_shape = tf.shape(image)
-    return image
+    return image,image,image
 
   return copy_file
 

@@ -26,7 +26,7 @@ def get_config():
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "x1")' +
-      f'|copy_file({reference_resolution}, inkey=("x1"), outkey=("x1"))'
+      f'|copy_file({reference_resolution}, inkey=("x1","x1","x1"), outkey=("x1","x1","x1"))'
       '|value_range(0, 1, data_key="x1")' +
       '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
       '|random_grayscale(0.2, data_key="x1")' +
