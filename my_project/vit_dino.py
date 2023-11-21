@@ -174,7 +174,7 @@ class ViTDINO(nn.Module):
       if len(idx_kept_tokens) < self.n_ref_positions:
         patches_repr = jnp.take(patches_repr, idx_kept_tokens, axis=1)
 
-    # Query patches look at those of the reference through cross attention.
+    # Query patches look at those of the reference through crossrng attention.
     if inputs_kv is None:
       inputs_kv = copy.deepcopy(patches_repr)
     x = CrossAttentionEncoderBlock(
@@ -345,8 +345,9 @@ class DINOLoss(nn.Module):
         self.center_momentum = config.center_momentum
         self.ncrops = config.ncrops
         out_dim = config.model.head_output_dim
+        shape = (1,out_dim)
         #self.register_buffer("center", jnp.zeros(1, out_dim))
-        self.center = self.param('center', lambda rng, shape: jnp.zeros(shape), (1,out_dim))
+        self.center = self.param('center', lambda rng, shape: jnp.zeros(shape), shape)
         # we apply a warm up for the teacher temperature because
         # a too high temperature makes the training instable at the beginning
         self.teacher_temp_schedule = jnp.concatenate((
