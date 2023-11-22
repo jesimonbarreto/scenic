@@ -263,7 +263,7 @@ def train(
           loss_fn=dino_loss,
           metrics_fn=model.get_metrics_fn(),
           momentum_parameter_scheduler=momentum_parameter_scheduler,
-          steps_per_epoch = steps_per_epoch
+          steps_per_epoch = steps_per_epoch,
           config=config),
       axis_name='batch',
       # We can donate both buffers of train_state and train_batch.
