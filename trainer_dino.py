@@ -97,7 +97,7 @@ def dino_train_step(
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
 
     
-    loss_dino = loss_fn(student_out, teacher_out, jnp.int(step/(config.steps_per_epoch*1.0)))
+    loss_dino = loss_fn(student_out, teacher_out, jnp.astype(step/(config.steps_per_epoch*1.0), int))
 
     if not math.isfinite(loss_dino):
       print("Loss is {}, stopping training".format(jnp.asarray(loss_dino) ), force=True)
