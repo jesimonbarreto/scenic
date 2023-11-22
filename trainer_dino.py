@@ -78,18 +78,18 @@ def dino_train_step(
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
     
-    _, teacher_out, _, _ = flax_model.apply(
+    _, teacher_out= flax_model.apply(
         {'params': train_state.ema_params},
-        batch['x1'][:2],
+        jnp.concatenate([batch['x1'],batch['x2']], axis=0),
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    _, student_out, _, _ = flax_model.apply(
+    _, student_out = flax_model.apply(
         {'params': params},
-        batch['x1'],
+        jnp.concatenate([batch['x1'],batch['x2']], axis=0),
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
