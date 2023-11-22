@@ -96,10 +96,10 @@ def dino_train_step(
         drop_moment=drop_moment,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
-    logging.info('Step details %s', jnp.array(step, int))
+    logging.info('Step details %s', train_state.global_step)
     logging.info('Step per epoch details %s', steps_per_epoch)
     #logging.info('Epoch details %s', epoch)
-    epoch = int(step/steps_per_epoch)
+    epoch = int(train_state.global_step/steps_per_epoch)
     
     loss_dino = loss_fn(student_out, teacher_out, epoch)
 
