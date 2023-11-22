@@ -124,6 +124,7 @@ class ViTDINO(nn.Module):
   stochastic_depth: float = 0.1
   posembs: Tuple[int, int] = (14, 14)
   dtype: Any = jnp.float32
+  loca: bool = False
 
   @nn.compact
   def __call__(self, x: jnp.ndarray, *jnp, inputs_kv: Optional[jnp.ndarray] = None,
@@ -164,30 +165,31 @@ class ViTDINO(nn.Module):
           output_dim=self.head_output_dim,
           name='projection_head_for_clustering_prediction')(
               x, train).reshape((-1, self.head_output_dim))
+    if loca:
+      patches_repr = x
+      # Drop some tokens (in the reference view).
+      if drop_moment == 'late':
+        rng = self.make_rng('droptok')
+        idx_kept_tokens = token_indexes_not_to_drop(
+            seqlen, self.n_ref_positions, seqlen_selection, rng)
+        if len(idx_kept_tokens) < self.n_ref_positions:
+          patches_repr = jnp.take(patches_repr, idx_kept_tokens, axis=1)
 
-    patches_repr = x
-    # Drop some tokens (in the reference view).
-    if drop_moment == 'late':
-      rng = self.make_rng('droptok')
-      idx_kept_tokens = token_indexes_not_to_drop(
-          seqlen, self.n_ref_positions, seqlen_selection, rng)
-      if len(idx_kept_tokens) < self.n_ref_positions:
-        patches_repr = jnp.take(patches_repr, idx_kept_tokens, axis=1)
-
-    # Query patches look at those of the reference through crossrng attention.
-    if inputs_kv is None:
-      inputs_kv = copy.deepcopy(patches_repr)
-    x = CrossAttentionEncoderBlock(
-        mlp_dim=self.mlp_dim,
-        num_heads=self.num_heads,
-        dropout_rate=self.dropout_rate,
-        attention_dropout_rate=self.attention_dropout_rate,
-        name='cross_attention_block',
-        dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
-            x, inputs_kv=inputs_kv, deterministic=not train)
-    x = nn.LayerNorm(name='final_norm')(x)
-    x = nn.Dense(self.n_ref_positions, name='position_predictor')(x)
-    return x, cluster_pred_outputs, patches_repr, idx_kept_tokens
+      # Query patches look at those of the reference through crossrng attention.
+      if inputs_kv is None:
+        inputs_kv = copy.deepcopy(patches_repr)
+      x = CrossAttentionEncoderBlock(
+          mlp_dim=self.mlp_dim,
+          num_heads=self.num_heads,
+          dropout_rate=self.dropout_rate,
+          attention_dropout_rate=self.attention_dropout_rate,
+          name='cross_attention_block',
+          dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
+              x, inputs_kv=inputs_kv, deterministic=not train)
+      x = nn.LayerNorm(name='final_norm')(x)
+      x = nn.Dense(self.n_ref_positions, name='position_predictor')(x)
+      return x, cluster_pred_outputs, patches_repr, idx_kept_tokens
+    return x, cluster_pred_outputs
 
 
 def norm_kernel_init_fn(rng, shape, dtype):
