@@ -97,6 +97,7 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     logging.info('Step details %s', jnp.array(step, int))
+    logging.info('Step per epoch details %s', steps_per_epoch)
     #logging.info('Epoch details %s', epoch)
     epoch = int(step/steps_per_epoch)
     
