@@ -165,7 +165,7 @@ class ViTDINO(nn.Module):
           output_dim=self.head_output_dim,
           name='projection_head_for_clustering_prediction')(
               x, train).reshape((-1, self.head_output_dim))
-    if loca:
+    if self.loca:
       patches_repr = x
       # Drop some tokens (in the reference view).
       if drop_moment == 'late':
