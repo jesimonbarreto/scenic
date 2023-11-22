@@ -34,7 +34,6 @@ def get_config():
       '|random_grayscale(0.2, data_key="x1")' +
       '|random_blur(1.0, data_key="x1")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")' +
-      'decode' +
       '|copy("image", "x2")' +
       '|init_patch_matching_tracker(14, "target_mask")' +
       '|init_box_tracker("target_box")' +
