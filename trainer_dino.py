@@ -98,8 +98,8 @@ def dino_train_step(
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
 
     epoch = int(step/steps_per_epoch)
-    print('EPOCAAAAAAAAA')
-    print(epoch)
+    logging.info('Step details %s', step)
+    logging.info('Epoch details %s', epoch)
     loss_dino = loss_fn(student_out, teacher_out, epoch)
 
     if not math.isfinite(loss_dino):
