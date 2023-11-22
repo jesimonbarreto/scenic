@@ -93,9 +93,9 @@ def get_config():
   config.max_grad_norm = 1
   config.num_training_epochs = 100
   config.batch_size = 1024
-  steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
+  config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
-  total_steps = config.num_training_epochs * steps_per_epoch
+  total_steps = config.num_training_epochs * config.steps_per_epoch
   config.global_crops_scale = (0.4, 1.0) 
   config.local_crops_number = 8 #if 0, global scale = 0.14,1.0
   config.local_crops_scale = (0.05,0.4)
@@ -111,7 +111,7 @@ def get_config():
   config.lr_configs = ml_collections.ConfigDict()
   config.lr_configs.learning_rate_schedule = 'compound'
   config.lr_configs.factors = 'constant * cosine_decay * linear_warmup'
-  config.lr_configs.warmup_steps = steps_per_epoch * 15
+  config.lr_configs.warmup_steps = config.steps_per_epoch * 15
   config.lr_configs.steps_per_cycle = total_steps
   config.lr_configs.base_learning_rate = 0.001 * config.batch_size / 1024
   config.lr_configs.alpha = 0.01
