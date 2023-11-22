@@ -96,7 +96,7 @@ def dino_train_step(
         drop_moment=drop_moment,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
-    logging.info('Step details %s', train_state.global_step[0])
+    logging.info('Step details %s', train_state.global_step)
     logging.info('Step per epoch details %s', steps_per_epoch)
     #logging.info('Epoch details %s', epoch)
     step = 0
