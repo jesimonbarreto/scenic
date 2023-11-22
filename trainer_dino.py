@@ -36,6 +36,7 @@ def dino_train_step(
     momentum_parameter_scheduler: Callable[[int], float],
     loss_fn: Any,
     metrics_fn: Any,
+    steps_per_epoch: float,
     config: ml_collections.ConfigDict,
 ) -> Tuple[utils.TrainState, Dict[str, Tuple[float, int]]]:
   """Runs a single step of training.
@@ -96,8 +97,10 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
 
-    
-    loss_dino = loss_fn(student_out, teacher_out, int(step/(config.steps_per_epoch*1.0)))
+    epoch = int(step/steps_per_epoch)
+    print('EPOCAAAAAAAAA')
+    print(epoch)
+    loss_dino = loss_fn(student_out, teacher_out, epoch)
 
     if not math.isfinite(loss_dino):
       print("Loss is {}, stopping training".format(jnp.asarray(loss_dino) ), force=True)
@@ -260,6 +263,7 @@ def train(
           loss_fn=dino_loss,
           metrics_fn=model.get_metrics_fn(),
           momentum_parameter_scheduler=momentum_parameter_scheduler,
+          steps_per_epoch = steps_per_epoch
           config=config),
       axis_name='batch',
       # We can donate both buffers of train_state and train_batch.

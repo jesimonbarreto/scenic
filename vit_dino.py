@@ -346,8 +346,9 @@ class DINOLoss(nn.Module):
         self.student_temp = config.student_temp
         self.center_momentum = config.center_momentum
         self.ncrops = config.ncrops
-        out_dim = config.model.head_output_dim
-        shapex = (1,out_dim)
+        self.out_dim = config.model.head_output_dim
+        self.shapex = (1,self.out_dim)
+        self.init_count = False
         #self.center =self.register_buffer("center", jnp.zeros(1, out_dim))
         #self.center = self.param('center', lambda rng, shape: jnp.zeros(shapex))
         # we apply a warm up for the teacher temperature because
@@ -362,6 +363,10 @@ class DINOLoss(nn.Module):
         """
         Cross-entropy between softmax outputs of the teacher and student networks.
         """
+        if not self.init_count:
+          self.center =self.register_buffer("center", jnp.zeros(1, self.out_dim))
+          self.init_count=True
+
         student_out = student_output / self.student_temp
         student_out = jnp.split(student_out,self.ncrops)
 
