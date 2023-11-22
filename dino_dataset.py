@@ -42,8 +42,8 @@ def get_dataset(*,
   del eval_batch_size, rng
   logging.info('Loading train split of the %s for Dino training.',
                dataset_configs.dataset)
-  n_train_ex = dataset_utils.get_num_examples(dataset_configs.dataset,
-                                              dataset_configs.train_split)
+  #n_train_ex = dataset_utils.get_num_examples(dataset_configs.dataset,
+  #                                            dataset_configs.train_split)
 
   train_ds = dataset_utils.get_data(
       dataset=dataset_configs.dataset,
@@ -74,7 +74,7 @@ def get_dataset(*,
   train_iter = map(dataset_utils.tf_to_numpy, train_iter)
   train_iter = map(shard_batches, train_iter)
   train_iter = jax_utils.prefetch_to_device(train_iter, prefetch_buffer_size)
-  input_shape = (-1,) + tuple(train_ds.element_spec['x1'].shape[1:])
+  input_shape = (-1,) + tuple(train_ds.element_spec['reference'].shape[1:])
   logging.info('input_shape details %s', input_shape)
   meta_data = {
       'input_shape': input_shape,

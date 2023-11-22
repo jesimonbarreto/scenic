@@ -80,7 +80,7 @@ def dino_train_step(
     
     _, teacher_out= flax_model.apply(
         {'params': train_state.ema_params},
-        batch['x1'],
+        batch['reference'],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
@@ -89,7 +89,7 @@ def dino_train_step(
     
     _, student_out = flax_model.apply(
         {'params': params},
-        batch['x1'],
+        batch['reference'],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
