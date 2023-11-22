@@ -45,20 +45,6 @@ def get_config():
       '|random_blur(1.0, data_key="x2")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")' + ')')
       
-      """
-      
-      ''.join([f'|copy("image", "query{i}")' for i in range(n_queries)]) +
-      '|inception_crop_with_mask((224, 224), 32, 100, (14, 14), inkey=("query0", "target_mask", "target_box"), outkey=("query0", "query0_mask", "query0_box"))' +
-      ''.join([f'|inception_crop_with_mask((96, 96), 5, 32, (6, 6), inkey=("query{i}", "target_mask", "target_box"), outkey=("query{i}", "query{i}_mask", "query{i}_box"))' for i in range(1, n_queries)]) +
-      ''.join([f'|flip_with_mask(inkey=("query{i}", "query{i}_mask"), outkey=("query{i}", "query{i}_mask"))' for i in range(n_queries)]) +
-      ''.join([f'|value_range(0, 1, data_key="query{i}")' for i in range(n_queries)]) +
-      ''.join([f'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="query{i}")' for i in range(n_queries)]) +
-      ''.join([f'|random_grayscale(0.2, data_key="query{i}")' for i in range(n_queries)]) +
-      ''.join([f'|random_blur(0.5, data_key="query{i}")' for i in range(1, n_queries)]) +
-      '|random_blur(0.1, data_key="query0")|random_solarize(0.2, data_key="query0")' +
-      ''.join([f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="query{i}")' for i in range(n_queries)]) +
-      '|keep("x1"' + ''.join([f', "query{i}", "query{i}_box", "query{i}_mask"' for i in range(n_queries)]) + ')')
-      """
   
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
