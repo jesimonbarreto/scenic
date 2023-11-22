@@ -201,7 +201,8 @@ def cropflip_generatemask(resize_size=224, area_min=5, area_max=100, flip=True,
                 [begin[1], orig_shape[1] - size[1] - begin[1]], [0, 0]]
     full_mask = tf.pad(resized_mask, paddings, "CONSTANT", constant_values=-1)
 
-    return crop, full_mask, box
+    #return crop, full_mask, box
+    return image, full_mask, box
 
   return _cropflip_generatemask
 
