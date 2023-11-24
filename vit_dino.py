@@ -276,7 +276,24 @@ class CrossAttentionEncoderBlock(vit.Encoder1DBlock):
 
 class ViTDinoModel(base_model.BaseModel):
   """Vision Transformer model for LOCA training."""
-
+  def __init__(self, config):
+        super().__init__()
+        self.student_temp = config.student_temp
+        self.center_momentum = config.center_momentum
+        self.ncrops = config.ncrops
+        self.out_dim = config.model.head_output_dim
+        self.shapex = (1,self.out_dim)
+        self.init_count = False
+        #self.center =self.register_buffer("center", jnp.zeros(1, out_dim))
+        #self.center = self.param('center', lambda rng, shape: jnp.zeros(shapex))
+        # we apply a warm up for the teacher temperature because
+        # a too high temperature makes the training instable at the beginning
+        self.teacher_temp_schedule = jnp.concatenate((
+            jnp.linspace(config.warmup_teacher_temp,
+                        config.teacher_temp, config.warmup_teacher_temp_epochs),
+            jnp.ones(config.num_training_epochs - config.warmup_teacher_temp_epochs) * config.teacher_temp
+        ))
+  
   def build_flax_model(self)-> nn.Module:
     model_dtype = getattr(jnp, self.config.get('model_dtype_str', 'float32'))
     return ViTDINO(
@@ -329,13 +346,61 @@ class ViTDinoModel(base_model.BaseModel):
                  model_utils.num_examples)}))
 
   def loss_function(self,
-                    predictions: jnp.ndarray,
-                    targets: jnp.ndarray,
+                    teacher_output: jnp.ndarray,
+                    student_output: jnp.ndarray,
+                    epoch,
                     weights: Optional[jnp.ndarray] = None) -> float:
     """Returns the cross-entropy loss."""
-    loss = model_utils.weighted_softmax_cross_entropy(predictions, targets,
-                                                      weights)
-    return loss  # pytype: disable=bad-return-type
+
+    #loss = model_utils.weighted_softmax_cross_entropy(predictions, targets,
+    #                                                  weights)
+    if not self.init_count:
+      self.center =self.register_buffer("center", jnp.zeros(1, self.out_dim))
+      self.init_count=True
+
+    student_out = student_output / self.student_temp
+    student_out = jnp.split(student_out,self.ncrops)
+
+    # teacher centering and sharpening
+    temp = self.teacher_temp_schedule[epoch]
+    teacher_out = opr.softmax((teacher_output - self.center) / temp, axis=-1)
+    teacher_out = jnp.split(lax.stop_gradient(teacher_out),2)
+
+    total_loss = 0
+    n_loss_terms = 0
+    for iq, q in enumerate(teacher_out):
+        for v in range(len(student_out)):
+            if v == iq:
+                # we skip cases where student and teacher operate on the same view
+                continue
+            loss = jnp.sum(-q * opr.log_softmax(student_out[v], axis=-1), axis=-1)
+            total_loss += jnp.mean(loss)
+            n_loss_terms += 1
+    total_loss /= n_loss_terms
+    self.update_center(teacher_output)
+    return total_loss
+    
+  
+  def reduce(self, value):
+    # Dummy function to simulate the reduction operation
+    def reduce_sum(x):
+      return jax.lax.psum(x, 'i')
+    # Perform the reduction
+    global_sum = jax.pmap(reduce_sum)(value)
+    return global_sum
+
+
+  def update_center(self, teacher_out):
+      """
+      Update center used for teacher output.
+      """
+      teacher_output = lax.stop_gradient(teacher_out)
+      batch_center = jnp.sum(teacher_output, dim=0, keepdim=True)
+      self.reduce(batch_center)
+      batch_center = batch_center / (len(teacher_output) * jax.local_device_count())
+
+      # ema update
+      self.center = self.center * self.center_momentum + batch_center * (1 - self.center_momentum)
 
 
   
