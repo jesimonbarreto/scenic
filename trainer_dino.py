@@ -99,9 +99,9 @@ def dino_train_step(
     
     loss_dino = loss_fn(student_out, teacher_out, 0)
 
-    if not math.isfinite(loss_dino):
-      print("Loss is {}, stopping training".format(jnp.asarray(loss_dino) ), force=True)
-      sys.exit(1)
+    #if not math.isfinite(loss_dino):
+    #  print("Loss is {}, stopping training".format(jnp.asarray(loss_dino) ), force=True)
+    #  sys.exit(1)
     
     '''q_r_intersect = q_loc_targets != -1  # intersection of reference and queries
     # q_loc_targets are the position to predict for all the patches of the
