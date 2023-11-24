@@ -376,6 +376,7 @@ class ViTDinoModel(base_model.BaseModel):
             total_loss += jnp.mean(loss)
             n_loss_terms += 1
     total_loss /= n_loss_terms
+    total_loss = jnp.array(total_loss, float)
     #self.update_center(teacher_output)
     return total_loss
     
