@@ -150,7 +150,7 @@ def dino_train_step(
     return total_loss
 
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
-  (total_loss), grad = compute_gradient_fn(
+  total_loss, grad = compute_gradient_fn(
       train_state.params)
   #metrics = metrics_fn(logits, batch)
   metrics = (
