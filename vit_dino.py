@@ -354,7 +354,7 @@ class ViTDinoModel(base_model.BaseModel):
     #loss = model_utils.weighted_softmax_cross_entropy(predictions, targets,
     #                                                  weights)
     if not self.init_count:
-      self.center =self.register_buffer("center", jnp.zeros(1, self.out_dim))
+      self.center = self.param('center', lambda rng, shape: jnp.zeros(shape), (1, self.out_dim))
       self.init_count=True
 
     student_out = student_output / self.student_temp
