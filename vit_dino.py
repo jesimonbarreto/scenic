@@ -276,26 +276,25 @@ class CrossAttentionEncoderBlock(vit.Encoder1DBlock):
 
 class ViTDinoModel(base_model.BaseModel):
   """Vision Transformer model for LOCA training."""
-  def __init__(self, config):
-        super().__init__()
-        self.student_temp = config.student_temp
-        self.center_momentum = config.center_momentum
-        self.ncrops = config.ncrops
-        self.out_dim = config.model.head_output_dim
-        self.shapex = (1,self.out_dim)
-        self.init_count = False
-        #self.center =self.register_buffer("center", jnp.zeros(1, out_dim))
-        #self.center = self.param('center', lambda rng, shape: jnp.zeros(shapex))
-        # we apply a warm up for the teacher temperature because
-        # a too high temperature makes the training instable at the beginning
-        self.teacher_temp_schedule = jnp.concatenate((
-            jnp.linspace(config.warmup_teacher_temp,
-                        config.teacher_temp, config.warmup_teacher_temp_epochs),
-            jnp.ones(config.num_training_epochs - config.warmup_teacher_temp_epochs) * config.teacher_temp
-        ))
+
   
   def build_flax_model(self)-> nn.Module:
     model_dtype = getattr(jnp, self.config.get('model_dtype_str', 'float32'))
+    self.student_temp = self.config.student_temp
+    self.center_momentum = self.config.center_momentum
+    self.ncrops = self.config.ncrops
+    self.out_dim = self.config.model.head_output_dim
+    self.shapex = (1,self.out_dim)
+    self.init_count = False
+    #self.center =self.register_buffer("center", jnp.zeros(1, out_dim))
+    #self.center = self.param('center', lambda rng, shape: jnp.zeros(shapex))
+    # we apply a warm up for the teacher temperature because
+    # a too high temperature makes the training instable at the beginning
+    self.teacher_temp_schedule = jnp.concatenate((
+        jnp.linspace(self.config.warmup_teacher_temp,
+                    self.config.teacher_temp, self.config.warmup_teacher_temp_epochs),
+        jnp.ones(self.config.num_training_epochs - self.config.warmup_teacher_temp_epochs) * self.config.teacher_temp
+    ))
     return ViTDINO(
         mlp_dim=self.config.model.mlp_dim,
         num_layers=self.config.model.num_layers,

@@ -208,7 +208,6 @@ def train(
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
 
-  dino_loss = vit.DINOLoss(config)
 
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
@@ -257,7 +256,7 @@ def train(
       functools.partial(
           dino_train_step,
           flax_model=model.flax_model,
-          loss_fn=dino_loss,
+          loss_fn=model.loss_function,
           metrics_fn=model.get_metrics_fn(),
           momentum_parameter_scheduler=momentum_parameter_scheduler,
           steps_per_epoch = steps_per_epoch,
