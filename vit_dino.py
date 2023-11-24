@@ -394,7 +394,7 @@ class ViTDinoModel(base_model.BaseModel):
       Update center used for teacher output.
       """
       teacher_output = lax.stop_gradient(teacher_out)
-      batch_center = jnp.sum(teacher_output, dim=0, keepdim=True)
+      batch_center = jnp.sum(teacher_output, axis=0, keepdim=True)
       self.reduce(batch_center)
       batch_center = batch_center / (len(teacher_output) * jax.local_device_count())
 
