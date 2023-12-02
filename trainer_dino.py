@@ -98,53 +98,6 @@ def dino_train_step(
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
     loss_dino = loss_fn(student_out, teacher_out, 0)
-
-    #if not math.isfinite(loss_dino):
-    #  print("Loss is {}, stopping training".format(jnp.asarray(loss_dino) ), force=True)
-    #  sys.exit(1)
-    
-    '''q_r_intersect = q_loc_targets != -1  # intersection of reference and queries
-    # q_loc_targets are the position to predict for all the patches of the
-    # queries.
-    q_loc_targets = jax.nn.one_hot(q_loc_targets, n_pos)
-
-    # Step 3): Position prediction loss.
-    localization_loss = loss_fn(q_loc_pred, q_loc_targets, q_r_intersect)'''
-
-    '''# Step 4): Patch cluster prediction loss.
-    feature_loss = 0
-    if config.apply_cluster_loss:
-      k = r_feat_targets.shape[-1]  # Output dimension for feature pred loss.
-      q_feat_pred = jnp.concatenate([
-          q_rand_feat_pred, q_foc_feat_pred], axis=0) / config.model.temperature
-      # Feature targets.
-      r_feat_targets = nn.softmax(r_feat_targets / config.sharpening, axis=-1)
-      # We adjust the targets with Optimal Transport to prevent collapse.
-      r_feat_targets = utils.sinkhorn(r_feat_targets, distributed=True)
-      # (bs*N) x k -> bs x N x k
-      r_feat_targets = r_feat_targets.reshape(bs, -1, k)
-      # Feature targets for the random query.
-      q_rand_feat_targets = jnp.take_along_axis(
-          r_feat_targets, jnp.expand_dims(q_rand_loc_targets, axis=-1), axis=1)
-      q_rand_feat_targets = q_rand_feat_targets.reshape(-1, k)
-      # Feature targets for the focal queries.
-      r_feat_targets = jnp.tile(r_feat_targets, (n_q_foc, 1, 1))
-      q_foc_feat_targets = jnp.take_along_axis(
-          r_feat_targets, jnp.expand_dims(q_foc_loc_targets, axis=-1), axis=1)
-      q_foc_feat_targets = q_foc_feat_targets.reshape(-1, k)
-      # Concatenate the targets for the random and focal queries.
-      q_feat_targets = jnp.concatenate([
-          q_rand_feat_targets, q_foc_feat_targets], axis=0)
-      feature_loss = loss_fn(q_feat_pred, q_feat_targets, q_r_intersect)
-      # `me-max` regularization.
-      avg_prediction = jnp.mean(nn.softmax(q_feat_pred, axis=-1), axis=0)
-      avg_prediction = jax.lax.pmean(avg_prediction, axis_name='batch')
-      feature_loss += jnp.sum(avg_prediction * jnp.log(avg_prediction))
-    
-    total_loss = localization_loss + feature_loss
-    return total_loss, (
-        {'label': q_loc_targets, 'batch_mask': q_r_intersect},
-        q_loc_pred, feature_loss)'''
     
     total_loss = loss_dino
     return total_loss
