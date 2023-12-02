@@ -98,12 +98,12 @@ def dino_train_step(
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
     loss_dino = loss_fn(student_out, teacher_out, 0)
-    
+
     total_loss = loss_dino
-    return total_loss
+    return total_loss, loss_dino
 
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
-  (total_loss), grad = compute_gradient_fn(
+  (total_loss, loss_dino), grad = compute_gradient_fn(
       train_state.params)
   #metrics = metrics_fn(logits, batch)
   metrics = (
