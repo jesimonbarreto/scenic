@@ -232,7 +232,7 @@ def representation_fn_eval(
 
   _, embedding = flax_model.apply(
     variables, 
-    batch['inputs'],
+    batch['references'],
     train=False,
     return_feats = True,
     debug=False, 

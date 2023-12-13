@@ -45,8 +45,8 @@ def get_config():
   config.experiment_name = 'universal-embedding-vit'
 
   # Dataset that was used for training.
-  config.dataset_name = "food2k,cars,sop,inshop,inat,met,gldv2,rp2k"
-  config.knn_eval_names = "food2k,cars,sop,inshop,inat,met,gldv2,rp2k"
+  config.dataset_name = "imagenette,"
+  config.knn_eval_names = "imagenette,"
 
   config.data_dtype_str = 'float32'
   #config.data_dtype_str = 'bfloat16'
@@ -200,7 +200,7 @@ def get_config():
 
 
 
-#################3Editado
+#################Editado
 
 
 # pylint: disable=line-too-long

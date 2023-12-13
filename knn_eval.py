@@ -8,13 +8,13 @@ import ml_collections
 from scenic import app
 import dino_dataset  # pylint: disable=unused-import
 import ops  # pylint: disable=unused-import
-import trainer_dino as trainer
+import trainer_knn as trainer
 from scenic.train_lib import train_utils
 
 FLAGS = flags.FLAGS
 
 
-def main(rng: jnp.ndarray, config: ml_collections.ConfigDict, workdir: str,
+def knn_evaluate(rng: jnp.ndarray, config: ml_collections.ConfigDict, workdir: str,
          writer: metric_writers.MetricWriter):
   """Main entry point for dino training."""
   data_rng, rng = jax.random.split(rng)
@@ -30,4 +30,4 @@ def main(rng: jnp.ndarray, config: ml_collections.ConfigDict, workdir: str,
 
 
 if __name__ == '__main__':
-  app.run(main=main)
+  app.run(main=knn_evaluate)

@@ -57,8 +57,6 @@ def knn_evaluate(
   rng, init_rng = jax.random.split(rng)
 
   #Load model
-  
-  
   train_state = train_utils.TrainState(
     params=params, 
     model_state=model_state
