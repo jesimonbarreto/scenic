@@ -26,9 +26,7 @@ from scenic.train_lib import lr_schedules
 from scenic.train_lib import optimizers
 from scenic.train_lib import train_utils
 
-from universal_embedding import knn_utils
-from universal_embedding import vit_with_embedding
-from universal_embedding import sampling_utils
+import knn_utils
 
 
 
