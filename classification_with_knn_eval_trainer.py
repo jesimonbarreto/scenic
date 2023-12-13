@@ -27,6 +27,8 @@ from scenic.train_lib import optimizers
 from scenic.train_lib import train_utils
 
 import knn_utils
+import vit_with_embedding
+import sampling_utils
 
 
 
