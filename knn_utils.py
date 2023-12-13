@@ -14,8 +14,8 @@ import json
 from tensorflow.io import gfile
 import os
 
-from universal_embedding import datasets
-from universal_embedding import utils
+import datasets
+import utils_um as utils
 
 
 
