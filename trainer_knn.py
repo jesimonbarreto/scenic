@@ -197,7 +197,7 @@ def train(
     flax_model = model.flax_model, 
     project_feats = config.project_feats_knn
   )
-  
+
   knn_eval_batch_size = config.get('knn_eval_batch_size') or config.batch_size
   
   knn_evaluator = knn_utils.KNNEvaluator(
@@ -206,7 +206,6 @@ def train(
     knn_eval_batch_size,
     config.get("extract_only_descrs",False),
   )
-
 
   train_dir = config.get('train_dir')
 

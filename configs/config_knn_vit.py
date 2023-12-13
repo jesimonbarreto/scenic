@@ -152,7 +152,7 @@ def get_config():
   # kNN
 
   #dir of checkpoints
-  config.train_dir = ''
+  config.train_dir = '/home/jesimonbarreto/checkpoint_900'
   
   # Logging.
 
