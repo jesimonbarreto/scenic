@@ -25,6 +25,7 @@ import datasets
 import knn_utils
 import models
 import vit_dino as vit
+import utils_dino as utils
 
 
 
