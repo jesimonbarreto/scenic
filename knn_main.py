@@ -73,7 +73,7 @@ def knn_evaluate(
   k=20
 
   devices = 8
-  train, test = get_datasets(batch=3)
+  train, test = get_datasets(batch=-1)
 
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config)
