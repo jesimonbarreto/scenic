@@ -24,6 +24,8 @@ import utils_dino as utils
 import jax
 import jax.numpy as jnp
 import tensorflow_datasets as tfds
+import datasets
+
 
 FLAGS = flags.FLAGS
 
