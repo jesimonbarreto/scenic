@@ -113,8 +113,8 @@ def knn_evaluate(
   print(train.shape)
   
   predictions = []
-  for data_point in train:
-    data_point['image'] = jnp.float32(data_point['image']) / 255.
+  for data_point in train.get_next():
+    data_point = jnp.float32(data_point) / 255.
     _, pred_ = model.apply(
         {'params': train_state.params},
         data_point['image'])
