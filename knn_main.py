@@ -103,10 +103,10 @@ def knn_evaluate(
     params=params, 
     model_state=model_state
   )
-  chrono = train_utils.Chrono()
+  #chrono = train_utils.Chrono()
   if config.checkpoint:
     train_state, start_step = utils.restore_checkpoint(workdir, train_state)
-  chrono.load(train_state.metadata['chrono'])
+  #chrono.load(train_state.metadata['chrono'])
   train_state = train_state.replace(metadata={})
   # Replicate the training state: optimizer, params and rng.
   train_state = jax_utils.replicate(train_state)
