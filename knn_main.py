@@ -20,10 +20,6 @@ if sys.version_info.major == 3 and sys.version_info.minor >= 10:
 else:
   from collections import MutableMapping
 
-import classification_with_knn_eval_trainer
-import datasets
-import knn_utils
-import models
 import vit_dino as vit
 import utils_dino as utils
 import jax
