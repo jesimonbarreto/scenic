@@ -37,8 +37,6 @@ def get_datasets(batch=3):
     ds_builder.download_and_prepare()
     train_ds = tfds.as_numpy(ds_builder.as_dataset(split='train', batch_size=batch))
     test_ds = tfds.as_numpy(ds_builder.as_dataset(split='validation', batch_size=batch))
-    train_ds['image'] = jnp.float32(train_ds['image']) / 255.
-    test_ds['image'] = jnp.float32(test_ds['image']) / 255.
     return train_ds, test_ds
 
 def compute_diff(u, v):
@@ -116,9 +114,10 @@ def knn_evaluate(
   
   predictions = []
   for data_point in train:
+    data_point['image'] = jnp.float32(data_point['image']) / 255.
     _, pred_ = model.apply(
         {'params': train_state.params},
-        data_point)
+        data_point['image'])
     predictions.append(pred_)
   # Concatenate individual predictions into a single array
   X_train = jnp.concatenate(predictions)
