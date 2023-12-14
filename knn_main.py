@@ -92,8 +92,8 @@ def knn_evaluate(
   (params, model_state, num_trainable_params,
    gflops) = train_utils.initialize_model(
        model_def=model.flax_model,
-       input_spec=[((28,28,1),
-                    getattr(jnp, 'float32'))],
+       input_spec=[(dataset.meta_data['input_shape'],
+                    dataset.meta_data.get('input_dtype', jnp.float32))],
        config=config, rngs=init_rng)
 
   rng, init_rng = jax.random.split(rng)
