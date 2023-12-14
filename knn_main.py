@@ -39,6 +39,9 @@ def get_datasets(batch=3):
 def compute_diff(u, v):
     return (u[:, None] - v[None, :]) ** 2
 
+# We pmap the built-in argsort function along the first axes.
+# We sort a matrix with shape (devices, n_test // devices, n_train)
+p_argsort = jax.pmap(jnp.argsort, in_axes=0)
 
 def compute_distance(U, V):
     return compute_diff(U, V).mean(axis=-1)
@@ -49,6 +52,15 @@ def compute_k_closest(U, V, k, devices, n_test):
     nearest = p_argsort(D)[..., 1:k+1]
     return nearest
 
+compute_diff = jax.vmap(compute_diff, in_axes=1, out_axes=-1)
+
+# We pmap the built-in argsort function along the first axes.
+# We sort a matrix with shape (devices, n_test // devices, n_train)
+p_argsort = jax.pmap(jnp.argsort, in_axes=0)  
+
+n_train = 30_000
+n_test = 10 * 8
+
 def knn_evaluate(
   rng: jnp.ndarray,
   config: ml_collections.ConfigDict,
@@ -58,14 +70,6 @@ def knn_evaluate(
 
   lead_host = jax.process_index() == 0
 
-  compute_diff = jax.vmap(compute_diff, in_axes=1, out_axes=-1)
-
-  # We pmap the built-in argsort function along the first axes.
-  # We sort a matrix with shape (devices, n_test // devices, n_train)
-  p_argsort = jax.pmap(jnp.argsort, in_axes=0)  
-
-  n_train = 30_000
-  n_test = 10 * 8
   k=20
 
   devices = 8
