@@ -26,8 +26,37 @@ import knn_utils
 import models
 import vit_dino as vit
 import utils_dino as utils
+import jax
+import jax.numpy as jnp
+import tensorflow_datasets as tfds
 
+def get_datasets(batch=3):
+    """Load MNIST train and test datasets into memory."""
+    ds_builder = tfds.builder('mnist')
+    ds_builder.download_and_prepare()
+    train_ds = tfds.as_numpy(ds_builder.as_dataset(split='train', batch_size=batch))
+    test_ds = tfds.as_numpy(ds_builder.as_dataset(split='test', batch_size=batch))
+    train_ds['image'] = jnp.float32(train_ds['image']) / 255.
+    test_ds['image'] = jnp.float32(test_ds['image']) / 255.
+    return train_ds, test_ds
 
+def compute_diff(u, v):
+    return (u[:, None] - v[None, :]) ** 2
+
+compute_diff = jax.vmap(compute_diff, in_axes=1, out_axes=-1)
+
+# We pmap the built-in argsort function along the first axes.
+# We sort a matrix with shape (devices, n_test // devices, n_train)
+p_argsort = jax.pmap(jnp.argsort, in_axes=0)
+
+def compute_distance(U, V):
+    return compute_diff(U, V).mean(axis=-1)
+
+def compute_k_closest(U, V, k, devices, n_test):
+    D = compute_distance(U, V)
+    D = D.reshape(devices, n_test // devices, -1)
+    nearest = p_argsort(D)[..., 1:k+1]
+    return nearest
 
 def knn_evaluate(
   rng: jnp.ndarray,
@@ -38,12 +67,21 @@ def knn_evaluate(
 
   lead_host = jax.process_index() == 0
 
-  #dataset used for training
-  dataset_dict = datasets.get_training_dataset_new(config)
+  compute_diff = jax.vmap(compute_diff, in_axes=1, out_axes=-1)
 
-  
+  # We pmap the built-in argsort function along the first axes.
+  # We sort a matrix with shape (devices, n_test // devices, n_train)
+  p_argsort = jax.pmap(jnp.argsort, in_axes=0)  
+
+  n_train = 30_000
+  n_test = 10 * 8
+  k=20
+
+  devices = 8
+  train, test = get_datasets(batch=3)
+
   # Build the loss_fn, metrics, and flax_model.
-  model = vit.ViTDinoModel(config, dataset_dict.meta_data)
+  model = vit.ViTDinoModel(config)
 
 
   # Randomly initialize model parameters.
@@ -51,8 +89,8 @@ def knn_evaluate(
   (params, model_state, num_trainable_params,
    gflops) = train_utils.initialize_model(
        model_def=model.flax_model,
-       input_spec=[(dataset_dict.meta_data['input_shape'],
-                    dataset_dict.meta_data.get('input_dtype', jnp.float32))],
+       input_spec=[((224,224,1),
+                    getattr(jnp, 'float32'))],
        config=config, rngs=init_rng)
 
   rng, init_rng = jax.random.split(rng)
@@ -72,77 +110,37 @@ def knn_evaluate(
   del params
 
   
-  #project feats or not
-  representation_fn_knn = functools.partial(
-    classification_with_knn_eval_trainer.representation_fn_eval,
-    flax_model = model.flax_model, 
-    project_feats = config.project_feats_knn
-  )
-
-  knn_eval_batch_size = config.get('knn_eval_batch_size') or config.batch_size
-
-  knn_evaluator = knn_utils.KNNEvaluator(
-    config,
-    representation_fn_knn,
-    knn_eval_batch_size,
-    config.get("extract_only_descrs",False),
-  )
+  predictions = []
+  for data_point in train.get:
+    _, pred_ = model.apply(
+        {'params': train_state.params},
+        data_point)
+    predictions.append(pred_)
+  # Concatenate individual predictions into a single array
+  X_train = jnp.concatenate(predictions)
 
 
-  train_dir = config.get('train_dir')
+  predictions = []
+  for data_point in test.get:
+    _, pred_ = model.apply(
+        {'params': train_state.params},
+        data_point)
+    predictions.append(pred_)
+  # Concatenate individual predictions into a single array
+  X_test = jnp.concatenate(predictions)
 
-  if config.test_pretrained_features:
+  y_train = train['label']
+  y_test = test['label']
+  print(X_train.shape)
+  print(X_test.shape)
+  
+  k_nearest = compute_k_closest(X_test, X_train, k)
+  if jax.process_index() == 0:
+    print(k_nearest.shape)
+    k_nearest = k_nearest.reshape(-1, k)
+    class_rate = (y_train[k_nearest, ...].mean(axis=1).round() == y_test).mean()
+    print(f"{class_rate=}")
 
-    knn_utils.knn_step(
-      knn_evaluator,
-      train_state,
-      config,
-      train_dir,
-      0,
-      writer,
-      config.preextracted,
-    )
-
-  for epoch in range(config.knn_start_epoch,config.knn_end_epoch+1):
-
-    step = epoch * config.steps_per_epoch
-
-    print(f"step: {step}")
-
-    if not config.preextracted:
-      ckpt_file = os.path.join(train_dir,str(step))  
-      ckpt_info = ckpt_file.split('/')
-      ckpt_dir = '/'.join(ckpt_info[:-1])
-      ckpt_num = ckpt_info[-1].split('_')[-1]
-
-      try:
-
-        train_state, _ = train_utils.restore_checkpoint(
-          ckpt_dir, 
-          train_state, 
-          assert_exist=True, 
-          step=int(ckpt_num),
-        )
-        
-      except:
-
-        sys.exit("no checkpoint found")
-
-      train_state = jax_utils.replicate(train_state)
-
-    else:
-
-      train_state = None
-
-    knn_utils.knn_step(
-      knn_evaluator,
-      train_state,
-      config,
-      train_dir,
-      step,
-      writer,
-      config.preextracted,
-    )
 
   train_utils.barrier_across_hosts()
 

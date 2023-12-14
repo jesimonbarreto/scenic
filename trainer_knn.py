@@ -191,6 +191,21 @@ def train(
   train_state = jax_utils.replicate(train_state)
   del params
 
+  #Predict train samples with model
+
+  _, x_train= model.apply(
+        {'params': train_state.params},
+        batch['reference'],
+        train=True)
+
+
+  #predict val samples with model
+  
+
+  #call train knn pass train samples and annotations
+
+  #call test knn pass train samples and annotaions
+
   #Associa o modelo a representação de features
   representation_fn_knn = functools.partial(
     classification_with_knn_eval_trainer.representation_fn_eval,
