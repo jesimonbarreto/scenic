@@ -26,7 +26,7 @@ import jax.numpy as jnp
 import tensorflow_datasets as tfds
 import datasets
 import dino_dataset  # pylint: disable=unused-import
-
+from scenic.dataset_lib import tinyImagenet_dataset
 
 
 FLAGS = flags.FLAGS
