@@ -25,6 +25,8 @@ import jax
 import jax.numpy as jnp
 import tensorflow_datasets as tfds
 import datasets
+import dino_dataset  # pylint: disable=unused-import
+
 
 
 FLAGS = flags.FLAGS
