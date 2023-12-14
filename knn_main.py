@@ -9,7 +9,6 @@ import jax.numpy as jnp
 import ml_collections
 from scenic import app
 from scenic.train_lib import train_utils
-from scenic.data import Dataset, ShardedDataLayer
 
 import os
 import sys
