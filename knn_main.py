@@ -2,8 +2,7 @@
 import functools
 
 from clu import metric_writers
-
-from absl import logging
+from absl import flags
 from flax import jax_utils
 import jax
 import jax.numpy as jnp
@@ -25,6 +24,8 @@ import utils_dino as utils
 import jax
 import jax.numpy as jnp
 import tensorflow_datasets as tfds
+
+FLAGS = flags.FLAGS
 
 def get_datasets(batch=3):
     """Load MNIST train and test datasets into memory."""
@@ -75,8 +76,11 @@ def knn_evaluate(
   devices = 8
   train, test = get_datasets(batch=-1)
 
+  data_rng, rng = jax.random.split(rng)
+  dataset = train_utils.get_dataset(
+      config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
   # Build the loss_fn, metrics, and flax_model.
-  model = vit.ViTDinoModel(config)
+  model = vit.ViTDinoModel(config, dataset.meta_data)
 
 
   # Randomly initialize model parameters.
