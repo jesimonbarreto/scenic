@@ -1,5 +1,5 @@
 # pylint: disable=line-too-long
-"""Default config for LOCA training on ImageNet2012 for 100 epochs."""
+"""Default config for Dino training on ImageNet2012 for 100 epochs."""
 
 import ml_collections
 
