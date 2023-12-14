@@ -15,7 +15,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   config.experiment_name = '100ep_run'
   # Dataset.
-  config.dataset_name = 'imagenette'
+  config.dataset_name = 'dino_dataset'
   config.data_dtype_str = 'float32'
   config.dataset_configs = ml_collections.ConfigDict()
   config.dataset_configs.prefetch_to_device = 2
