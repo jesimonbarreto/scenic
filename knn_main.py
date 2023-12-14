@@ -9,6 +9,7 @@ import jax.numpy as jnp
 import ml_collections
 from scenic import app
 from scenic.train_lib import train_utils
+from scenic.data import Dataset, ShardedDataLayer
 
 import os
 import sys
@@ -115,7 +116,7 @@ def knn_evaluate(
 
   
   predictions = []
-  for data_point in dataset.data_stream():
+  for data_point in dataset['batch']:
     _, pred_ = model.apply(
         {'params': train_state.params},
         data_point)
