@@ -33,7 +33,7 @@ FLAGS = flags.FLAGS
 
 def get_datasets(batch=3):
     """Load MNIST train and test datasets into memory."""
-    ds_builder = tfds.builder('mnist')
+    ds_builder = tfds.builder('imagenette')
     ds_builder.download_and_prepare()
     train_ds = tfds.as_numpy(ds_builder.as_dataset(split='train', batch_size=batch))
     test_ds = tfds.as_numpy(ds_builder.as_dataset(split='test', batch_size=batch))
@@ -78,7 +78,7 @@ def knn_evaluate(
   k=20
 
   devices = 8
-  train, test = get_datasets(batch=-1)
+  train, test = get_datasets(batch=512)
 
   data_rng, rng = jax.random.split(rng)
   dataset = train_utils.get_dataset(
@@ -112,10 +112,10 @@ def knn_evaluate(
   train_state = jax_utils.replicate(train_state)
   del params
 
-
+  print(train.shape)
   
   predictions = []
-  for data_point in dataset['batch']:
+  for data_point in train:
     _, pred_ = model.apply(
         {'params': train_state.params},
         data_point)
