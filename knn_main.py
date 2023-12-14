@@ -112,9 +112,10 @@ def knn_evaluate(
   train_state = jax_utils.replicate(train_state)
   del params
 
+
   
   predictions = []
-  for data_point in train.get:
+  for data_point in dataset.data_stream():
     _, pred_ = model.apply(
         {'params': train_state.params},
         data_point)
@@ -123,17 +124,17 @@ def knn_evaluate(
   X_train = jnp.concatenate(predictions)
 
 
-  predictions = []
+  '''predictions = []
   for data_point in test.get:
     _, pred_ = model.apply(
         {'params': train_state.params},
         data_point)
     predictions.append(pred_)
   # Concatenate individual predictions into a single array
-  X_test = jnp.concatenate(predictions)
+  X_test = jnp.concatenate(predictions)'''
 
-  y_train = train['label']
-  y_test = test['label']
+  y_train = dataset['label']
+  y_test = dataset['label']
   print(X_train.shape)
   print(X_test.shape)
   
