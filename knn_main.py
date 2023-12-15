@@ -114,6 +114,8 @@ def knn_evaluate(
   for batch in train:
     batch['image'] = jnp.float32(batch['image']) / 255.
     print(batch['image'].shape)
+    batch['image'] = batch['image'].reshape(-1,224,224,3)
+    print(batch['image'].shape)
     _, pred_ = model.flax_model.apply(
         {'params': train_state.params},
         batch['image'], train=False)
