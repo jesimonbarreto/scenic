@@ -76,7 +76,7 @@ def knn_evaluate(
   k=20
 
   devices = 8
-  train, test = get_datasets(batch=512)
+  train, test = get_datasets(batch=128)
 
   data_rng, rng = jax.random.split(rng)
   dataset = train_utils.get_dataset(
@@ -118,18 +118,21 @@ def knn_evaluate(
         {'params': train_state.params},
         batch['image'])
     predictions.append(pred_)
+    break
   # Concatenate individual predictions into a single array
   X_train = jnp.concatenate(predictions)
 
 
-  '''predictions = []
-  for data_point in test.get:
+  predictions = []
+  for batch in test:
+    batch['image'] = jnp.float32(batch['image']) / 255.
     _, pred_ = model.apply(
         {'params': train_state.params},
-        data_point)
+        batch['image'])
     predictions.append(pred_)
+    break
   # Concatenate individual predictions into a single array
-  X_test = jnp.concatenate(predictions)'''
+  X_test = jnp.concatenate(predictions)
 
   y_train = dataset['label']
   y_test = dataset['label']
