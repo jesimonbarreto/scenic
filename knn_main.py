@@ -76,7 +76,7 @@ def knn_evaluate(
   k=20
 
   devices = 8
-  train, test = get_datasets(batch=128)
+  train, test = get_datasets(batch=8)
 
   data_rng, rng = jax.random.split(rng)
   dataset = train_utils.get_dataset(
