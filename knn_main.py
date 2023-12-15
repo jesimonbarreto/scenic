@@ -76,7 +76,7 @@ def knn_evaluate(
   k=20
 
   devices = 8
-  train, test = get_datasets(batch=8)
+  train, test = get_datasets(batch=1)
 
   data_rng, rng = jax.random.split(rng)
   dataset = train_utils.get_dataset(
@@ -114,7 +114,7 @@ def knn_evaluate(
   for batch in train:
     batch['image'] = jnp.float32(batch['image']) / 255.
     print(batch['image'].shape)
-    batch['image'] = jnp.resize(batch['image'], (8,224,224,3))
+    batch['image'] = jnp.resize(batch['image'], (1,224,224,3))
     batch['image'] = batch['image'].reshape(-1,224,224,3)
     print(batch['image'].shape)
     _, pred_ = model.flax_model.apply(
