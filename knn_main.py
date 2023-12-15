@@ -111,11 +111,12 @@ def knn_evaluate(
   del params
 
   predictions = []
-  for x, y in train:
-    x['image'] = jnp.float32(x['image']) / 255.
+  for batch in train:
+
+    batch['image'] = jnp.float32(batch['image']) / 255.
     _, pred_ = model.apply(
         {'params': train_state.params},
-        x['image'])
+        batch['image'])
     predictions.append(pred_)
   # Concatenate individual predictions into a single array
   X_train = jnp.concatenate(predictions)
