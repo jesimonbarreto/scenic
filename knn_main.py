@@ -110,14 +110,12 @@ def knn_evaluate(
   train_state = jax_utils.replicate(train_state)
   del params
 
-  print(train.shape)
-  
   predictions = []
-  for data_point in train.get_next():
-    data_point = jnp.float32(data_point) / 255.
+  for x, y in train:
+    x = jnp.float32(x) / 255.
     _, pred_ = model.apply(
         {'params': train_state.params},
-        data_point['image'])
+        x)
     predictions.append(pred_)
   # Concatenate individual predictions into a single array
   X_train = jnp.concatenate(predictions)
