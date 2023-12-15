@@ -134,6 +134,7 @@ class ViTDINO(nn.Module):
                seqlen_selection: str = 'unstructured', debug: bool = False):
     del debug
     # Input image -> sequence of patch tokens.
+    print(x.shape)
     to_token_fn = ToTokenSequence(
         patches=self.patches,
         hidden_size=self.hidden_size,
