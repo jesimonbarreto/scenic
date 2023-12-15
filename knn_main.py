@@ -115,7 +115,7 @@ def knn_evaluate(
     batch['image'] = jnp.float32(batch['image']) / 255.
     _, pred_ = model.flax_model.apply(
         {'params': train_state.params},
-        batch['image'])
+        batch['image'], train=False)
     predictions.append(pred_)
     break
   # Concatenate individual predictions into a single array
@@ -127,7 +127,7 @@ def knn_evaluate(
     batch['image'] = jnp.float32(batch['image']) / 255.
     _, pred_ = model.flax_model.apply(
         {'params': train_state.params},
-        batch['image'])
+        batch['image'], train=False)
     predictions.append(pred_)
     break
   # Concatenate individual predictions into a single array
