@@ -26,8 +26,10 @@ def get_config():
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "reference")' +
-      '|copy_resize_file("image", "x1")' +
-      '|copy_resize_file("image", "x2")' +
+      '|copy("image", "x1")' +
+      '|copy("image", "x2")' +
+      #'|copy_resize_file("image", "x1")' +
+      #'|copy_resize_file("image", "x2")' +
       '|init_patch_matching_tracker(14, "target_mask")' +
       '|init_box_tracker("target_box")' +
       f'|cropflip_generatemask({reference_resolution}, 32, flip=False, inkey=("reference", "target_mask", "target_box"), outkey=("reference", "target_mask", "target_box"))' +
