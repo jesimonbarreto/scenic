@@ -226,7 +226,7 @@ def copy_resize_file(resize_size=224, resize_method=tf.image.ResizeMethod.BILINE
     orig_shape = tf.shape(image)
     resized_image = tf.image.resize(image, [resize_size, resize_size], resize_method)
     
-    return resized_image
+    return resized_image, resized_image, resized_image
 
   return copy_resize_file
 
