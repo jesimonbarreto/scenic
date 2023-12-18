@@ -452,6 +452,7 @@ class DINOLoss(nn.Module):
                 total_loss += jnp.mean(loss)
                 n_loss_terms += 1
         total_loss /= n_loss_terms
+        print(total_loss)
         self.update_center(teacher_output)
         return total_loss
     
