@@ -26,6 +26,8 @@ def get_config():
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "reference")' +
+      '|copy_resize_file("image", "x1")' +
+      '|copy_resize_file("image", "x2")' +
       '|init_patch_matching_tracker(14, "target_mask")' +
       '|init_box_tracker("target_box")' +
       f'|cropflip_generatemask({reference_resolution}, 32, flip=False, inkey=("reference", "target_mask", "target_box"), outkey=("reference", "target_mask", "target_box"))' +
@@ -34,6 +36,19 @@ def get_config():
       '|random_grayscale(0.2, data_key="reference")' +
       '|random_blur(1.0, data_key="reference")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="reference")' +
+
+      '|value_range(0, 1, data_key="x1")' +
+      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
+      '|random_grayscale(0.2, data_key="x1")' +
+      '|random_blur(1.0, data_key="x1")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")' +
+      
+      '|value_range(0, 1, data_key="x2")' +
+      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
+      '|random_grayscale(0.2, data_key="x2")' +
+      '|random_blur(1.0, data_key="x2")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")' +
+      
       ''.join([f'|copy("image", "query{i}")' for i in range(n_queries)]) +
       '|inception_crop_with_mask((224, 224), 32, 100, (14, 14), inkey=("query0", "target_mask", "target_box"), outkey=("query0", "query0_mask", "query0_box"))' +
       ''.join([f'|inception_crop_with_mask((96, 96), 5, 32, (6, 6), inkey=("query{i}", "target_mask", "target_box"), outkey=("query{i}", "query{i}_mask", "query{i}_box"))' for i in range(1, n_queries)]) +

@@ -216,6 +216,20 @@ def copy_file(resize_size=224):
 
   return copy_file
 
+
+@registry.Registry.register("preprocess_ops.copy_file", "function")
+@ThreeInKeysThreeOutKeys()
+@BatchedImagePreprocessingWithMaskAndBox()
+def copy_resize_file(resize_size=224, resize_method=tf.image.ResizeMethod.BILINEAR):
+  """Crop and flip an image and keep track of these operations with a mask."""
+  def copy_resize_file(image):
+    orig_shape = tf.shape(image)
+    resized_image = tf.image.resize(image, [resize_size, resize_size], resize_method)
+    
+    return resized_image
+
+  return copy_resize_file
+
 @registry.Registry.register("preprocess_ops.flip_with_mask", "function")
 @TwoInKeysTwoOutKeys()
 @BatchedImagePreprocessingWithMask()

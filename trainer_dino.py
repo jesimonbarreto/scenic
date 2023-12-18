@@ -68,7 +68,7 @@ def dino_train_step(
   step = train_state.global_step
   momentum_parameter = momentum_parameter_scheduler(step)
   n_pos = config.n_ref_positions  # Number of reference positions.
-  bs = batch['reference'].shape[0]  # Per-device batch size.
+  bs = batch['x1'].shape[0]  # Per-device batch size.
   n_q_foc = config.dataset_configs.number_of_focal_queries
   batch = utils.prepare_input(batch, config)
 
@@ -79,25 +79,48 @@ def dino_train_step(
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
     
-    _, teacher_out= flax_model.apply(
+    _, teacher_out1= flax_model.apply(
         {'params': train_state.ema_params},
-        batch['reference'],
+        batch['x1'],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    _, student_out = flax_model.apply(
+    _, teacher_out2= flax_model.apply(
+        {'params': train_state.ema_params},
+        batch['x2'],
+        seqlen=config.reference_seqlen,
+        seqlen_selection=config.reference_seqlen_selection,
+        drop_moment=drop_moment,
+        train=True,
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+    
+    _, student_out1 = flax_model.apply(
         {'params': params},
-        batch['reference'],
+        batch['x1'],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    loss_dino = loss_fn(student_out, teacher_out, 0)
+    _, student_out2 = flax_model.apply(
+        {'params': params},
+        batch['x2'],
+        seqlen=config.reference_seqlen,
+        seqlen_selection=config.reference_seqlen_selection,
+        drop_moment=drop_moment,
+        train=True,
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+    
+    teacher_out = [item for pair in zip(teacher_out1, teacher_out2) for item in pair]
+    student_out = [item for pair in zip(student_out1, student_out2) for item in pair]
+
+    epoch = step//steps_per_epoch
+    
+    loss_dino = loss_fn(jnp.array(student_out), jnp(teacher_out), epoch)
 
     total_loss = loss_dino
     return total_loss, loss_dino

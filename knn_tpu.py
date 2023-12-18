@@ -34,6 +34,16 @@ def compute_k_closest(U, V, k):
     nearest = p_argsort(D)[..., 1:k+1]
     return nearest
 
+train, test = get_datasets()
+
+X_train = train["image"].reshape(-1, 28 ** 2)
+X_train = 4 * X_train - 2
+y_train = train["label"]
+
+X_test = test["image"].reshape(-1, 28 ** 2)
+X_test = 4 * X_test - 2
+y_test = test["label"]
+
 k = 20
 train, test = get_datasets()
 
@@ -50,7 +60,6 @@ y_train = y_train[:n_train]
 
 X_test = X_test[:n_test]
 y_test = y_test[:n_test]
-
 
 
 k_nearest = compute_k_closest(X_test, X_train, k)
