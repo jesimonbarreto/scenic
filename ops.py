@@ -218,7 +218,7 @@ def copy_file(resize_size=224):
 
 
 @registry.Registry.register("preprocess_ops.copy_resize_file", "function")
-@ThreeInKeysThreeOutKeys()
+@utils.InKeyOutKey()
 @BatchedImagePreprocessingWithMaskAndBox()
 def copy_resize_file(resize_size=224):
   """Crop and flip an image and keep track of these operations with a mask."""
