@@ -112,7 +112,7 @@ def get_config():
   config.rng_seed = 42
   total_steps = config.num_training_epochs * config.steps_per_epoch
   config.global_crops_scale = (0.4, 1.0) 
-  config.local_crops_number = 8 #if 0, global scale = 0.14,1.0
+  config.local_crops_number = 0 #if 0, global scale = 0.14,1.0
   config.local_crops_scale = (0.05,0.4)
   config.student_temp = 0.1
   config.center_momentum = 0.9
