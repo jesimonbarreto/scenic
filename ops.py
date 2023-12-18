@@ -217,7 +217,7 @@ def copy_file(resize_size=224):
   return copy_file
 
 
-@registry.Registry.register("preprocess_ops.copy_file", "function")
+@registry.Registry.register("preprocess_ops.copy_resize_file", "function")
 @ThreeInKeysThreeOutKeys()
 @BatchedImagePreprocessingWithMaskAndBox()
 def copy_resize_file(resize_size=224, resize_method=tf.image.ResizeMethod.BILINEAR):
