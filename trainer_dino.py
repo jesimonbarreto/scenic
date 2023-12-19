@@ -122,7 +122,7 @@ def dino_train_step(
     logging.info('steps_per_epoch %s', steps_per_epoch)
     logging.info('epoch %s', epoch)
     
-    loss_dino = loss_fn(jnp.array(student_out), jnp(teacher_out), epoch)
+    loss_dino = loss_fn(jnp.array(student_out), jnp.array(teacher_out), 0)
 
     total_loss = loss_dino
     return total_loss, loss_dino
