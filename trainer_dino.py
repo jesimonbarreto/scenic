@@ -117,7 +117,7 @@ def dino_train_step(
     teacher_out = jnp.concatenate([teacher_out1, teacher_out2], axis=0) #[item for pair in zip(teacher_out1, teacher_out2) for item in pair]
     student_out = jnp.concatenate([student_out1, student_out2], axis=0) #[item for pair in zip(student_out1, student_out2) for item in pair]
     
-    loss_dino = loss_fn(jnp.array(student_out), jnp.array(teacher_out))
+    loss_dino = loss_fn(jnp.array(student_out), jnp.array(teacher_out), train_state, steps_per_epoch)
 
     total_loss = loss_dino
     return total_loss, loss_dino
