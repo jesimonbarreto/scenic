@@ -72,7 +72,6 @@ def dino_train_step(
   n_q_foc = config.dataset_configs.number_of_focal_queries
   batch = utils.prepare_input(batch, config)
 
-
   def training_loss_fn(params):
     # Step 1): Predict teacher network, predict student.
     # get features
@@ -118,8 +117,8 @@ def dino_train_step(
     teacher_out = [item for pair in zip(teacher_out1, teacher_out2) for item in pair]
     student_out = [item for pair in zip(student_out1, student_out2) for item in pair]
 
-    epoch = step//steps_per_epoch
-    logging.info('step %s', step)
+    epoch = float(step)//steps_per_epoch
+    logging.info('step %s', float(step))
     logging.info('steps_per_epoch %s', steps_per_epoch)
     logging.info('epoch %s', epoch)
     
