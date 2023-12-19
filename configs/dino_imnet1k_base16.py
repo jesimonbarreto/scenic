@@ -30,13 +30,11 @@ def get_config():
       '|copy("image", "x2")' +
       '|copy_resize_file(224, inkey=("image", "x1"), outkey=("image", "x1"))' +
       '|copy_resize_file(224, inkey=("image", "x2"), outkey=("image", "x2"))' +
-      '|init_patch_matching_tracker(14, "target_mask")' +
-      '|init_box_tracker("target_box")' +
-      '|value_range(0, 1, data_key="reference")' +
-      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="reference")' +
-      '|random_grayscale(0.2, data_key="reference")' +
-      '|random_blur(1.0, data_key="reference")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="reference")'
+      '|value_range(0, 1, data_key="x1")' +
+      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
+      '|random_grayscale(0.2, data_key="x1")' +
+      '|random_blur(1.0, data_key="x1")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
       )
       #'|copy_resize_file("image", "x1")' +
       #'|copy_resize_file("image", "x2")' +
