@@ -221,7 +221,7 @@ def copy_file(resize_size=224):
 @TwoInKeysTwoOutKeys()
 def copy_resize_file(resize_size=224):
   """Crop and flip an image and keep track of these operations with a mask."""
-  def copy_resize_file(image):
+  def copy_resize_file(image, image_):
     orig_shape = tf.shape(image)
     resize_method=tf.image.ResizeMethod.BILINEAR
     resized_image = tf.image.resize(image, [resize_size, resize_size], resize_method)
