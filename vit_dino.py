@@ -348,7 +348,8 @@ class ViTDinoModel(base_model.BaseModel):
   def loss_function(self,
                     teacher_output: jnp.ndarray,
                     student_output: jnp.ndarray,
-                    epoch,
+                    state,
+                    step_epoch,
                     weights: Optional[jnp.ndarray] = None) -> float:
     """Returns the cross-entropy loss."""
 
@@ -360,6 +361,9 @@ class ViTDinoModel(base_model.BaseModel):
 
     student_out = student_output / self.student_temp
     student_out = jnp.split(student_out,self.ncrops)
+
+    step = state.global_step
+    epoch = float(step[0])/step_epoch
 
     # teacher centering and sharpening
     temp = self.teacher_temp_schedule[epoch]
