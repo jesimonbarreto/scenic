@@ -119,6 +119,8 @@ def dino_train_step(
     student_out = [item for pair in zip(student_out1, student_out2) for item in pair]
 
     epoch = step//steps_per_epoch
+    logging.info('step %s', step)
+    logging.info('steps_per_epoch %s', steps_per_epoch)
     logging.info('epoch %s', epoch)
     
     loss_dino = loss_fn(jnp.array(student_out), jnp(teacher_out), epoch)
