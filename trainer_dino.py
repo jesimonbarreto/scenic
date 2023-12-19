@@ -114,8 +114,8 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    teacher_out = jnp.concatenate([teacher_out1, teacher_out2], axis=-1) #[item for pair in zip(teacher_out1, teacher_out2) for item in pair]
-    student_out = jnp.concatenate([student_out1, student_out2], axis=-1) #[item for pair in zip(student_out1, student_out2) for item in pair]
+    teacher_out = jnp.concatenate([teacher_out1, teacher_out2], axis=0) #[item for pair in zip(teacher_out1, teacher_out2) for item in pair]
+    student_out = jnp.concatenate([student_out1, student_out2], axis=0) #[item for pair in zip(student_out1, student_out2) for item in pair]
 
     epoch = jnp.array(step, float)//steps_per_epoch
     logging.info('step %s', jnp.array(step, float))
