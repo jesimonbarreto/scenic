@@ -140,7 +140,7 @@ def prepare_input(inputs: Dict[str, jnp.ndarray],
                   config: ml_collections.ConfigDict) -> Dict[str, jnp.ndarray]:
   """Prepare the different views for LOCA training."""
   # Reference view.
-  batch = dict(reference=inputs['x1'])
+  batch = dict(x1=inputs['x1'], x2=inputs['x2'])
 
   '''# A bunch of queries.
   n_focal_queries = config.dataset_configs.number_of_focal_queries
