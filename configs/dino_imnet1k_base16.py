@@ -26,6 +26,8 @@ def get_config():
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "reference")' +
+      '|copy("image", "x1")' +
+      '|copy("image", "x2")' +
       '|copy_resize_file(224, inkey=("image", "x1"), outkey=("image", "x1"))' +
       '|copy_resize_file(224, inkey=("image", "x2"), outkey=("image", "x2"))' +
       '|init_patch_matching_tracker(14, "target_mask")' +
