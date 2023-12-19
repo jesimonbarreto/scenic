@@ -364,7 +364,11 @@ class ViTDinoModel(base_model.BaseModel):
 
     step = state.global_step
     epoch = float(step[0])/step_epoch
-
+    print('step %s', jnp.array(step, float))
+    print('step %s', float(len(step)))
+    print('step %s', float(step[0]))
+    print('steps_per_epoch %s', step_epoch)
+    print('epoch %s', epoch)
     # teacher centering and sharpening
     temp = self.teacher_temp_schedule[epoch]
     teacher_out = opr.softmax((teacher_output - self.center) / temp, axis=-1)
