@@ -25,7 +25,6 @@ def get_config():
   config.dataset_configs.number_of_focal_queries = n_queries - 1
   config.dataset_configs.pp_train = (
       'decode' +
-      '|copy("image", "reference")' +
       '|copy("image", "x1")' +
       '|copy("image", "x2")' +
       '|copy_resize_file(224, inkey=("image", "x1"), outkey=("image", "x1"))' +
