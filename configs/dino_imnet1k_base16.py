@@ -35,6 +35,11 @@ def get_config():
       '|random_grayscale(0.2, data_key="x1")' +
       '|random_blur(1.0, data_key="x1")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
+      '|value_range(0, 1, data_key="x2")' +
+      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
+      '|random_grayscale(0.2, data_key="x2")' +
+      '|random_blur(1.0, data_key="x2")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'
       )
       #'|copy_resize_file("image", "x1")' +
       #'|copy_resize_file("image", "x2")' +
