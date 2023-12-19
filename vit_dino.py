@@ -364,7 +364,7 @@ class ViTDinoModel(base_model.BaseModel):
     student_out = jnp.split(student_out,self.ncrops)
     
     self.cont += 1
-    epoch = self.cont/ step_epoch
+    epoch = int(self.cont/ step_epoch)
     print(epoch)
     # teacher centering and sharpening
     temp = self.teacher_temp_schedule[epoch]
