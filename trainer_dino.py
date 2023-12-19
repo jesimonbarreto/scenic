@@ -119,6 +119,8 @@ def dino_train_step(
 
     epoch = jnp.array(step, float)//steps_per_epoch
     logging.info('step %s', jnp.array(step, float))
+    logging.info('step %s', float(len(step)))
+    logging.info('step %s', float(step[0]))
     logging.info('steps_per_epoch %s', steps_per_epoch)
     logging.info('epoch %s', epoch)
     
