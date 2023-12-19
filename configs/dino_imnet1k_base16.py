@@ -27,7 +27,7 @@ def get_config():
       'decode' +
       '|copy("image", "reference")' +
       '|copy("image", "x1")' +
-      '|copy("image", "x2")' + ')' 
+      '|copy("image", "x2")'
       )
       #'|copy_resize_file("image", "x1")' +
       #'|copy_resize_file("image", "x2")' +
