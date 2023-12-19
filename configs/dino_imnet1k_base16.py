@@ -27,7 +27,15 @@ def get_config():
       'decode' +
       '|copy("image", "reference")' +
       '|copy("image", "x1")' +
-      '|copy("image", "x2")'
+      '|copy("image", "x2")' +
+      '|init_patch_matching_tracker(14, "target_mask")' +
+      '|init_box_tracker("target_box")' +
+      f'|cropflip_generatemask({reference_resolution}, 32, flip=False, inkey=("reference", "target_mask", "target_box"), outkey=("reference", "target_mask", "target_box"))' +
+      '|value_range(0, 1, data_key="reference")' +
+      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="reference")' +
+      '|random_grayscale(0.2, data_key="reference")' +
+      '|random_blur(1.0, data_key="reference")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="reference")'
       )
       #'|copy_resize_file("image", "x1")' +
       #'|copy_resize_file("image", "x2")' +
