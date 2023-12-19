@@ -434,7 +434,7 @@ class DINOLoss(nn.Module):
           self.init_count=True
 
         student_out = student_output / self.student_temp
-        student_out = jnp.split(student_out,self.ncrops)
+        student_out = jnp.split(student_out, self.ncrops)
 
         # teacher centering and sharpening
         temp = self.teacher_temp_schedule[epoch]
