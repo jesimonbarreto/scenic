@@ -287,6 +287,7 @@ class ViTDinoModel(base_model.BaseModel):
     self.out_dim = self.config.model.head_output_dim
     self.shapex = (1,self.out_dim)
     self.init_count = False
+    self.cont = -1
     #self.center =self.register_buffer("center", jnp.zeros(1, out_dim))
     #self.center = self.param('center', lambda rng, shape: jnp.zeros(shapex))
     # we apply a warm up for the teacher temperature because
@@ -361,14 +362,10 @@ class ViTDinoModel(base_model.BaseModel):
 
     student_out = student_output / self.student_temp
     student_out = jnp.split(student_out,self.ncrops)
-
-    step = state.global_step
-    epoch = float(step[0])/step_epoch
-    print('step %s', jnp.array(step, float))
-    print('step %s', float(len(step)))
-    print('step %s', float(step[0]))
-    print('steps_per_epoch %s', step_epoch)
-    print('epoch %s', epoch)
+    
+    self.cont += 1
+    epoch = self.cont/ step_epoch
+    print(epoch)
     # teacher centering and sharpening
     temp = self.teacher_temp_schedule[epoch]
     teacher_out = opr.softmax((teacher_output - self.center) / temp, axis=-1)
