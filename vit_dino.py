@@ -361,7 +361,7 @@ class ViTDinoModel(base_model.BaseModel):
       self.init_count=True
 
     student_out = student_output / self.student_temp
-    student_out = jnp.split(student_out,self.ncrops)
+    student_out = jnp.split(student_out, self.ncrops)
     
     self.cont += 1
     epoch = int(self.cont/ step_epoch)
@@ -383,7 +383,7 @@ class ViTDinoModel(base_model.BaseModel):
             n_loss_terms += 1
     total_loss /= n_loss_terms
     #total_loss = jnp.array(total_loss, float)
-    #self.update_center(teacher_output)
+    self.update_center(teacher_output)
     return total_loss
     
   
@@ -394,7 +394,7 @@ class ViTDinoModel(base_model.BaseModel):
     # Perform the reduction
     global_sum = jax.pmap(reduce_sum)(value)
     return global_sum
-
+    
 
   def update_center(self, teacher_out):
       """
