@@ -390,7 +390,7 @@ class ViTDinoModel(base_model.BaseModel):
   def reduce(self, value):
     # Dummy function to simulate the reduction operation
     def reduce_sum(x):
-      return jax.lax.psum(x, 'i')
+      return jax.lax.psum(x)
     # Perform the reduction
     global_sum = jax.pmap(reduce_sum)(value)
     return global_sum
