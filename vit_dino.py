@@ -402,7 +402,7 @@ class ViTDinoModel(base_model.BaseModel):
       """
       teacher_output = lax.stop_gradient(teacher_out)
       batch_center = jnp.sum(teacher_output, axis=0, keepdims=True)
-      self.reduce(batch_center)
+      batch_center = self.reduce(batch_center)
       batch_center = batch_center / (len(teacher_output) * jax.local_device_count())
 
       # ema update
