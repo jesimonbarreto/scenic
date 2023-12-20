@@ -359,7 +359,8 @@ class ViTDinoModel(base_model.BaseModel):
     if not self.init_count:
       self.center = jnp.zeros((1, self.out_dim))
       self.init_count=True
-
+      print('dentro')
+    print('fora')
     student_out = student_output / self.student_temp
     student_out = jnp.split(student_out, self.ncrops)
     

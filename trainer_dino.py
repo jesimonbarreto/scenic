@@ -128,6 +128,8 @@ def dino_train_step(
   #metrics = metrics_fn(logits, batch)
   metrics = (
       dict(total_loss=(total_loss, 1)))
+  print(total_loss)
+  print(loss_dino)
 
   # Update the network parameters.
   grad = jax.lax.pmean(grad, axis_name='batch')
