@@ -32,7 +32,6 @@ def dino_train_step(
     train_state: utils.TrainState,
     batch: Batch,
     center: jnp.ndarray,
-    epoch: int,
     *,
     flax_model: nn.Module,
     momentum_parameter_scheduler: Callable[[int], float],
@@ -238,7 +237,7 @@ def train(
           config=config),
       axis_name='batch',
       # We can donate both buffers of train_state and train_batch.
-      donate_argnums=(0, 1, 2, 3),
+      donate_argnums=(0, 1, 2),
   )
 
   train_metrics, train_summary = [], None
@@ -263,7 +262,7 @@ def train(
     with jax.profiler.StepTraceAnnotation('train', step_num=step):
       epoch = int(step/steps_per_epoch)
       train_batch = next(dataset.train_iter)
-      train_state, tm, center = dino_train_step_pmapped(train_state, train_batch, center, epoch)
+      train_state, tm, center = dino_train_step_pmapped(train_state, train_batch, center)
       train_metrics.append(tm)
     for h in hooks:
       h(step)
