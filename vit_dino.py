@@ -360,7 +360,7 @@ class ViTDinoModel(base_model.BaseModel):
     student_out = student_output / self.student_temp
     student_out = jnp.split(student_out, self.ncrops)
     
-    jax.debug.print("🤯 Epoca: {epoch} 🤯", epoch=epoch)
+    #jax.debug.print("🤯 Epoca: {epoch} 🤯", epoch=epoch)
     # teacher centering and sharpening
     temp = self.teacher_temp_schedule[epoch]
     teacher_out = opr.softmax((teacher_output - center) / temp, axis=-1)
@@ -378,9 +378,9 @@ class ViTDinoModel(base_model.BaseModel):
             n_loss_terms += 1
     total_loss /= n_loss_terms
     #total_loss = jnp.array(total_loss, float)
-    jax.debug.print("🤯 Center Antes: {center} 🤯", center=center)
+    #jax.debug.print("🤯 Center Antes: {center} 🤯", center=center)
     center = self.update_center(teacher_output, center)
-    jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
+    #jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
     return total_loss, center
     
   
