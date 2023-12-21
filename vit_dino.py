@@ -388,7 +388,7 @@ class ViTDinoModel(base_model.BaseModel):
     jax.debug.print("🤯 Center Antes: {center} 🤯", center=center)
     self.update_center(teacher_output)
     center = self.center
-    jax.debug.print("🤯 Center Depois: {enter} 🤯", center=center)
+    jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
     return total_loss
     
   
