@@ -349,26 +349,21 @@ class ViTDinoModel(base_model.BaseModel):
   def loss_function(self,
                     teacher_output: jnp.ndarray,
                     student_output: jnp.ndarray,
-                    state,
-                    step_epoch,
+                    epoch,
+                    center,
                     weights: Optional[jnp.ndarray] = None) -> float:
     """Returns the cross-entropy loss."""
 
     #loss = model_utils.weighted_softmax_cross_entropy(predictions, targets,
     #                                                  weights)
-    if not self.init_count:
-      self.center = jnp.zeros((1, self.out_dim))
-      self.init_count=True
 
     student_out = student_output / self.student_temp
     student_out = jnp.split(student_out, self.ncrops)
     
-    self.cont += 1
-    epoch = int(self.cont/ step_epoch)
     jax.debug.print("🤯 Epoca: {epoch} 🤯", epoch=epoch)
     # teacher centering and sharpening
     temp = self.teacher_temp_schedule[epoch]
-    teacher_out = opr.softmax((teacher_output - self.center) / temp, axis=-1)
+    teacher_out = opr.softmax((teacher_output - center) / temp, axis=-1)
     teacher_out = jnp.split(lax.stop_gradient(teacher_out),2)
 
     total_loss = 0
@@ -383,12 +378,10 @@ class ViTDinoModel(base_model.BaseModel):
             n_loss_terms += 1
     total_loss /= n_loss_terms
     #total_loss = jnp.array(total_loss, float)
-    center = self.center
     jax.debug.print("🤯 Center Antes: {center} 🤯", center=center)
-    self.update_center(teacher_output)
-    center = self.center
+    center = self.update_center(teacher_output, center)
     jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
-    return total_loss, self.center
+    return total_loss, center
     
   
   def reduce(self, value):
@@ -400,7 +393,7 @@ class ViTDinoModel(base_model.BaseModel):
     return global_sum
     
 
-  def update_center(self, teacher_out):
+  def update_center(self, teacher_out, center):
       """
       Update center used for teacher output.
       """
@@ -409,4 +402,5 @@ class ViTDinoModel(base_model.BaseModel):
       batch_center = self.reduce(batch_center)
       batch_center = batch_center / (len(teacher_output) * jax.local_device_count())
       # ema update
-      self.center = self.center * self.center_momentum + batch_center * (1 - self.center_momentum)
+      center = center * self.center_momentum + batch_center * (1 - self.center_momentum)
+      return center

@@ -31,6 +31,8 @@ Batch = Dict[str, jnp.ndarray]
 def dino_train_step(
     train_state: utils.TrainState,
     batch: Batch,
+    center: jnp.ndarray,
+    epoch: int,
     *,
     flax_model: nn.Module,
     momentum_parameter_scheduler: Callable[[int], float],
@@ -117,19 +119,17 @@ def dino_train_step(
     teacher_out = jnp.concatenate([teacher_out1, teacher_out2], axis=0) #[item for pair in zip(teacher_out1, teacher_out2) for item in pair]
     student_out = jnp.concatenate([student_out1, student_out2], axis=0) #[item for pair in zip(student_out1, student_out2) for item in pair]
     
-    loss_dino, center = loss_fn(jnp.array(student_out), jnp.array(teacher_out), train_state, steps_per_epoch)
+    loss_dino, center = loss_fn(jnp.array(student_out), jnp.array(teacher_out), center, steps_per_epoch)
 
     total_loss = loss_dino
-    return total_loss, loss_dino
+    return total_loss, (loss_dino, center)
 
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
-  (total_loss, loss_dino), grad = compute_gradient_fn(
+  (total_loss, (loss_dino, center)), grad = compute_gradient_fn(
       train_state.params)
   #metrics = metrics_fn(logits, batch)
   metrics = (
       dict(total_loss=(total_loss, 1)))
-  print(total_loss)
-  print(loss_dino)
 
   # Update the network parameters.
   grad = jax.lax.pmean(grad, axis_name='batch')
@@ -152,7 +152,7 @@ def dino_train_step(
         params=new_params,
         ema_params=new_ema_params,
         rng=new_rng)
-  return new_train_state, metrics
+  return new_train_state, metrics, center
 
 
 def train(
@@ -183,7 +183,7 @@ def train(
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
 
-
+  center = jnp.zeros((1, config.model.head_output_dim))
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
   (params, _, num_trainable_params,
@@ -214,7 +214,7 @@ def train(
   train_state = utils.TrainState(
       global_step=0, opt_state=opt_state, tx=tx, params=params,
       ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
-
+  
   start_step = train_state.global_step
   if config.checkpoint:
     train_state, start_step = utils.restore_checkpoint(workdir, train_state)
@@ -238,7 +238,7 @@ def train(
           config=config),
       axis_name='batch',
       # We can donate both buffers of train_state and train_batch.
-      donate_argnums=(0, 1),
+      donate_argnums=(0, 1, 2, 3),
   )
 
   train_metrics, train_summary = [], None
@@ -261,8 +261,9 @@ def train(
   logging.info('Starting training loop at step %d.', start_step + 1)
   for step in range(start_step + 1, total_steps + 1):
     with jax.profiler.StepTraceAnnotation('train', step_num=step):
+      epoch = int(step/steps_per_epoch)
       train_batch = next(dataset.train_iter)
-      train_state, tm = dino_train_step_pmapped(train_state, train_batch)
+      train_state, tm, center = dino_train_step_pmapped(train_state, train_batch, center, epoch)
       train_metrics.append(tm)
     for h in hooks:
       h(step)
