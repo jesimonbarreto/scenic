@@ -227,7 +227,7 @@ def train(
       config, dataset.meta_data)
 
   # The function that performs one step of loca training.
-  loca_train_step_pmapped = jax.pmap(
+  dino_train_step_pmapped = jax.pmap(
       functools.partial(
           dino_train_step,
           flax_model=model.flax_model,
@@ -262,7 +262,7 @@ def train(
   for step in range(start_step + 1, total_steps + 1):
     with jax.profiler.StepTraceAnnotation('train', step_num=step):
       train_batch = next(dataset.train_iter)
-      train_state, tm = loca_train_step_pmapped(train_state, train_batch)
+      train_state, tm = dino_train_step_pmapped(train_state, train_batch)
       train_metrics.append(tm)
     for h in hooks:
       h(step)
