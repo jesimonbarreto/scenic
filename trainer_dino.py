@@ -186,6 +186,7 @@ def train(
   num_local_devices = jax.local_device_count()
 
   center = jnp.zeros((num_local_devices, config.model.head_output_dim))
+  
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
   (params, _, num_trainable_params,
@@ -263,7 +264,8 @@ def train(
   logging.info('Starting training loop at step %d.', start_step + 1)
   for step in range(start_step + 1, total_steps + 1):
     with jax.profiler.StepTraceAnnotation('train', step_num=step):
-      epoch = int(step/steps_per_epoch)
+      epoch = jnp.ones((num_local_devices, 1))*step/steps_per_epoch
+      epoch = epoch.astype(jnp.int32)
       print(epoch)
       train_batch = next(dataset.train_iter)
       train_state, tm, center = dino_train_step_pmapped(train_state, train_batch, center, epoch)
