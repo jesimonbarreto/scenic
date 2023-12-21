@@ -379,13 +379,14 @@ class ViTDinoModel(base_model.BaseModel):
                 # we skip cases where student and teacher operate on the same view
                 continue
             loss = jnp.sum(-q * opr.log_softmax(student_out[v], axis=-1), axis=-1)
-            jax.debug.print("🤯 {loss} 🤯", loss=loss)
             total_loss += jnp.mean(loss)
             jax.debug.print("🤯 {total_loss} 🤯", total_loss=total_loss)
             n_loss_terms += 1
     total_loss /= n_loss_terms
     #total_loss = jnp.array(total_loss, float)
+    jax.debug.print("🤯 Center Antes: {self.center} 🤯", center=self.center)
     self.update_center(teacher_output)
+    jax.debug.print("🤯 Center Depois: {self.center} 🤯", center=self.center)
     return total_loss
     
   
@@ -406,6 +407,5 @@ class ViTDinoModel(base_model.BaseModel):
       batch_center = jnp.sum(teacher_output, axis=0, keepdims=True)
       batch_center = self.reduce(batch_center)
       batch_center = batch_center / (len(teacher_output) * jax.local_device_count())
-
       # ema update
       self.center = self.center * self.center_momentum + batch_center * (1 - self.center_momentum)

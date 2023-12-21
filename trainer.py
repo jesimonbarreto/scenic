@@ -82,6 +82,15 @@ def loca_train_step(
         drop_moment=drop_moment,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+    
+    _, feat, patch, _ = flax_model.apply(
+        {'params': params},
+        batch['reference'],
+        seqlen=config.reference_seqlen,
+        seqlen_selection=config.reference_seqlen_selection,
+        drop_moment=drop_moment,
+        train=True,
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
 
     # Step 2): Forward pass on the QUERY views.
     use_pe = True if config.apply_cluster_loss else False
