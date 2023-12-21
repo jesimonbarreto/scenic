@@ -365,7 +365,7 @@ class ViTDinoModel(base_model.BaseModel):
     
     self.cont += 1
     epoch = int(self.cont/ step_epoch)
-    print(epoch)
+    jax.debug.print("🤯 Epoca: {epoch} 🤯", epoch=epoch)
     # teacher centering and sharpening
     temp = self.teacher_temp_schedule[epoch]
     teacher_out = opr.softmax((teacher_output - self.center) / temp, axis=-1)
@@ -380,7 +380,6 @@ class ViTDinoModel(base_model.BaseModel):
                 continue
             loss = jnp.sum(-q * opr.log_softmax(student_out[v], axis=-1), axis=-1)
             total_loss += jnp.mean(loss)
-            jax.debug.print("🤯 {total_loss} 🤯", total_loss=total_loss)
             n_loss_terms += 1
     total_loss /= n_loss_terms
     #total_loss = jnp.array(total_loss, float)
@@ -389,7 +388,7 @@ class ViTDinoModel(base_model.BaseModel):
     self.update_center(teacher_output)
     center = self.center
     jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
-    return total_loss
+    return total_loss, self.center
     
   
   def reduce(self, value):
