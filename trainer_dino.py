@@ -237,7 +237,7 @@ def train(
           config=config),
       axis_name='batch',
       # We can donate both buffers of train_state and train_batch.
-      donate_argnums=(0, 1, 2),
+      donate_argnums=(0, 1),
   )
 
   train_metrics, train_summary = [], None
