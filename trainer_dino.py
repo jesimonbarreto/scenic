@@ -32,6 +32,7 @@ def dino_train_step(
     train_state: utils.TrainState,
     batch: Batch,
     center: jnp.ndarray,
+    epoch: int,
     *,
     flax_model: nn.Module,
     momentum_parameter_scheduler: Callable[[int], float],
@@ -73,7 +74,7 @@ def dino_train_step(
   n_q_foc = config.dataset_configs.number_of_focal_queries
   batch = utils.prepare_input(batch, config)
 
-  def training_loss_fn(params, center):
+  def training_loss_fn(params, center, epoch):
     # Step 1): Predict teacher network, predict student.
     # get features
     use_ema = config.apply_cluster_loss
@@ -118,14 +119,14 @@ def dino_train_step(
     teacher_out = jnp.concatenate([teacher_out1, teacher_out2], axis=0) #[item for pair in zip(teacher_out1, teacher_out2) for item in pair]
     student_out = jnp.concatenate([student_out1, student_out2], axis=0) #[item for pair in zip(student_out1, student_out2) for item in pair]
     
-    loss_dino, center = loss_fn(jnp.array(student_out), jnp.array(teacher_out), center, steps_per_epoch)
+    loss_dino, center = loss_fn(jnp.array(student_out), jnp.array(teacher_out), epoch, center.reshape(1,-1))
 
     total_loss = loss_dino
     return total_loss, (loss_dino, center)
 
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
   (total_loss, (loss_dino, center)), grad = compute_gradient_fn(
-      train_state.params, center)
+      train_state.params, center, epoch)
   #metrics = metrics_fn(logits, batch)
   metrics = (
       dict(total_loss=(total_loss, 1)))
@@ -263,8 +264,9 @@ def train(
   for step in range(start_step + 1, total_steps + 1):
     with jax.profiler.StepTraceAnnotation('train', step_num=step):
       epoch = int(step/steps_per_epoch)
+      print(epoch)
       train_batch = next(dataset.train_iter)
-      train_state, tm, center = dino_train_step_pmapped(train_state, train_batch, center)
+      train_state, tm, center = dino_train_step_pmapped(train_state, train_batch, center, epoch)
       train_metrics.append(tm)
     for h in hooks:
       h(step)
