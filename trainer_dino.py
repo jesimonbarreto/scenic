@@ -182,7 +182,7 @@ def train(
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
 
-  center = jnp.zeros((1, config.model.head_output_dim))
+  center = jnp.zeros((config.model.head_output_dim))
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
   (params, _, num_trainable_params,
@@ -237,7 +237,7 @@ def train(
           config=config),
       axis_name='batch',
       # We can donate both buffers of train_state and train_batch.
-      #donate_argnums=(2,),
+      donate_argnums=(0,1,2),
   )
 
   train_metrics, train_summary = [], None
