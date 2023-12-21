@@ -260,6 +260,8 @@ def train(
   logging.info('Starting training loop at step %d.', start_step + 1)
   for step in range(start_step + 1, total_steps + 1):
     with jax.profiler.StepTraceAnnotation('train', step_num=step):
+      print(train_state.shape)
+      print(tm.shape)
       epoch = int(step/steps_per_epoch)
       train_batch = next(dataset.train_iter)
       train_state, tm, center = dino_train_step_pmapped(train_state, train_batch, center)
