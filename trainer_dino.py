@@ -73,7 +73,7 @@ def dino_train_step(
   n_q_foc = config.dataset_configs.number_of_focal_queries
   batch = utils.prepare_input(batch, config)
 
-  def training_loss_fn(params):
+  def training_loss_fn(params, center):
     # Step 1): Predict teacher network, predict student.
     # get features
     use_ema = config.apply_cluster_loss
@@ -125,7 +125,7 @@ def dino_train_step(
 
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
   (total_loss, (loss_dino, center)), grad = compute_gradient_fn(
-      train_state.params)
+      train_state.params, center)
   #metrics = metrics_fn(logits, batch)
   metrics = (
       dict(total_loss=(total_loss, 1)))
@@ -182,7 +182,9 @@ def train(
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
 
-  center = jnp.zeros(( 8,config.model.head_output_dim))
+  num_local_devices = jax.local_device_count()
+
+  center = jnp.zeros((num_local_devices, config.model.head_output_dim))
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
   (params, _, num_trainable_params,
@@ -237,7 +239,7 @@ def train(
           config=config),
       axis_name='batch',
       # We can donate both buffers of train_state and train_batch.
-      donate_argnums=(0,),
+      donate_argnums=(0,1),
   )
 
   train_metrics, train_summary = [], None
