@@ -182,7 +182,7 @@ def train(
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
 
-  center = jnp.zeros((config.model.head_output_dim))
+  center = jnp.zeros(( 8,config.model.head_output_dim))
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
   (params, _, num_trainable_params,
@@ -260,8 +260,6 @@ def train(
   logging.info('Starting training loop at step %d.', start_step + 1)
   for step in range(start_step + 1, total_steps + 1):
     with jax.profiler.StepTraceAnnotation('train', step_num=step):
-      print(train_state.shape)
-      print(tm.shape)
       epoch = int(step/steps_per_epoch)
       train_batch = next(dataset.train_iter)
       train_state, tm, center = dino_train_step_pmapped(train_state, train_batch, center)
