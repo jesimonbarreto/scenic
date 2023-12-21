@@ -384,9 +384,11 @@ class ViTDinoModel(base_model.BaseModel):
             n_loss_terms += 1
     total_loss /= n_loss_terms
     #total_loss = jnp.array(total_loss, float)
-    jax.debug.print("🤯 Center Antes: {self.center} 🤯", center=self.center)
+    center = self.center
+    jax.debug.print("🤯 Center Antes: {center} 🤯", center=center)
     self.update_center(teacher_output)
-    jax.debug.print("🤯 Center Depois: {self.center} 🤯", center=self.center)
+    center = self.center
+    jax.debug.print("🤯 Center Depois: {enter} 🤯", center=center)
     return total_loss
     
   
