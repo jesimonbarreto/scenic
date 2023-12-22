@@ -281,22 +281,7 @@ class ViTDinoModel(base_model.BaseModel):
   
   def build_flax_model(self)-> nn.Module:
     model_dtype = getattr(jnp, self.config.get('model_dtype_str', 'float32'))
-    self.student_temp = self.config.student_temp
-    self.center_momentum = self.config.center_momentum
-    self.ncrops = self.config.ncrops
-    self.out_dim = self.config.model.head_output_dim
-    self.shapex = (1,self.out_dim)
-    self.init_count = False
-    self.cont = -1
-    #self.center =self.register_buffer("center", jnp.zeros(1, out_dim))
-    #self.center = self.param('center', lambda rng, shape: jnp.zeros(shapex))
-    # we apply a warm up for the teacher temperature because
-    # a too high temperature makes the training instable at the beginning
-    self.teacher_temp_schedule = jnp.concatenate((
-        jnp.linspace(self.config.warmup_teacher_temp,
-                    self.config.teacher_temp, self.config.warmup_teacher_temp_epochs),
-        jnp.ones(self.config.num_training_epochs - self.config.warmup_teacher_temp_epochs) * self.config.teacher_temp
-    ))
+    
     return ViTDINO(
         mlp_dim=self.config.model.mlp_dim,
         num_layers=self.config.model.num_layers,
@@ -350,20 +335,20 @@ class ViTDinoModel(base_model.BaseModel):
                     teacher_output: jnp.ndarray,
                     student_output: jnp.ndarray,
                     epoch,
-                    center,
+                    dino,
                     weights: Optional[jnp.ndarray] = None) -> float:
     """Returns the cross-entropy loss."""
 
     #loss = model_utils.weighted_softmax_cross_entropy(predictions, targets,
     #                                                  weights)
 
-    student_out = student_output / self.student_temp
-    student_out = jnp.split(student_out, self.ncrops)
+    student_out = student_output / dino.student_temp
+    student_out = jnp.split(student_out, dino.ncrops)
     
     #jax.debug.print("🤯 Epoca: {epoch} 🤯", epoch=epoch)
     # teacher centering and sharpening
     temp = self.teacher_temp_schedule[epoch]
-    teacher_out = opr.softmax((teacher_output - center) / temp, axis=-1)
+    teacher_out = opr.softmax((teacher_output - dino.center) / temp, axis=-1)
     teacher_out = jnp.split(lax.stop_gradient(teacher_out),2)
 
     total_loss = 0
@@ -379,9 +364,9 @@ class ViTDinoModel(base_model.BaseModel):
     total_loss /= n_loss_terms
     #total_loss = jnp.array(total_loss, float)
     #jax.debug.print("🤯 Center Antes: {center} 🤯", center=center)
-    center = self.update_center(teacher_output, center)
+    dino = self.update_center(teacher_output, dino)
     #jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
-    return total_loss, center
+    return total_loss, dino
     
   
   def reduce(self, value):
@@ -393,7 +378,7 @@ class ViTDinoModel(base_model.BaseModel):
     return global_sum
     
 
-  def update_center(self, teacher_out, center):
+  def update_center(self, teacher_out, dino):
       """
       Update center used for teacher output.
       """
@@ -402,5 +387,87 @@ class ViTDinoModel(base_model.BaseModel):
       batch_center = self.reduce(batch_center)
       batch_center = batch_center / (len(teacher_output) * jax.local_device_count())
       # ema update
-      center = center * self.center_momentum + batch_center * (1 - self.center_momentum)
-      return center
+      dino.center = dino.center * dino.center_momentum + batch_center * (1 - dino.center_momentum)
+      return dino
+
+
+class DINOLoss:
+    def __init__(self, config):
+        super().__init__()
+        self.student_temp = config.student_temp
+        self.center_momentum = config.center_momentum
+        self.ncrops = config.ncrops
+        self.out_dim = config.model.head_output_dim
+        self.shapex = (1, self.out_dim)
+        self.center = jnp.zeros(1, self.out_dim)
+        self.teacher_temp_schedule = jnp.concatenate((
+            jnp.linspace(config.warmup_teacher_temp,
+                        config.teacher_temp, config.warmup_teacher_temp_epochs),
+            jnp.ones(config.num_training_epochs - config.warmup_teacher_temp_epochs) * config.teacher_temp
+        ))
+    
+    def get_metrics_fn(self, split: Optional[str] = None):
+      del split
+      return functools.partial(
+          classification_model.classification_metrics_function,
+          target_is_onehot=True,
+          metrics=dict(
+              {'loss': (
+                  model_utils.weighted_unnormalized_softmax_cross_entropy,
+                  model_utils.num_examples)}))
+
+    def loss_function(self,
+                    teacher_output: jnp.ndarray,
+                    student_output: jnp.ndarray,
+                    epoch,
+                    weights: Optional[jnp.ndarray] = None) -> float:
+      """Returns the cross-entropy loss."""
+
+      #loss = model_utils.weighted_softmax_cross_entropy(predictions, targets,
+      #                                                  weights)
+
+      student_out = student_output / self.student_temp
+      student_out = jnp.split(student_out, self.ncrops)
+      
+      #jax.debug.print("🤯 Epoca: {epoch} 🤯", epoch=epoch)
+      # teacher centering and sharpening
+      temp = self.teacher_temp_schedule[epoch]
+      teacher_out = opr.softmax((teacher_output - self.center) / temp, axis=-1)
+      teacher_out = jnp.split(lax.stop_gradient(teacher_out),2)
+
+      total_loss = 0
+      n_loss_terms = 0
+      for iq, q in enumerate(teacher_out):
+          for v in range(len(student_out)):
+              if v == iq:
+                  # we skip cases where student and teacher operate on the same view
+                  continue
+              loss = jnp.sum(-q * opr.log_softmax(student_out[v], axis=-1), axis=-1)
+              total_loss += jnp.mean(loss)
+              n_loss_terms += 1
+      total_loss /= n_loss_terms
+      #total_loss = jnp.array(total_loss, float)
+      #jax.debug.print("🤯 Center Antes: {center} 🤯", center=center)
+      self.update_center(teacher_output)
+      #jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
+      return total_loss
+    
+    def reduce(self, value):
+      # Dummy function to simulate the reduction operation
+      def reduce_sum(x):
+        return jax.lax.psum(x, axis_name='batch')
+      # Perform the reduction
+      global_sum = jax.pmap(reduce_sum)(value)
+      return global_sum
+    
+    def update_center(self, teacher_out):
+        """
+        Update center used for teacher output.
+        """
+        teacher_output = lax.stop_gradient(teacher_out)
+        batch_center = jnp.sum(teacher_output, axis=0, keepdims=True)
+        batch_center = self.reduce(batch_center)
+        batch_center = batch_center / (len(teacher_output) * jax.local_device_count())
+        # ema update
+        self.center = self.center * self.center_momentum + batch_center * (1 - self.center_momentum)
+        return self.center
