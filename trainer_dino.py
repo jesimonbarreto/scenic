@@ -20,7 +20,7 @@ import optax
 from scenic.dataset_lib import dataset_utils
 import utils_dino as utils
 import vit_dino as vit
-from vit import DINOLoss
+from vit_dino import DINOLoss
 from scenic.train_lib import lr_schedules
 from scenic.train_lib import train_utils
 import math, sys
