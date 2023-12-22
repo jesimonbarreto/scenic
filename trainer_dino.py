@@ -188,7 +188,7 @@ def train(
   dino_loss = []
   for _ in range(num_local_devices):
     dino_loss.append(DINOLoss(config))
-  
+  dino_loss = jnp.array(dino_loss).reshape(num_local_devices,1)
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
   (params, _, num_trainable_params,
