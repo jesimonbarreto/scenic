@@ -187,7 +187,7 @@ def train(
   num_local_devices = jax.local_device_count()
   dinio_loss = []
   for _ in range(num_local_devices):
-    dinio_loss.append(dl = DINOLoss(config))
+    dinio_loss.append(DINOLoss(config))
   
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
