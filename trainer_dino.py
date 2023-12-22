@@ -185,9 +185,9 @@ def train(
   model = vit.ViTDinoModel(config, dataset.meta_data)
 
   num_local_devices = jax.local_device_count()
-  dinio_loss = []
+  dino_loss = []
   for _ in range(num_local_devices):
-    dinio_loss.append(DINOLoss(config))
+    dino_loss.append(DINOLoss(config))
   
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
