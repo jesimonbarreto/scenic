@@ -399,7 +399,7 @@ class DINOLoss:
         self.ncrops = config.ncrops
         self.out_dim = config.model.head_output_dim
         self.shapex = (1, self.out_dim)
-        self.center = jnp.zeros(1, self.out_dim)
+        self.center = jnp.zeros((1, self.out_dim))
         self.teacher_temp_schedule = jnp.concatenate((
             jnp.linspace(config.warmup_teacher_temp,
                         config.teacher_temp, config.warmup_teacher_temp_epochs),
