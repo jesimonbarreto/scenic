@@ -269,7 +269,7 @@ def train(
       epoch = epoch.astype(jnp.int32)
       #print(epoch)
       train_batch = next(dataset.train_iter)
-      train_state, tm, center = dino_train_step_pmapped(
+      train_state, center, tm = dino_train_step_pmapped(
                                   train_state,
                                   train_batch,
                                   center,
