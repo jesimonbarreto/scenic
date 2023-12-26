@@ -22,6 +22,23 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
+
+  # Training.
+  config.max_grad_norm = 1
+  config.num_training_epochs = 100
+  config.batch_size = 1024
+  config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
+  config.rng_seed = 42
+  total_steps = config.num_training_epochs * config.steps_per_epoch
+  config.global_crops_scale = (0.4, 1.0) 
+  config.local_crops_number = 0 #if 0, global scale = 0.14,1.0
+  config.local_crops_scale = (0.05,0.4)
+  config.student_temp = 0.1
+  config.center_momentum = 0.9
+  config.ncrops = 2
+  config.warmup_teacher_temp = 0.04
+  config.teacher_temp = 0.04
+  config.warmup_teacher_temp_epochs = 0
   config.dataset_configs.number_of_focal_queries = n_queries - 1
   config.dataset_configs.pp_train = (
       'decode' +
@@ -38,10 +55,10 @@ def get_config():
       '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
       '|random_grayscale(0.2, data_key="x2")' +
       '|random_blur(1.0, data_key="x2")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'
-      )
-      #'|copy_resize_file("image", "x1")' +
-      #'|copy_resize_file("image", "x2")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")')
+
+  #'|copy_resize_file("image", "x1")' +
+  #'|copy_resize_file("image", "x2")' +
   ''' '|init_patch_matching_tracker(14, "target_mask")' +
   '|init_box_tracker("target_box")' +
   f'|cropflip_generatemask({reference_resolution}, 32, flip=False, inkey=("reference", "target_mask", "target_box"), outkey=("reference", "target_mask", "target_box"))' +
@@ -120,7 +137,7 @@ def get_config():
 
   # Training.
   config.max_grad_norm = 1
-  config.num_training_epochs = 100
+  config.num_training_epochs = 800
   config.batch_size = 1024
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
