@@ -389,7 +389,7 @@ class ViTDinoModel(base_model.BaseModel):
     return global_sum
     
 
-  def update_center(self, teacher_out, dino):
+  def update_center(self, teacher_out, center):
       """
       Update center used for teacher output.
       """
