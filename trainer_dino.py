@@ -20,7 +20,6 @@ import optax
 from scenic.dataset_lib import dataset_utils
 import utils_dino as utils
 import vit_dino as vit
-from vit_dino import DINOLoss
 from scenic.train_lib import lr_schedules
 from scenic.train_lib import train_utils
 import math, sys
@@ -32,7 +31,7 @@ Batch = Dict[str, jnp.ndarray]
 def dino_train_step(
     train_state: utils.TrainState,
     batch: Batch,
-    dinoloss: DINOLoss,
+    center: jnp.ndarray,
     epoch: int,
     *,
     flax_model: nn.Module,
@@ -75,7 +74,7 @@ def dino_train_step(
   n_q_foc = config.dataset_configs.number_of_focal_queries
   batch = utils.prepare_input(batch, config)
 
-  def training_loss_fn(params, dinoloss, epoch):
+  def training_loss_fn(params, center, epoch):
     # Step 1): Predict teacher network, predict student.
     # get features
     use_ema = config.apply_cluster_loss
@@ -120,14 +119,14 @@ def dino_train_step(
     teacher_out = jnp.concatenate([teacher_out1, teacher_out2], axis=0) #[item for pair in zip(teacher_out1, teacher_out2) for item in pair]
     student_out = jnp.concatenate([student_out1, student_out2], axis=0) #[item for pair in zip(student_out1, student_out2) for item in pair]
     
-    loss_dino, center = loss_fn(jnp.array(student_out), jnp.array(teacher_out), epoch, center.reshape(1,-1))
+    loss_dino, center = loss_fn(jnp.array(student_out), jnp.array(teacher_out), center, epoch)
 
     total_loss = loss_dino
-    return total_loss, (loss_dino, dinoloss)
+    return total_loss, (loss_dino, center)
 
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
-  (total_loss, (loss_dino, dinoloss)), grad = compute_gradient_fn(
-      train_state.params, dinoloss, epoch)
+  (total_loss, (loss_dino, center)), grad = compute_gradient_fn(
+      train_state.params, center, epoch)
   #metrics = metrics_fn(logits, batch)
   metrics = (
       dict(total_loss=(total_loss, 1)))
@@ -153,7 +152,7 @@ def dino_train_step(
         params=new_params,
         ema_params=new_ema_params,
         rng=new_rng)
-  return new_train_state, metrics, dinoloss
+  return new_train_state, center, metrics
 
 
 def train(
@@ -185,10 +184,10 @@ def train(
   model = vit.ViTDinoModel(config, dataset.meta_data)
 
   num_local_devices = jax.local_device_count()
-  dino_loss = []
-  for _ in range(num_local_devices):
-    dino_loss.append(DINOLoss(config))
-  dino_loss = jnp.array(dino_loss).reshape(num_local_devices,1)
+
+  #Center used to calculate the loss
+  center = jnp.zeros((num_local_devices, config.model.head_output_dim))
+  
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
   (params, _, num_trainable_params,
@@ -270,7 +269,11 @@ def train(
       epoch = epoch.astype(jnp.int32)
       #print(epoch)
       train_batch = next(dataset.train_iter)
-      train_state, tm, dino_loss = dino_train_step_pmapped(train_state, train_batch, dino_loss, epoch)
+      train_state, tm, center = dino_train_step_pmapped(
+                                  train_state,
+                                  train_batch,
+                                  center,
+                                  epoch)
       train_metrics.append(tm)
     for h in hooks:
       h(step)
