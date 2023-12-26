@@ -359,7 +359,7 @@ class ViTDinoModel(base_model.BaseModel):
     #jax.debug.print("🤯 Epoca: {epoch} 🤯", epoch=epoch)
     # teacher centering and sharpening
     temp = self.teacher_temp_schedule[epoch]
-    teacher_out = opr.softmax((teacher_output - self.center) / temp, axis=-1)
+    teacher_out = opr.softmax((teacher_output - center) / temp, axis=-1)
     teacher_out = jnp.split(lax.stop_gradient(teacher_out),2)
 
     total_loss = 0
