@@ -231,13 +231,12 @@ def copy_resize_file(resize_size=224):
   return copy_resize_file
 
 @registry.Registry.register("preprocess_ops.flip_with_mask", "function")
-@TwoInKeysTwoOutKeys()
-@BatchedImagePreprocessingWithMask()
+@utils.InKeyOutKey()
+@utils.BatchedImagePreprocessing
 def flip_with_mask():
-  def _flip_with_mask(image, mask):
+  def _flip_with_mask(image):
     seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
     image = tf.image.stateless_random_flip_left_right(image, seed)
-    mask = tf.image.stateless_random_flip_left_right(mask, seed)
     return image, mask
   return _flip_with_mask
 
@@ -458,3 +457,62 @@ def random_solarization(p=0.1):
         lambda: _solarize(image),
         lambda: image)
   return _random_solarize
+
+
+
+@registry.Registry.register("preprocess_ops.generate_crops",
+                            "function")
+@utils.InKeyOutKey()
+@utils.BatchedImagePreprocessing()
+def generate_crops(resize_size=None,
+                   scale_crops=None,
+                   resize_method=tf.image.ResizeMethod.BILINEAR):
+  """Applies the same inception-style crop to an image and a mask tensor.
+
+  Inception-style crop is a random image crop (its size and aspect ratio are
+  random) that was used for training Inception models, see
+  https://www.cs.unc.edu/~wliu/papers/GoogLeNet.pdf.
+
+  Args:
+    resize_size: Sequence of 2 ints; Resize image to [height, width] after crop.
+    scale_crops: scale
+    resize_method: Resize method.
+
+  Returns:
+    Function to crop image and x tensors.
+  """
+  def _generate_crops(image):
+    begin, size, _ = tf.image.sample_distorted_bounding_box(
+        tf.shape(image), tf.zeros([0, 0, 4], tf.float32),
+        area_range= scale_crops,
+        min_object_covered=0,  # Don't enforce a minimum area.
+        use_image_if_no_bounding_boxes=True)
+    # Process image:
+    image_cropped = tf.slice(image, begin, size)
+    image_cropped.set_shape([None, None, image.shape[-1]])
+    if resize_size:
+      image_cropped = tf.image.resize(image_cropped, resize_size, resize_method)
+    
+    return image_cropped
+  return _generate_crops
+
+
+@registry.Registry.register("preprocess_ops.flip", "function")
+@utils.InKeyOutKey()
+@utils.BatchedImagePreprocessing
+def flip():
+  def _flip(image):
+    seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
+    image = tf.image.stateless_random_flip_left_right(image, seed)
+    return image
+  return _flip
+
+
+@registry.Registry.register("preprocess_ops.flip", "function")
+def concatenate(*keys):
+  """Keeps only the given keys."""
+
+  def _concatenate(data):
+    return {k: v for k, v in data.items() if k in keys}
+
+  return _concatenate
