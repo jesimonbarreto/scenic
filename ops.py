@@ -508,7 +508,7 @@ def flip():
   return _flip
 
 
-@registry.Registry.register("preprocess_ops.flip", "function")
+@registry.Registry.register("preprocess_ops.concatenate", "function")
 def concatenate(*keys):
   """Keeps only the given keys."""
 
