@@ -498,7 +498,6 @@ def generate_crops(resize_size=None,
     if flip:
       seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
       image_cropped = tf.image.stateless_random_flip_left_right(image_cropped, seed)
-      mask = tf.image.stateless_random_flip_left_right(mask, seed)
     
     return image_cropped
   return _generate_crops
