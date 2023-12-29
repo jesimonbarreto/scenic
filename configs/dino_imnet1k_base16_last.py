@@ -66,7 +66,7 @@ def get_config():
       ''.join([f'|random_grayscale(0.2, data_key="crops{i}")' for i in range(config.ncrops)]) +
       ''.join([f'|random_blur(0.5, data_key="crops{i}")' for i in range(config.ncrops)]) +
       #''.join([f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="crops{i}")' for i in range(config.ncrops)]) +
-      '|keep("x1, x2"' + ''.join([f', "crops{i}"' for i in range(config.ncrops)]) + ')')
+      '|keep("x1"' + ''.join([f', "crops{i}"' for i in range(config.ncrops)]) + ')')
 
   #'|copy_resize_file("image", "x1")' +
   #'|copy_resize_file("image", "x2")' +
