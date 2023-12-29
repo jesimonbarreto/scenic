@@ -84,6 +84,7 @@ def dino_train_step(
     print(batch['x2'].shape)
     print(batch['crops0'].shape)
     print(batch['crops1'].shape)
+    print(batch['sample'].shape)
     
     _, teacher_out1= flax_model.apply(
         {'params': train_state.ema_params},
