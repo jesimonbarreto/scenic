@@ -139,20 +139,17 @@ def to_cpu(array: jnp.ndarray):
 def prepare_input(inputs: Dict[str, jnp.ndarray],
                   config: ml_collections.ConfigDict) -> Dict[str, jnp.ndarray]:
   """Prepare the different views for LOCA training."""
-  # Reference view.
-  batch = dict(x1=inputs['x1'], x2=inputs['x2'])
+  
+  n_crops = config.ncrops
+  # views.
+  batch = dict(x1=inputs['x1'])
+  batch['x2'] = inputs['x2']
+  batch['crops'] = jnp.concatenate(
+      [inputs['crops' + str(i)] for i in range(n_crops)])
 
-  '''# A bunch of queries.
-  n_focal_queries = config.dataset_configs.number_of_focal_queries
-  # This one will have "random" dropping.
-  batch['query0'] = inputs['query0']
-  batch['query0_target_position'] = inputs['query0_mask']
-  # Those ones have had "focal" dropping during data processing (i.e. cropping).
-  batch['queries'] = jnp.concatenate(
-      [inputs['query' + str(i)] for i in range(1, 1 + n_focal_queries)])
-  target_pos = jnp.concatenate([inputs[
-      'query' + str(i) + '_mask'] for i in range(1, 1 + n_focal_queries)])
-  batch['target_positions'] = target_pos.reshape(target_pos.shape[0], -1)'''
+  batch['x2'] = inputs['x2']
+  batch['sample'] = jnp.concatenate([batch['x1'], batch['x2'], batch['crops']])
+
   return batch
 
 
