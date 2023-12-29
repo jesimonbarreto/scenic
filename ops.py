@@ -466,6 +466,7 @@ def random_solarization(p=0.1):
 @utils.BatchedImagePreprocessing()
 def generate_crops(resize_size=None,
                    scale_crops=None,
+                   flip=True,
                    resize_method=tf.image.ResizeMethod.BILINEAR):
   """Applies the same inception-style crop to an image and a mask tensor.
 
@@ -490,8 +491,14 @@ def generate_crops(resize_size=None,
     # Process image:
     image_cropped = tf.slice(image, begin, size)
     image_cropped.set_shape([None, None, image.shape[-1]])
+
     if resize_size:
       image_cropped = tf.image.resize(image_cropped, resize_size, resize_method)
+
+    if flip:
+      seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
+      image_cropped = tf.image.stateless_random_flip_left_right(image_cropped, seed)
+      mask = tf.image.stateless_random_flip_left_right(mask, seed)
     
     return image_cropped
   return _generate_crops
