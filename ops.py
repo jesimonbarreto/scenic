@@ -500,7 +500,7 @@ def generate_crops(resize_size=None,
 @registry.Registry.register("preprocess_ops.flip", "function")
 @utils.InKeyOutKey()
 @utils.BatchedImagePreprocessing
-def flip():
+def flip(sgin=2):
   def _flip(image):
     seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
     image = tf.image.stateless_random_flip_left_right(image, seed)

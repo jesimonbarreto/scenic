@@ -60,7 +60,7 @@ def get_config():
 
       ''.join([f'|copy("image", "crops{i}")' for i in range(config.ncrops)]) +
       ''.join([f'|generate_crops((224, 224), {config.local_crops_scale}, inkey=("crops{i}"), outkey=("crops{i}"))' for i in range(config.ncrops)]) +
-      #''.join([f'|flip(data_key="crops{i}")' for i in range(config.ncrops)]) + 
+      ''.join([f'|flip(2, data_key="crops{i}")' for i in range(config.ncrops)]) + 
       ''.join([f'|value_range(0, 1, data_key="crops{i}")' for i in range(config.ncrops)]) +
       ''.join([f'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="crops{i}")' for i in range(config.ncrops)]) +
       ''.join([f'|random_grayscale(0.2, data_key="crops{i}")' for i in range(config.ncrops)]) +
