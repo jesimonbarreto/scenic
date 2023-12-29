@@ -234,7 +234,7 @@ def copy_resize_file(resize_size=224):
 @utils.InKeyOutKey()
 @utils.BatchedImagePreprocessing
 def flip_with_mask():
-  def _flip_with_mask(image):
+  def _flip_with_mask(image, mask):
     seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
     image = tf.image.stateless_random_flip_left_right(image, seed)
     return image, mask
