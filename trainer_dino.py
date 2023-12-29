@@ -82,8 +82,7 @@ def dino_train_step(
     print(bs)
     print(batch['x1'].shape)
     print(batch['x2'].shape)
-    print(batch['crops0'].shape)
-    print(batch['crops1'].shape)
+    print(batch['crops'].shape)
     print(batch['sample'].shape)
     
     _, teacher_out1= flax_model.apply(
