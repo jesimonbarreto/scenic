@@ -88,9 +88,11 @@ def dino_train_step(
     imageio.imwrite('/home/jesimonbarreto/imagex1.png', python_array)  # Saves as a PNG image
     python_array = jnp.asarray(batch['sample'][1][0])
     imageio.imwrite('/home/jesimonbarreto/imagex2.png', python_array)  # Saves as a PNG image
-    for j in range(len(batch['sample'][2][0])):
-      python_array = jnp.asarray(batch['sample'][2][0][i])
-      imageio.imwrite(f'/home/jesimonbarreto/crops{j}.jpg', python_array)
+    
+    python_array = jnp.asarray(batch['sample'][2][0])
+    imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', python_array)
+    python_array = jnp.asarray(batch['sample'][2][128])
+    imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', python_array)
     
     print('Plot Feito')
     _, teacher_out= flax_model.apply(
