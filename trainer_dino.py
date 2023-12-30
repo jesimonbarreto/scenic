@@ -264,7 +264,7 @@ def train(
       train_batch = next(dataset.train_iter)
       print(train_batch['x1'][0,0].shape)
       img = train_batch['x1'][0,0]
-      image = Image.fromarray((img * 255).astype(jnp.uint8)).resize((224, 224)).convert('RGB')
+      image = Image.fromarray((img * 255).astype(jnp.uint8))
       image.save('/home/jesimonbarreto/imagex1.png')  # Saving as a BMP image
       imageio.imwrite('/home/jesimonbarreto/imagex1.png', imageio.fromarray((img * 255).astype(jnp.uint8)).resize((224, 224)).convert('RGB'))  # Saves as a PNG image
       imageio.imwrite('/home/jesimonbarreto/imagex2.png', train_batch['x2'][0,0])  # Saves as a PNG image
