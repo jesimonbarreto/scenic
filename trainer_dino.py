@@ -84,12 +84,11 @@ def dino_train_step(
     for ec, i in enumerate(batch['sample']):
       print(f' position {ec} shape {i.shape}')
     
-    imageio.imwrite('/home/jesimonbarreto/imagex1.png', batch['sample'][0][0])  # Saves as a PNG image
-    imageio.imwrite('/home/jesimonbarreto/imagex2.png', batch['sample'][1][0])  # Saves as a PNG image
-    
-    imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', batch['sample'][2][0])
-    imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', batch['sample'][2][128])
-    
+    jnp.save('/home/jesimonbarreto/imagex1', batch['sample'][0][0])
+    jnp.save('/home/jesimonbarreto/imagex2', batch['sample'][1][0])
+    jnp.save('/home/jesimonbarreto/crop0', batch['sample'][2][0])
+    jnp.save('/home/jesimonbarreto/crop1', batch['sample'][2][128])
+   
     print('Plot Feito')
     _, teacher_out= flax_model.apply(
         {'params': train_state.ema_params},
