@@ -47,12 +47,12 @@ def get_config():
       '|copy("image", "x2")' +
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x1"), outkey=("image", "x1"))' +
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x2"), outkey=("image", "x2"))' +
-      #'|value_range(0, 1, data_key="x1")' +
+      '|value_range(0, 1, data_key="x1")' +
       '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
       '|random_grayscale(0.2, data_key="x1")' +
       '|random_blur(1.0, data_key="x1")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
-      #'|value_range(0, 1, data_key="x2")' +
+      '|value_range(0, 1, data_key="x2")' +
       '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
       '|random_grayscale(0.2, data_key="x2")' +
       '|random_blur(0.1, data_key="x2")' +
@@ -62,7 +62,7 @@ def get_config():
       ''.join([f'|copy("image", "crops{i}")' for i in range(config.ncrops)]) +
       ''.join([f'|generate_crops((96, 96), {config.local_crops_scale}, inkey=("crops{i}"), outkey=("crops{i}"))' for i in range(config.ncrops)]) +
       #''.join([f'|flip(2, data_key="crops{i}")' for i in range(config.ncrops)]) + 
-      #''.join([f'|value_range(0, 1, data_key="crops{i}")' for i in range(config.ncrops)]) +
+      ''.join([f'|value_range(0, 1, data_key="crops{i}")' for i in range(config.ncrops)]) +
       ''.join([f'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="crops{i}")' for i in range(config.ncrops)]) +
       ''.join([f'|random_grayscale(0.2, data_key="crops{i}")' for i in range(config.ncrops)]) +
       ''.join([f'|random_blur(0.5, data_key="crops{i}")' for i in range(config.ncrops)]) +
