@@ -23,8 +23,7 @@ import vit_dino as vit
 from scenic.train_lib import lr_schedules
 from scenic.train_lib import train_utils
 import math, sys
-import matplotlib.pyplot as plt
-
+import imageio
 
 # Aliases for custom types:
 Batch = Dict[str, jnp.ndarray]
@@ -86,51 +85,31 @@ def dino_train_step(
       print(f' position {ec} shape {i.shape}')
     
     python_array = jnp.asarray(batch['sample'][0][0])
-    plt.imsave('/home/jesimonbarreto/imagex1.jpg', python_array)
+    imageio.imwrite('/home/jesimonbarreto/imagex1.png', python_array)  # Saves as a PNG image
     python_array = jnp.asarray(batch['sample'][1][0])
-    plt.imsave('/home/jesimonbarreto/imagex2.jpg', python_array)
+    imageio.imwrite('/home/jesimonbarreto/imagex2.png', python_array)  # Saves as a PNG image
     for j in range(len(batch['sample'][2][0])):
       python_array = jnp.asarray(batch['sample'][2][0][i])
-      plt.imsave(f'/home/jesimonbarreto/crops{j}.jpg', python_array)
+      imageio.imwrite(f'/home/jesimonbarreto/crops{j}.jpg', python_array)
     
-    _, teacher_out1= flax_model.apply(
+    print('Plot Feito')
+    _, teacher_out= flax_model.apply(
         {'params': train_state.ema_params},
-        batch['x1'],
+        batch['sample'],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    _, teacher_out2= flax_model.apply(
-        {'params': train_state.ema_params},
-        batch['x2'],
-        seqlen=config.reference_seqlen,
-        seqlen_selection=config.reference_seqlen_selection,
-        drop_moment=drop_moment,
-        train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
-    
-    _, student_out1 = flax_model.apply(
+    _, student_out = flax_model.apply(
         {'params': params},
-        batch['x1'],
+        batch['sample'],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
-    
-    _, student_out2 = flax_model.apply(
-        {'params': params},
-        batch['x2'],
-        seqlen=config.reference_seqlen,
-        seqlen_selection=config.reference_seqlen_selection,
-        drop_moment=drop_moment,
-        train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
-    
-    teacher_out = jnp.concatenate([teacher_out1, teacher_out2], axis=0) #[item for pair in zip(teacher_out1, teacher_out2) for item in pair]
-    student_out = jnp.concatenate([student_out1, student_out2], axis=0) #[item for pair in zip(student_out1, student_out2) for item in pair]
     
     loss_dino, center = loss_fn(jnp.array(student_out), jnp.array(teacher_out), center, epoch)
 
