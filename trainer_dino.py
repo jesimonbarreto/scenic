@@ -25,6 +25,8 @@ from scenic.train_lib import train_utils
 import math, sys
 import imageio
 from PIL import Image
+import matplotlib.pyplot as plt
+
 
 
 # Aliases for custom types:
@@ -264,8 +266,7 @@ def train(
       train_batch = next(dataset.train_iter)
       print(train_batch['x1'][0,0].shape)
       img = train_batch['x1'][0,0]
-      image = Image.fromarray((img * 255))
-      image.save('/home/jesimonbarreto/imagex1.png')  # Saving as a BMP image
+      plt.imsave('image.jpg', img)  # Using matplotlib
       imageio.imwrite('/home/jesimonbarreto/imagex1.png', imageio.fromarray((img * 255).astype(jnp.uint8)).resize((224, 224)).convert('RGB'))  # Saves as a PNG image
       imageio.imwrite('/home/jesimonbarreto/imagex2.png', train_batch['x2'][0,0])  # Saves as a PNG image
     
