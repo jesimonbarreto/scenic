@@ -261,7 +261,7 @@ def train(
       #print(epoch)
       train_batch = next(dataset.train_iter)
       print(len(train_batch))
-      print(train_batch.shape)
+      print(list(train_batch.keys()))
       imageio.imwrite('/home/jesimonbarreto/imagex1.png', train_batch['sample'][0][0])  # Saves as a PNG image
       imageio.imwrite('/home/jesimonbarreto/imagex2.png', train_batch['sample'][1][0])  # Saves as a PNG image
     
