@@ -260,7 +260,7 @@ def train(
       epoch = epoch.astype(jnp.int32)
       #print(epoch)
       train_batch = next(dataset.train_iter)
-      print(train_batch['x1'].shape)
+      print(train_batch['x1'][0,0].shape)
       imageio.imwrite('/home/jesimonbarreto/imagex1.png', train_batch['x1'][0,0])  # Saves as a PNG image
       imageio.imwrite('/home/jesimonbarreto/imagex2.png', train_batch['x2'][0,0])  # Saves as a PNG image
     
