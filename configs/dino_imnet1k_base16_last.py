@@ -46,7 +46,7 @@ def get_config():
       '|copy("image", "x1")' +
       '|copy("image", "x2")' +
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x1"), outkey=("image", "x1"))' +
-      '|copy_resize_file(224, inkey=("image", "x2"), outkey=("image", "x2"))' +
+      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x2"), outkey=("image", "x2"))' +
       '|value_range(0, 1, data_key="x1")' +
       '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
       '|random_grayscale(0.2, data_key="x1")' +
