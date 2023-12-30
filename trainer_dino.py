@@ -80,9 +80,6 @@ def dino_train_step(
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
     print(bs)
-    print(batch['x1'].shape)
-    print(batch['x2'].shape)
-    print(batch['crops'].shape)
     print(batch['sample'].shape)
     
     _, teacher_out1= flax_model.apply(
