@@ -266,9 +266,13 @@ def train(
       train_batch = next(dataset.train_iter)
       print(train_batch['x1'][0,0].shape)
       img = train_batch['x1'][0,0]
-      print(f'min {img.min} max {img.max}')
-      res = img / img.max(axis=(1, 2), keepdims=True)
-      print(f'min {res.min} max {res.max}')
+      def normalize_vector(vector):
+        """Normalizes a JAX NumPy vector to values between 0 and 1."""
+        min_val = jnp.min(vector)
+        max_val = jnp.max(vector)
+        return (vector - min_val) / (max_val - min_val)
+
+      res = normalize_vector(img)
       print(res)
       plt.imsave('image.jpg', res)  # Using matplotlib
       imageio.imwrite('/home/jesimonbarreto/imagex1.png', imageio.fromarray((img * 255).astype(jnp.uint8)).resize((224, 224)).convert('RGB'))  # Saves as a PNG image
