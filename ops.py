@@ -219,15 +219,23 @@ def copy_file(resize_size=224):
 
 @registry.Registry.register("preprocess_ops.copy_resize_file", "function")
 @TwoInKeysTwoOutKeys()
-def copy_resize_file(resize_size=224):
+def copy_resize_file(resize_size=224, global_scale=None):
   """Crop and flip an image and keep track of these operations with a mask."""
   def copy_resize_file(image, image_):
-    orig_shape = tf.shape(image)
-    resize_method=tf.image.ResizeMethod.BILINEAR
-    resized_image = tf.image.resize(image, [resize_size, resize_size], resize_method)
-    
-    return image, resized_image
 
+    resize_method=tf.image.ResizeMethod.BILINEAR
+    #resized_image = tf.image.resize(image, [resize_size, resize_size], resize_method)
+    begin, size, _ = tf.image.sample_distorted_bounding_box(
+        tf.shape(image), tf.zeros([0, 0, 4], tf.float32),
+        area_range= global_scale,
+        min_object_covered=0,  # Don't enforce a minimum area.
+        use_image_if_no_bounding_boxes=True)
+    # Process image:
+    image_cropped = tf.slice(image, begin, size)
+    image_cropped.set_shape([None, None, image.shape[-1]])
+    image_cropped = tf.image.resize(image_cropped, [resize_size, resize_size], resize_method)
+    
+    return image, image_cropped
   return copy_resize_file
 
 @registry.Registry.register("preprocess_ops.flip_with_mask", "function")
