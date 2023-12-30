@@ -84,15 +84,11 @@ def dino_train_step(
     for ec, i in enumerate(batch['sample']):
       print(f' position {ec} shape {i.shape}')
     
-    python_array = jnp.asarray(batch['sample'][0][0])
-    imageio.imwrite('/home/jesimonbarreto/imagex1.png', python_array)  # Saves as a PNG image
-    python_array = jnp.asarray(batch['sample'][1][0])
-    imageio.imwrite('/home/jesimonbarreto/imagex2.png', python_array)  # Saves as a PNG image
+    imageio.imwrite('/home/jesimonbarreto/imagex1.png', batch['sample'][0][0])  # Saves as a PNG image
+    imageio.imwrite('/home/jesimonbarreto/imagex2.png', batch['sample'][1][0])  # Saves as a PNG image
     
-    python_array = jnp.asarray(batch['sample'][2][0])
-    imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', python_array)
-    python_array = jnp.asarray(batch['sample'][2][128])
-    imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', python_array)
+    imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', batch['sample'][2][0])
+    imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', batch['sample'][2][128])
     
     print('Plot Feito')
     _, teacher_out= flax_model.apply(
