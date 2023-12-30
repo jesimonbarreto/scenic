@@ -262,11 +262,11 @@ def train(
       train_batch = next(dataset.train_iter)
       print(len(train_batch))
       print(list(train_batch.keys()))
-      imageio.imwrite('/home/jesimonbarreto/imagex1.png', train_batch['sample'][0][0])  # Saves as a PNG image
-      imageio.imwrite('/home/jesimonbarreto/imagex2.png', train_batch['sample'][1][0])  # Saves as a PNG image
+      imageio.imwrite('/home/jesimonbarreto/imagex1.png', train_batch['x1'][0])  # Saves as a PNG image
+      imageio.imwrite('/home/jesimonbarreto/imagex2.png', train_batch['x2'][0])  # Saves as a PNG image
     
-      imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', train_batch['sample'][2][0])
-      imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', train_batch['sample'][2][128])
+      imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', train_batch['crops0'][0])
+      imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', train_batch['crops1'][0])
       train_state, center, tm = dino_train_step_pmapped(
                                   train_state,
                                   train_batch,
