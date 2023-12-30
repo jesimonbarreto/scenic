@@ -86,12 +86,12 @@ def dino_train_step(
       print(f' position {ec} shape {i.shape}')
     
     python_array = jnp.asarray(batch['sample'][0][0])
-    plt.imsave('imagex1.jpg', python_array)
+    plt.imsave('/home/jesimonbarreto/imagex1.jpg', python_array)
     python_array = jnp.asarray(batch['sample'][1][0])
-    plt.imsave('imagex2.jpg', python_array)
+    plt.imsave('/home/jesimonbarreto/imagex2.jpg', python_array)
     for j in range(len(batch['sample'][2][0])):
       python_array = jnp.asarray(batch['sample'][2][0][i])
-      plt.imsave(f'crops{j}.jpg', python_array)
+      plt.imsave(f'/home/jesimonbarreto/crops{j}.jpg', python_array)
     
     _, teacher_out1= flax_model.apply(
         {'params': train_state.ema_params},
