@@ -23,6 +23,8 @@ import vit_dino as vit
 from scenic.train_lib import lr_schedules
 from scenic.train_lib import train_utils
 import math, sys
+import matplotlib.pyplot as plt
+
 
 # Aliases for custom types:
 Batch = Dict[str, jnp.ndarray]
@@ -80,7 +82,16 @@ def dino_train_step(
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
     print(bs)
-    print(batch['sample'].shape)
+    for ec, i in enumerate(batch['sample']):
+      print(f' position {ec} shape {i.shape}')
+    
+    python_array = jnp.asarray(batch['sample'][0][0])
+    plt.imsave('imagex1.jpg', python_array)
+    python_array = jnp.asarray(batch['sample'][1][0])
+    plt.imsave('imagex2.jpg', python_array)
+    for j in range(len(batch['sample'][2][0])):
+      python_array = jnp.asarray(batch['sample'][2][0][i])
+      plt.imsave(f'crops{j}.jpg', python_array)
     
     _, teacher_out1= flax_model.apply(
         {'params': train_state.ema_params},
