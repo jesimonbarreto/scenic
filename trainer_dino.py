@@ -71,7 +71,7 @@ def dino_train_step(
   step = train_state.global_step
   momentum_parameter = momentum_parameter_scheduler(step)
   n_pos = config.n_ref_positions  # Number of reference positions.
-  bs = batch['sample'][0].shape[0]  # Per-device batch size.
+  bs = batch['x1'].shape[0]  # Per-device batch size.
   n_q_foc = config.dataset_configs.number_of_focal_queries
   batch = utils.prepare_input(batch, config)
 
