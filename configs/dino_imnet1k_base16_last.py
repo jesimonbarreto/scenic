@@ -56,7 +56,7 @@ def get_config():
       '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
       '|random_grayscale(0.2, data_key="x2")' +
       '|random_blur(0.1, data_key="x2")' +
-      '|random_solarization(0.2, data_key="x2")' +
+      '|random_solarize(0.2, data_key="x2")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")' +
 
       ''.join([f'|copy("image", "crops{i}")' for i in range(config.ncrops)]) +
