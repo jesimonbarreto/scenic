@@ -83,11 +83,11 @@ def dino_train_step(
     print(bs)
     for ec, i in enumerate(batch['sample']):
       print(f' position {ec} shape {i.shape}')
-    
-    jnp.save('/home/jesimonbarreto/imagex1', batch['sample'][0][0])
-    jnp.save('/home/jesimonbarreto/imagex2', batch['sample'][1][0])
-    jnp.save('/home/jesimonbarreto/crop0', batch['sample'][2][0])
-    jnp.save('/home/jesimonbarreto/crop1', batch['sample'][2][128])
+    if batch['sample']:
+      jnp.save('/home/jesimonbarreto/imagex1', batch['sample'][0][0])
+      jnp.save('/home/jesimonbarreto/imagex2', batch['sample'][1][0])
+      jnp.save('/home/jesimonbarreto/crop0', batch['sample'][2][0])
+      jnp.save('/home/jesimonbarreto/crop1', batch['sample'][2][128])
    
     print('Plot Feito')
     _, teacher_out= flax_model.apply(
