@@ -274,19 +274,19 @@ def train(
       for stepe in range(4):
         img = train_batch['x1'][0,0]
         res = normalize_vector(img)
-        plt.imsave(f'/home/jesimonbarreto/imagex1{stepe}.jpg', res)  # Using matplotlib
+        plt.imsave(f'/home/jesimonbarreto/images/imagex1{stepe}.jpg', res)  # Using matplotlib
         img = train_batch['x2'][0,0]
         res = normalize_vector(img)
-        plt.imsave(f'/home/jesimonbarreto/imagex2{stepe}.jpg', res)
+        plt.imsave(f'/home/jesimonbarreto/images/imagex2{stepe}.jpg', res)
         img = train_batch['crops0'][0,0]
         res = normalize_vector(img)
-        plt.imsave(f'/home/jesimonbarreto/crops0{stepe}.jpg', res)
+        plt.imsave(f'/home/jesimonbarreto/images/crops0{stepe}.jpg', res)
         img = train_batch['crops1'][0,0]
         res = normalize_vector(img)
-        plt.imsave(f'/home/jesimonbarreto/crops1{stepe}.jpg', res)
+        plt.imsave(f'/home/jesimonbarreto/images/crops1{stepe}.jpg', res)
         img = train_batch['image'][0,0]
         res = normalize_vector(img)
-        plt.imsave(f'/home/jesimonbarreto/image{stepe}.jpg', res)
+        plt.imsave(f'/home/jesimonbarreto/images/image{stepe}.jpg', res)
       
       train_state, center, tm = dino_train_step_pmapped(
                                   train_state,
