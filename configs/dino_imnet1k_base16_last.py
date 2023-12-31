@@ -152,23 +152,6 @@ def get_config():
   config.reference_seqlen_selection = 'consecutive'  # or 'unstructured' or 'first'
   config.query_max_seqlen = 70
 
-  # Training.
-  config.max_grad_norm = 1
-  config.num_training_epochs = 800
-  config.batch_size = 1024
-  config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
-  config.rng_seed = 42
-  total_steps = config.num_training_epochs * config.steps_per_epoch
-  config.global_crops_scale = (0.4, 1.0) 
-  config.local_crops_number = 0 #if 0, global scale = 0.14,1.0
-  config.local_crops_scale = (0.05,0.4)
-  config.student_temp = 0.1
-  config.center_momentum = 0.9
-  config.ncrops = 2
-  config.warmup_teacher_temp = 0.04
-  config.teacher_temp = 0.04
-  config.warmup_teacher_temp_epochs = 0
-
   # Learning rate.
   #cosine schedule lr
   config.lr_configs = ml_collections.ConfigDict()
