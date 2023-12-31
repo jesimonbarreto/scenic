@@ -48,8 +48,6 @@ def get_config():
 
   config.dataset_configs.pp_train = (
       'decode' +
-      '|copy("image", "image")' +
-      '|random_grayscale(0.0, data_key="image")' +
       '|copy("image", "x1")' +
       '|copy("image", "x2")' +
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x1"), outkey=("image", "x1"))' +

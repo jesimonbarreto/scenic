@@ -193,6 +193,8 @@ def train(
     train_state that has the state of training.
   """
   lead_host = jax.process_index() == 0
+  #plot
+  fstexe = True
 
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
@@ -283,12 +285,12 @@ def train(
       epoch = epoch.astype(jnp.int32)
       train_batch = next(dataset.train_iter)
 
-      if config.plot_ex:
+      if config.plot_ex and fstexe:
         plot_example(train_batch, 
                      number_plot=config.number_plot,
                      dir_plot='/home/jesimonbarreto/images/',
                      number_crops=config.ncrops)
-        config.plot_example = False
+        fstexe = False
 
       train_state, center, tm = dino_train_step_pmapped(
                                   train_state,
