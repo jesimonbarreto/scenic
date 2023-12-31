@@ -22,6 +22,11 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
+  
+  #plot
+  config.plot_ex = True
+  config.number_plot = 5
+  config.dir_plot = '/home/jesimonbarreto/images/'
 
   # Training.
   config.max_grad_norm = 1

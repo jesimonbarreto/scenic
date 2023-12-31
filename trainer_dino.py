@@ -283,7 +283,7 @@ def train(
       epoch = epoch.astype(jnp.int32)
       train_batch = next(dataset.train_iter)
 
-      if config.plot_example:
+      if config.plot_ex:
         plot_example(train_batch, 
                      number_plot=config.number_plot,
                      dir_plot='/home/jesimonbarreto/images/',
