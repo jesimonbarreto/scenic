@@ -22,7 +22,7 @@ import utils_dino as utils
 import vit_dino as vit
 from scenic.train_lib import lr_schedules
 from scenic.train_lib import train_utils
-import math, sys
+import math, sys, os
 import imageio
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -32,6 +32,25 @@ import matplotlib.pyplot as plt
 # Aliases for custom types:
 Batch = Dict[str, jnp.ndarray]
 
+def plot_example(train_batch, number_plot=5, dir_plot='/home/jesimonbarreto/images/', number_crops=2):
+  print(train_batch['x1'][0,0].shape)
+      
+  def normalize_vector(vector):
+    """Normalizes a JAX NumPy vector to values between 0 and 1."""
+    min_val = jnp.min(vector)
+    max_val = jnp.max(vector)
+    return (vector - min_val) / (max_val - min_val)
+  for stepe in range(number_plot):
+    img = train_batch['x1'][0,0]
+    res = normalize_vector(img)
+    plt.imsave(os.path.join(dir_plot,f'imagex1_{stepe}.jpg'), res)  # Using matplotlib
+    img = train_batch['x2'][0,0]
+    res = normalize_vector(img)
+    plt.imsave(os.path.join(dir_plot,f'imagex2_{stepe}.jpg'), res)
+    for vcrop in range(number_crops):
+      img = train_batch[f'crops{vcrop}'][0,0]
+      res = normalize_vector(img)
+      plt.imsave(os.path.join(dir_plot,f'crops{vcrop}_{stepe}.jpg'), res)
 
 def dino_train_step(
     train_state: utils.TrainState,
@@ -262,32 +281,15 @@ def train(
     with jax.profiler.StepTraceAnnotation('train', step_num=step):
       epoch = jnp.ones((num_local_devices, 1))*step/steps_per_epoch
       epoch = epoch.astype(jnp.int32)
-      #print(epoch)
       train_batch = next(dataset.train_iter)
-      print(train_batch['x1'][0,0].shape)
-      
-      def normalize_vector(vector):
-        """Normalizes a JAX NumPy vector to values between 0 and 1."""
-        min_val = jnp.min(vector)
-        max_val = jnp.max(vector)
-        return (vector - min_val) / (max_val - min_val)
-      for stepe in range(5):
-        img = train_batch['x1'][0,0]
-        res = normalize_vector(img)
-        plt.imsave(f'/home/jesimonbarreto/images/imagex1{stepe}.jpg', res)  # Using matplotlib
-        img = train_batch['x2'][0,0]
-        res = normalize_vector(img)
-        plt.imsave(f'/home/jesimonbarreto/images/imagex2{stepe}.jpg', res)
-        img = train_batch['crops0'][0,0]
-        res = normalize_vector(img)
-        plt.imsave(f'/home/jesimonbarreto/images/crops0{stepe}.jpg', res)
-        img = train_batch['crops1'][0,0]
-        res = normalize_vector(img)
-        plt.imsave(f'/home/jesimonbarreto/images/crops1{stepe}.jpg', res)
-        img = train_batch['image'][0,0]
-        res = normalize_vector(img)
-        plt.imsave(f'/home/jesimonbarreto/images/image{stepe}.jpg', res)
-      
+
+      if config.plot_example:
+        plot_example(train_batch, 
+                     number_plot=config.number_plot,
+                     dir_plot='/home/jesimonbarreto/images/',
+                     number_crops=config.ncrops)
+        config.plot_example = False
+
       train_state, center, tm = dino_train_step_pmapped(
                                   train_state,
                                   train_batch,
