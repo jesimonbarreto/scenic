@@ -51,7 +51,7 @@ def plot_example(train_batch, number_plot=5, dir_plot='/home/jesimonbarreto/imag
     img = normalize_vector(img)
     plt.imsave(os.path.join(dir_plot,f'imagex2_{stepe}.jpg'), img)
     for vcrop in range(number_crops):
-      print('{vcrop} de {number_crops}')
+      print(f'{vcrop} de {number_crops}')
       img = train_batch[f'crops{vcrop}'][0,stepe]
       img = normalize_vector(img)
       plt.imsave(os.path.join(dir_plot,f'crops{vcrop}_{stepe}.jpg'), img)
@@ -279,6 +279,7 @@ def train(
       train_batch = next(dataset.train_iter)
 
       if config.plot_ex and fstexe:
+        print(f' config {config.ncrops}')
         plot_example(train_batch, 
                      number_plot=config.number_plot,
                      dir_plot='/home/jesimonbarreto/images/',
