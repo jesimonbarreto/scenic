@@ -187,7 +187,7 @@ def train(
     train_state that has the state of training.
   """
   lead_host = jax.process_index() == 0
-  #plot
+  #plot flag
   fstexe = True
 
   # Build the loss_fn, metrics, and flax_model.

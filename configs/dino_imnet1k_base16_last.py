@@ -24,7 +24,7 @@ def get_config():
   n_queries = 10
   
   #plot
-  config.plot_ex = True
+  config.plot_ex = False
   config.number_plot = 5
   config.dir_plot = '/home/jesimonbarreto/images/'
 
