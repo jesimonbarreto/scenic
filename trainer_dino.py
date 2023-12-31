@@ -40,16 +40,16 @@ def plot_example(train_batch, number_plot=5, dir_plot='/home/jesimonbarreto/imag
     max_val = jnp.max(vector)
     return (vector - min_val) / (max_val - min_val)
   for stepe in range(number_plot):
-    img = train_batch['x1'][0,0]
-    res = normalize_vector(img)
-    plt.imsave(os.path.join(dir_plot,f'imagex1_{stepe}.jpg'), res)  # Using matplotlib
-    img = train_batch['x2'][0,0]
-    res = normalize_vector(img)
-    plt.imsave(os.path.join(dir_plot,f'imagex2_{stepe}.jpg'), res)
+    img = train_batch['x1'][0,stepe]
+    #img = normalize_vector(img)
+    plt.imsave(os.path.join(dir_plot,f'imagex1_{stepe}.jpg'), img)  # Using matplotlib
+    img = train_batch['x2'][0,stepe]
+    #img = normalize_vector(img)
+    plt.imsave(os.path.join(dir_plot,f'imagex2_{stepe}.jpg'), img)
     for vcrop in range(number_crops):
-      img = train_batch[f'crops{vcrop}'][0,0]
-      res = normalize_vector(img)
-      plt.imsave(os.path.join(dir_plot,f'crops{vcrop}_{stepe}.jpg'), res)
+      img = train_batch[f'crops{vcrop}'][0,stepe]
+      #img = normalize_vector(img)
+      plt.imsave(os.path.join(dir_plot,f'crops{vcrop}_{stepe}.jpg'), img)
 
 def dino_train_step(
     train_state: utils.TrainState,
