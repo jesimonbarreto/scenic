@@ -39,6 +39,7 @@ def plot_example(train_batch, number_plot=5, dir_plot='/home/jesimonbarreto/imag
     min_val = jnp.min(vector)
     max_val = jnp.max(vector)
     return (vector - min_val) / (max_val - min_val)
+  
   for stepe in range(number_plot):
     img = train_batch['x1'][0,stepe]
     print(f'1 max {jnp.max(img)} min {jnp.min(img)}')
