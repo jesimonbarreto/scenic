@@ -271,7 +271,7 @@ def train(
         min_val = jnp.min(vector)
         max_val = jnp.max(vector)
         return (vector - min_val) / (max_val - min_val)
-      for stepe in range(4):
+      for stepe in range(5):
         img = train_batch['x1'][0,0]
         res = normalize_vector(img)
         plt.imsave(f'/home/jesimonbarreto/images/imagex1{stepe}.jpg', res)  # Using matplotlib
