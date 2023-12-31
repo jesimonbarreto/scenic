@@ -265,21 +265,29 @@ def train(
       #print(epoch)
       train_batch = next(dataset.train_iter)
       print(train_batch['x1'][0,0].shape)
-      img = train_batch['x1'][0,0]
+      
       def normalize_vector(vector):
         """Normalizes a JAX NumPy vector to values between 0 and 1."""
         min_val = jnp.min(vector)
         max_val = jnp.max(vector)
         return (vector - min_val) / (max_val - min_val)
-
-      res = normalize_vector(img)
-      print(res)
-      plt.imsave('image.jpg', res)  # Using matplotlib
-      imageio.imwrite('/home/jesimonbarreto/imagex1.png', imageio.fromarray((img * 255).astype(jnp.uint8)).resize((224, 224)).convert('RGB'))  # Saves as a PNG image
-      imageio.imwrite('/home/jesimonbarreto/imagex2.png', train_batch['x2'][0,0])  # Saves as a PNG image
-    
-      imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', train_batch['crops0'][0,0])
-      imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', train_batch['crops1'][0,0])
+      for stepe in range(4):
+        img = train_batch['x1'][0,0]
+        res = normalize_vector(img)
+        plt.imsave(f'/home/jesimonbarreto/imagex1{stepe}.jpg', res)  # Using matplotlib
+        img = train_batch['x2'][0,0]
+        res = normalize_vector(img)
+        plt.imsave(f'/home/jesimonbarreto/imagex2{stepe}.jpg', res)
+        img = train_batch['crops0'][0,0]
+        res = normalize_vector(img)
+        plt.imsave(f'/home/jesimonbarreto/crops0{stepe}.jpg', res)
+        img = train_batch['crops1'][0,0]
+        res = normalize_vector(img)
+        plt.imsave(f'/home/jesimonbarreto/crops1{stepe}.jpg', res)
+        img = train_batch['image'][0,0]
+        res = normalize_vector(img)
+        plt.imsave(f'/home/jesimonbarreto/image{stepe}.jpg', res)
+      
       train_state, center, tm = dino_train_step_pmapped(
                                   train_state,
                                   train_batch,
