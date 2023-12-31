@@ -33,8 +33,7 @@ import matplotlib.pyplot as plt
 Batch = Dict[str, jnp.ndarray]
 
 def plot_example(train_batch, number_plot=5, dir_plot='/home/jesimonbarreto/images/', number_crops=2):
-  print(train_batch['x1'][0,0].shape)
-      
+  
   def normalize_vector(vector):
     """Normalizes a JAX NumPy vector to values between 0 and 1."""
     min_val = jnp.min(vector)
@@ -103,18 +102,7 @@ def dino_train_step(
     # get features
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
-    print(bs)
-    for ec, i in enumerate(batch['sample']):
-      print(f' position {ec} shape {i.shape}')
-    
-    
-    imageio.imwrite('/home/jesimonbarreto/imagex1.png', batch['sample'][0][0])  # Saves as a PNG image
-    imageio.imwrite('/home/jesimonbarreto/imagex2.png', batch['sample'][1][0])  # Saves as a PNG image
-    
-    imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', batch['sample'][2][0])
-    imageio.imwrite(f'/home/jesimonbarreto/crops0.jpg', batch['sample'][2][128])
-    
-    print('Plot Feito')
+
     _, teacher_out= flax_model.apply(
         {'params': train_state.ema_params},
         batch['sample'][0],
