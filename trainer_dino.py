@@ -143,13 +143,12 @@ def dino_train_step(
     
     shape_0  = batch['sample'][0].shape
     print(f"Shape 0 {shape_0}")
-    print(f"Shape TC {tc.shape} ")
     print(f"Shape St {st.shape} ")
     print(f"Shape cc {cc.shape} ")
 
     
-    bt = tc.shape[0]
-    tc = tc.reshape((bt,-1))
+    bt = teacher_out.shape[0]
+    teacher_out = teacher_out.reshape((bt,-1))
     bt = st.shape[0]
     st = st.reshape((bt,-1))
     bt = cc.shape[0]
@@ -166,7 +165,6 @@ def dino_train_step(
     print(f"Shape 0 {shape_0}")
     print(f"Shape ST {shape_st}")
     print(f"Shape Tea {shape_tea} ")
-    print(f"Shape TC {tc.shape} ")
     print(f"Shape St {st.shape} ")
     print(f"Shape cc {cc.shape} ")
 
