@@ -109,7 +109,7 @@ def dino_train_step(
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
 
-    tc = flax_model.apply(
+    teacher_out = flax_model.apply(
         {'params': train_state.ema_params},
         batch['sample'][0],
         seqlen=config.reference_seqlen,
@@ -158,27 +158,7 @@ def dino_train_step(
     shc = cc.shape[-1]
     shs = st.shape[-1]
     cc = jnp.concatenate([cc, jnp.zeros((bt,shs-shc))],axis=1)
-    stcc = jnp.concatenate([st,cc])
-
-    teacher_out = flax_model.apply(
-        {'params': train_state.ema_params},
-        tc,
-        seqlen=config.reference_seqlen,
-        seqlen_selection=config.reference_seqlen_selection,
-        drop_moment=drop_moment,
-        backbone = False,
-        train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
-
-    student_out = flax_model.apply(
-        {'params': train_state.ema_params},
-        stcc,
-        seqlen=config.reference_seqlen,
-        seqlen_selection=config.reference_seqlen_selection,
-        drop_moment=drop_moment,
-        backbone = False,
-        train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+    student_out = jnp.concatenate([st,cc])
 
     shape_0  = batch['sample'][0].shape
     shape_st = student_out.shape
@@ -190,7 +170,6 @@ def dino_train_step(
     print(f"Shape St {st.shape} ")
     print(f"Shape cc {cc.shape} ")
 
-    student_out = jnp.concatenate([student_out, student_out_crops],axis=0)
     loss_dino, center = loss_fn(student_out, teacher_out, center, epoch)
 
     total_loss = loss_dino

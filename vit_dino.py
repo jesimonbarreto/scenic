@@ -135,37 +135,36 @@ class ViTDINO(nn.Module):
                debug: bool = False):
     del debug
     
-    if backbone:
-      # Input image -> sequence of patch tokens.
-      to_token_fn = ToTokenSequence(
-          patches=self.patches,
-          hidden_size=self.hidden_size,
-          posembs=self.posembs)
-      x, idx_kept_tokens = to_token_fn(
-          x, seqlen=seqlen if drop_moment == 'early' else -1,
-          positional_embedding=None if use_pe else 'pe_not_in_use',
-          seqlen_selection=seqlen_selection)
+    
+    # Input image -> sequence of patch tokens.
+    to_token_fn = ToTokenSequence(
+        patches=self.patches,
+        hidden_size=self.hidden_size,
+        posembs=self.posembs)
+    x, idx_kept_tokens = to_token_fn(
+        x, seqlen=seqlen if drop_moment == 'early' else -1,
+        positional_embedding=None if use_pe else 'pe_not_in_use',
+        seqlen_selection=seqlen_selection)
 
-      # ViT Encoder.
-      for lyr in range(self.num_layers):
-        x = vit.Encoder1DBlock(
-            mlp_dim=self.mlp_dim,
-            num_heads=self.num_heads,
-            dropout_rate=self.dropout_rate,
-            attention_dropout_rate=self.attention_dropout_rate,
-            stochastic_depth=(lyr / max(self.num_layers - 1, 1)) *
-            self.stochastic_depth,
-            name=f'encoderblock_{lyr}',
-            dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
-                x, deterministic=not train)
-      x = nn.LayerNorm(name='encoder_norm')(x)
-    else:
-      x = ProjectionHead(
-            hidden_dim=self.head_hidden_dim,
-            bottleneck_dim=self.head_bottleneck_dim,
-            output_dim=self.head_output_dim,
-            name='projection_head')(
-                x, train)#.reshape((-1, self.head_output_dim))
+    # ViT Encoder.
+    for lyr in range(self.num_layers):
+      x = vit.Encoder1DBlock(
+          mlp_dim=self.mlp_dim,
+          num_heads=self.num_heads,
+          dropout_rate=self.dropout_rate,
+          attention_dropout_rate=self.attention_dropout_rate,
+          stochastic_depth=(lyr / max(self.num_layers - 1, 1)) *
+          self.stochastic_depth,
+          name=f'encoderblock_{lyr}',
+          dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
+              x, deterministic=not train)
+    x = nn.LayerNorm(name='encoder_norm')(x)
+    x = ProjectionHead(
+          hidden_dim=self.head_hidden_dim,
+          bottleneck_dim=self.head_bottleneck_dim,
+          output_dim=self.head_output_dim,
+          name='projection_head')(
+              x, train)#.reshape((-1, self.head_output_dim))
     if self.loca:
       patches_repr = x
       # Drop some tokens (in the reference view).
