@@ -135,9 +135,16 @@ def dino_train_step(
         drop_moment=drop_moment,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
-    
-    student_out = jnp.concatenate([student_out, student_out_crops])
-    print(student_out.shape)
+    shape_0  = batch['sample'][0].shape
+    shape_st = student_out.shape
+    shape_tea = teacher_out.shape
+    shape_stc = student_out_crops.shape
+    jax.debug.print("Shape 0 {shape_0} 🤯", shape_0=shape_0)
+    jax.debug.print("Shape ST {shape_st} 🤯", shape_st=shape_st)
+    jax.debug.print("Shape Tea {shape_tea} 🤯", shape_tea=shape_tea)
+    jax.debug.print("Shape STC {shape_stc} 🤯", shape_stc=shape_stc)
+
+    student_out = jnp.concatenate([student_out, student_out_crops],axis=0)
     loss_dino, center = loss_fn(student_out, teacher_out, center, epoch)
 
     total_loss = loss_dino
