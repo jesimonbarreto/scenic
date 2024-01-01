@@ -109,7 +109,7 @@ def dino_train_step(
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
 
-    _, teacher_out= flax_model.apply(
+    tc, teacher_out= flax_model.apply(
         {'params': train_state.ema_params},
         batch['sample'][0],
         seqlen=config.reference_seqlen,
@@ -118,7 +118,7 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    _, student_out = flax_model.apply(
+    st, student_out = flax_model.apply(
         {'params': params},
         batch['sample'][0],
         seqlen=config.reference_seqlen,
@@ -127,7 +127,7 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    _, student_out_crops = flax_model.apply(
+    cc, student_out_crops = flax_model.apply(
         {'params': params},
         batch['sample'][1],
         seqlen=config.reference_seqlen,
@@ -143,6 +143,9 @@ def dino_train_step(
     print(f"Shape ST {shape_st}")
     print(f"Shape Tea {shape_tea} ")
     print(f"Shape STC {shape_stc} ")
+    print(f"Shape TC {tc.shape} ")
+    print(f"Shape St {st.shape} ")
+    print(f"Shape cc {cc.shape} ")
 
     student_out = jnp.concatenate([student_out, student_out_crops],axis=0)
     loss_dino, center = loss_fn(student_out, teacher_out, center, epoch)
