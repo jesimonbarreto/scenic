@@ -109,40 +109,79 @@ def dino_train_step(
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
 
-    tc, teacher_out= flax_model.apply(
+    tc = flax_model.apply(
         {'params': train_state.ema_params},
         batch['sample'][0],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
+        backbone = True,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    st, student_out = flax_model.apply(
+    st = flax_model.apply(
         {'params': params},
         batch['sample'][0],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
+        backbone = True,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    cc, student_out_crops = flax_model.apply(
+    cc = flax_model.apply(
         {'params': params},
         batch['sample'][1],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
+        backbone = True,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+    
+    
+    
+    shape_0  = batch['sample'][0].shape
+    print(f"Shape 0 {shape_0}")
+    print(f"Shape TC {tc.shape} ")
+    print(f"Shape St {st.shape} ")
+    print(f"Shape cc {cc.shape} ")
+
+    
+    bt = tc.shape[0]
+    tc = tc.reshape((bt,-1))
+    bt = st.shape[0]
+    st = st.reshape((bt,-1))
+    bt = cc.shape[0]
+    cc = cc.reshape((bt,-1))
+    stcc = jnp.concatenate([st,cc])
+
+    teacher_out = flax_model.apply(
+        {'params': train_state.ema_params},
+        tc,
+        seqlen=config.reference_seqlen,
+        seqlen_selection=config.reference_seqlen_selection,
+        drop_moment=drop_moment,
+        backbone = False,
+        train=True,
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+
+    student_out = flax_model.apply(
+        {'params': train_state.ema_params},
+        stcc,
+        seqlen=config.reference_seqlen,
+        seqlen_selection=config.reference_seqlen_selection,
+        drop_moment=drop_moment,
+        backbone = False,
+        train=True,
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+
     shape_0  = batch['sample'][0].shape
     shape_st = student_out.shape
     shape_tea = teacher_out.shape
-    shape_stc = student_out_crops.shape
     print(f"Shape 0 {shape_0}")
     print(f"Shape ST {shape_st}")
     print(f"Shape Tea {shape_tea} ")
-    print(f"Shape STC {shape_stc} ")
     print(f"Shape TC {tc.shape} ")
     print(f"Shape St {st.shape} ")
     print(f"Shape cc {cc.shape} ")

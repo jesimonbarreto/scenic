@@ -130,41 +130,42 @@ class ViTDINO(nn.Module):
   def __call__(self, x: jnp.ndarray, *jnp, inputs_kv: Optional[jnp.ndarray] = None,
                train: bool, seqlen: int = -1, use_pe: bool = True,
                drop_moment: str = 'early',
-               seqlen_selection: str = 'unstructured', debug: bool = False):
+               seqlen_selection: str = 'unstructured', 
+               backbone: bool = True,
+               debug: bool = False):
     del debug
-    # Input image -> sequence of patch tokens.
-    to_token_fn = ToTokenSequence(
-        patches=self.patches,
-        hidden_size=self.hidden_size,
-        posembs=self.posembs)
-    x, idx_kept_tokens = to_token_fn(
-        x, seqlen=seqlen if drop_moment == 'early' else -1,
-        positional_embedding=None if use_pe else 'pe_not_in_use',
-        seqlen_selection=seqlen_selection)
+    
+    if backbone:
+      # Input image -> sequence of patch tokens.
+      to_token_fn = ToTokenSequence(
+          patches=self.patches,
+          hidden_size=self.hidden_size,
+          posembs=self.posembs)
+      x, idx_kept_tokens = to_token_fn(
+          x, seqlen=seqlen if drop_moment == 'early' else -1,
+          positional_embedding=None if use_pe else 'pe_not_in_use',
+          seqlen_selection=seqlen_selection)
 
-    # ViT Encoder.
-    for lyr in range(self.num_layers):
-      x = vit.Encoder1DBlock(
-          mlp_dim=self.mlp_dim,
-          num_heads=self.num_heads,
-          dropout_rate=self.dropout_rate,
-          attention_dropout_rate=self.attention_dropout_rate,
-          stochastic_depth=(lyr / max(self.num_layers - 1, 1)) *
-          self.stochastic_depth,
-          name=f'encoderblock_{lyr}',
-          dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
-              x, deterministic=not train)
-    x = nn.LayerNorm(name='encoder_norm')(x)
-
-    # Optionally apply a clustering prediction loss.
-    cluster_pred_outputs = None
-    #if self.apply_cluster_loss:
-    cluster_pred_outputs = ProjectionHead(
-          hidden_dim=self.head_hidden_dim,
-          bottleneck_dim=self.head_bottleneck_dim,
-          output_dim=self.head_output_dim,
-          name='projection_head')(
-              x, train)#.reshape((-1, self.head_output_dim))
+      # ViT Encoder.
+      for lyr in range(self.num_layers):
+        x = vit.Encoder1DBlock(
+            mlp_dim=self.mlp_dim,
+            num_heads=self.num_heads,
+            dropout_rate=self.dropout_rate,
+            attention_dropout_rate=self.attention_dropout_rate,
+            stochastic_depth=(lyr / max(self.num_layers - 1, 1)) *
+            self.stochastic_depth,
+            name=f'encoderblock_{lyr}',
+            dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
+                x, deterministic=not train)
+      x = nn.LayerNorm(name='encoder_norm')(x)
+    else:
+      x = ProjectionHead(
+            hidden_dim=self.head_hidden_dim,
+            bottleneck_dim=self.head_bottleneck_dim,
+            output_dim=self.head_output_dim,
+            name='projection_head')(
+                x, train)#.reshape((-1, self.head_output_dim))
     if self.loca:
       patches_repr = x
       # Drop some tokens (in the reference view).
@@ -188,9 +189,9 @@ class ViTDINO(nn.Module):
               x, inputs_kv=inputs_kv, deterministic=not train)
       x = nn.LayerNorm(name='final_norm')(x)
       x = nn.Dense(self.n_ref_positions, name='position_predictor')(x)
-      return x, cluster_pred_outputs, patches_repr, idx_kept_tokens
+      return x, patches_repr, idx_kept_tokens
     
-    return x, cluster_pred_outputs
+    return x
 
 
 class ViTDINONew(nn.Module):
