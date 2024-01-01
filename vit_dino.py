@@ -306,7 +306,7 @@ class ViTDINONew(nn.Module):
           name='cross_attention_block',
           dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
               x, inputs_kv=inputs_kv, deterministic=not train)
-      x = nn.LayerNorm(name='final_norm')(x)
+      x = nn.LayerNorm(name='final_norm_')(x)
       x = nn.Dense(self.n_ref_positions, name='position_predictor')(x)
       return x, cluster_pred_outputs, patches_repr, idx_kept_tokens
     
