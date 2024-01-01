@@ -157,7 +157,7 @@ def dino_train_step(
 
     shc = cc.shape[-1]
     shs = st.shape[-1]
-    cc = jnp.concatenate([cc, jnp.zeros(bt,shs-shc)],axis=1)
+    cc = jnp.concatenate([cc, jnp.zeros((bt,shs-shc))],axis=1)
     stcc = jnp.concatenate([st,cc])
 
     teacher_out = flax_model.apply(
