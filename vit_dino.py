@@ -241,6 +241,7 @@ class ViTDINONew(nn.Module):
     if not isinstance(x, list):
       x = [x]
     
+    output = jnp.zeros(0, dtype=x[0].dtype)
     un = jnp.array([inp.shape[-1] for inp in x])
     print(un)
     idx_crops = jnp.cumsum(jnp.unique(jnp.array([inp.shape[-1] for inp in x]))[1], axis=0)
