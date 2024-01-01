@@ -164,7 +164,7 @@ class ViTDINO(nn.Module):
           bottleneck_dim=self.head_bottleneck_dim,
           output_dim=self.head_output_dim,
           name='projection_head')(
-              x, train).reshape((-1, self.head_output_dim))
+              x, train)#.reshape((-1, self.head_output_dim))
     if self.loca:
       patches_repr = x
       # Drop some tokens (in the reference view).
