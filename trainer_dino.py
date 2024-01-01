@@ -168,7 +168,7 @@ def dino_train_step(
     print(f"Shape St {st.shape} ")
     print(f"Shape cc {cc.shape} ")
 
-    loss_dino, center = loss_fn(student_out, teacher_out, center, epoch)
+    loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
 
     total_loss = loss_dino
     return total_loss, (loss_dino, center)
