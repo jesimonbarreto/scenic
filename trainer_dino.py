@@ -139,26 +139,10 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    
-    
-    shape_0  = batch['sample'][0].shape
-    print(f"Shape 0 {shape_0}")
-    print(f"Shape St {st.shape} ")
-    print(f"Shape cc {cc.shape} ")
     teacher_out = jnp.mean(teacher_out, axis=1) 
     cc = jnp.mean(cc, axis=1)
     st = jnp.mean(st, axis=1)
-    
     student_out = jnp.concatenate([st,cc])
-
-    shape_0  = batch['sample'][0].shape
-    shape_st = student_out.shape
-    shape_tea = teacher_out.shape
-    print(f"Shape 0 {shape_0}")
-    print(f"Shape ST {shape_st}")
-    print(f"Shape Tea {shape_tea} ")
-    print(f"Shape St {st.shape} ")
-    print(f"Shape cc {cc.shape} ")
 
     loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
 
