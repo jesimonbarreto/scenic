@@ -139,10 +139,10 @@ def dino_train_step(
     shape_st = student_out.shape
     shape_tea = teacher_out.shape
     shape_stc = student_out_crops.shape
-    jax.debug.print("Shape 0 {shape_0} 🤯", shape_0=shape_0)
-    jax.debug.print("Shape ST {shape_st} 🤯", shape_st=shape_st)
-    jax.debug.print("Shape Tea {shape_tea} 🤯", shape_tea=shape_tea)
-    jax.debug.print("Shape STC {shape_stc} 🤯", shape_stc=shape_stc)
+    print(f"Shape 0 {shape_0}")
+    print(f"Shape ST {shape_st}")
+    print(f"Shape Tea {shape_tea} ")
+    print(f"Shape STC {shape_stc} ")
 
     student_out = jnp.concatenate([student_out, student_out_crops],axis=0)
     loss_dino, center = loss_fn(student_out, teacher_out, center, epoch)
