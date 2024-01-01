@@ -246,8 +246,8 @@ class ViTDINONew(nn.Module):
     start_idx = 0
     output = jnp.empty(0)
 
-    for end_idx in idx_crops:
-      x_ = jnp.concatenate(x[start_idx:end_idx])
+    for x_ in x:
+      #x_ = jnp.concatenate(x[start_idx:end_idx])
       # Input image -> sequence of patch tokens.
       to_token_fn = ToTokenSequence(
           patches=self.patches,
