@@ -271,7 +271,7 @@ class ViTDINONew(nn.Module):
             name=f'encoderblock_{lyr}',
             dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
                 x_, deterministic=not train)
-        x_ = nn.LayerNorm(name='encoder_norm')(x_)
+        x_ = nn.LayerNorm(name='encoder_norm_')(x_)
       output = jnp.concatenate((output,x_))
       #start_idx = end_idx
     
