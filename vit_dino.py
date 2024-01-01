@@ -247,6 +247,7 @@ class ViTDINONew(nn.Module):
     output = jnp.empty(0)
 
     for x_ in x:
+      #To otmization concatenate equal shape predictions
       #x_ = jnp.concatenate(x[start_idx:end_idx])
       # Input image -> sequence of patch tokens.
       to_token_fn = ToTokenSequence(
@@ -272,7 +273,7 @@ class ViTDINONew(nn.Module):
                 x_, deterministic=not train)
         x_ = nn.LayerNorm(name='encoder_norm')(x_)
       output = jnp.concatenate((output,x_))
-      start_idx = end_idx
+      #start_idx = end_idx
     
 
     # Optionally apply a clustering prediction loss.
