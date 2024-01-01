@@ -473,6 +473,9 @@ class ViTDinoModel(base_model.BaseModel):
     #                                                  weights)
 
     student_out = student_output / self.student_temp
+    print(f'crops {self.ncrops}')
+    print(f'student shape {student_output.shape}')
+    print(f'teacher shape {teacher_output.shape}')
     student_out = jnp.split(student_out, self.ncrops)
     
     #jax.debug.print("🤯 Epoca: {epoch} 🤯", epoch=epoch)

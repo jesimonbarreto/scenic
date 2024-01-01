@@ -137,6 +137,7 @@ def dino_train_step(
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
     student_out = jnp.concatenate([student_out, student_out_crops])
+    print(student_out.shape)
     loss_dino, center = loss_fn(student_out, teacher_out, center, epoch)
 
     total_loss = loss_dino
