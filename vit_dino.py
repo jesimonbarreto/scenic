@@ -163,7 +163,7 @@ class ViTDINO(nn.Module):
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
           output_dim=self.head_output_dim,
-          name='projection_head_for_clustering_prediction')(
+          name='projection_head')(
               x, train).reshape((-1, self.head_output_dim))
     if self.loca:
       patches_repr = x
@@ -271,7 +271,7 @@ class ViTDINONew(nn.Module):
             name=f'encoderblock_{lyr}',
             dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
                 x_, deterministic=not train)
-        x_ = nn.LayerNorm(name='encoder_norm_')(x_)
+        x_ = nn.LayerNorm(name='encoder_norm')(x_)
       output = jnp.concatenate((output,x_))
       #start_idx = end_idx
     
@@ -402,7 +402,7 @@ class ViTDinoModel(base_model.BaseModel):
     model_dtype = getattr(jnp, self.config.get('model_dtype_str', 'float32'))
     self.student_temp = self.config.student_temp
     self.center_momentum = self.config.center_momentum
-    self.ncrops = self.config.ncrops
+    self.ncrops = self.config.ncrops + 2
     self.out_dim = self.config.model.head_output_dim
     
     # we apply a warm up for the teacher temperature because
@@ -412,7 +412,7 @@ class ViTDinoModel(base_model.BaseModel):
                     self.config.teacher_temp, self.config.warmup_teacher_temp_epochs),
         jnp.ones(self.config.num_training_epochs - self.config.warmup_teacher_temp_epochs) * self.config.teacher_temp
     ))
-    return ViTDINONew(
+    return ViTDINO(
         mlp_dim=self.config.model.mlp_dim,
         num_layers=self.config.model.num_layers,
         num_heads=self.config.model.num_heads,

@@ -111,7 +111,7 @@ def dino_train_step(
 
     _, teacher_out= flax_model.apply(
         {'params': train_state.ema_params},
-        batch['sample'],
+        batch['sample'][0],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
@@ -120,14 +120,24 @@ def dino_train_step(
     
     _, student_out = flax_model.apply(
         {'params': params},
-        batch['sample'],
+        batch['sample'][0],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    loss_dino, center = loss_fn(jnp.array(student_out), jnp.array(teacher_out), center, epoch)
+    _, student_out_crops = flax_model.apply(
+        {'params': params},
+        batch['sample'][1],
+        seqlen=config.reference_seqlen,
+        seqlen_selection=config.reference_seqlen_selection,
+        drop_moment=drop_moment,
+        train=True,
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+    
+    student_out = jnp.concatenate([student_out, student_out_crops])
+    loss_dino, center = loss_fn(student_out, teacher_out, center, epoch)
 
     total_loss = loss_dino
     return total_loss, (loss_dino, center)
