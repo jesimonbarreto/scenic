@@ -232,7 +232,7 @@ class ViTDINONew(nn.Module):
   loca: bool = False
 
   @nn.compact
-  def __call__(self, x, *jnp, inputs_kv: Optional[jnp.ndarray] = None,
+  def __call__(self, x:list, *jnp, inputs_kv: Optional[jnp.ndarray] = None,
                train: bool, seqlen: int = -1, use_pe: bool = True,
                drop_moment: str = 'early',
                seqlen_selection: str = 'unstructured', debug: bool = False):
