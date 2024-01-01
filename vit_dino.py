@@ -244,7 +244,7 @@ class ViTDINONew(nn.Module):
     idx_crops = jnp.cumsum(jnp.unique(jnp.array([inp.shape[-1] for inp in x]))[1], axis=0)
     print(idx_crops)
     start_idx = 0
-    output = jnp.zeros(0, dtype=x[0].dtype)
+    output = jnp.empty(0, dtype=x[0].dtype)
 
     for end_idx in idx_crops:
       x_ = jnp.concatenate(x[start_idx:end_idx])
