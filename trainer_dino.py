@@ -145,18 +145,10 @@ def dino_train_step(
     print(f"Shape 0 {shape_0}")
     print(f"Shape St {st.shape} ")
     print(f"Shape cc {cc.shape} ")
-
+    teacher_out = jnp.mean(teacher_out, axis=1) 
+    cc = jnp.mean(cc, axis=1)
+    st = jnp.mean(st, axis=1)
     
-    bt = teacher_out.shape[0]
-    teacher_out = teacher_out.reshape((bt,-1))
-    bt = st.shape[0]
-    st = st.reshape((bt,-1))
-    bt = cc.shape[0]
-    cc = cc.reshape((bt,-1))
-
-    shc = cc.shape[-1]
-    shs = st.shape[-1]
-    cc = jnp.concatenate([cc, jnp.zeros((bt,shs-shc))],axis=1)
     student_out = jnp.concatenate([st,cc])
 
     shape_0  = batch['sample'][0].shape

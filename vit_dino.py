@@ -159,8 +159,6 @@ class ViTDINO(nn.Module):
           dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
               x, deterministic=not train)
     x = nn.LayerNorm(name='encoder_norm')(x)
-    sh = x.shape[0]
-    x = x.reshape((sh,-1))
     x = ProjectionHead(
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
