@@ -138,15 +138,16 @@ def to_cpu(array: jnp.ndarray):
 
 def prepare_input(inputs: Dict[str, jnp.ndarray],
                   config: ml_collections.ConfigDict) -> Dict[str, jnp.ndarray]:
-  """Prepare the different views for LOCA training."""
+  """Prepare the different crops for Dino training."""
   
   n_crops = config.ncrops
+  sample = [inputs['x1'], inputs['x2']]
   # views.
+  for i in range(n_crops):
+    sample.append(inputs['crops' + str(i)])
   batch = dict()
-  crps = jnp.concatenate(
-      [inputs['crops' + str(i)] for i in range(n_crops)])
-
-  batch['sample'] = [inputs['x1'], inputs['x2'], crps]
+  
+  batch['sample'] = sample
 
   return batch
 

@@ -189,8 +189,127 @@ class ViTDINO(nn.Module):
       x = nn.LayerNorm(name='final_norm')(x)
       x = nn.Dense(self.n_ref_positions, name='position_predictor')(x)
       return x, cluster_pred_outputs, patches_repr, idx_kept_tokens
+    
     return x, cluster_pred_outputs
 
+
+class ViTDINONew(nn.Module):
+  """Vision Transformer model for LOCA training.
+
+    Attributes:
+    mlp_dim: Dimension of the mlp on top of attention block.
+    num_layers: Number of layers.
+    num_heads: Number of self-attention heads.
+    patches: Configuration of the patches extracted in the stem of the model.
+    hidden_size: Size of the hidden state of the output of model's stem.
+    n_ref_positions: Number of position in the reference view.
+    apply_cluster_loss: Whether to apply the clustering loss.
+    head_hidden_dim: Dimension of the hidden layer in the projection mlp.
+    head_bottleneck_dim: Dimension of the bottleneck.
+    head_output_dim: Dimension of the output ("number of prototypes").
+    dropout_rate: Dropout rate.
+    attention_dropout_rate: Dropout for attention heads.
+    stochastic_depth: Stochastic depth.
+    posembs: Positional embedding size.
+    dtype: JAX data type for activations.
+  """
+
+  mlp_dim: int
+  num_layers: int
+  num_heads: int
+  patches: ml_collections.ConfigDict
+  hidden_size: int
+  n_ref_positions: int
+  apply_cluster_loss: bool
+  head_hidden_dim: int
+  head_bottleneck_dim: int
+  head_output_dim: int
+  dropout_rate: float = 0.0
+  attention_dropout_rate: float = 0.0
+  stochastic_depth: float = 0.1
+  posembs: Tuple[int, int] = (14, 14)
+  dtype: Any = jnp.float32
+  loca: bool = False
+
+  @nn.compact
+  def __call__(self, x, *jnp, inputs_kv: Optional[jnp.ndarray] = None,
+               train: bool, seqlen: int = -1, use_pe: bool = True,
+               drop_moment: str = 'early',
+               seqlen_selection: str = 'unstructured', debug: bool = False):
+    del debug
+       
+    if not isinstance(x, list):
+      x = [x]
+    
+    idx_crops = jnp.cumsum(jnp.unique(jnp.array([inp.shape[-1] for inp in x]))[1], axis=0)
+    print(idx_crops)
+    start_idx = 0
+    output = jnp.zeros(0, dtype=x[0].dtype)
+
+    for end_idx in idx_crops:
+      x_ = jnp.concatenate(x[start_idx:end_idx])
+      # Input image -> sequence of patch tokens.
+      to_token_fn = ToTokenSequence(
+          patches=self.patches,
+          hidden_size=self.hidden_size,
+          posembs=self.posembs)
+      x_, idx_kept_tokens = to_token_fn(
+          x_, seqlen=seqlen if drop_moment == 'early' else -1,
+          positional_embedding=None if use_pe else 'pe_not_in_use',
+          seqlen_selection=seqlen_selection)
+
+      # ViT Encoder.
+      for lyr in range(self.num_layers):
+        x_ = vit.Encoder1DBlock(
+            mlp_dim=self.mlp_dim,
+            num_heads=self.num_heads,
+            dropout_rate=self.dropout_rate,
+            attention_dropout_rate=self.attention_dropout_rate,
+            stochastic_depth=(lyr / max(self.num_layers - 1, 1)) *
+            self.stochastic_depth,
+            name=f'encoderblock_{lyr}',
+            dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
+                x_, deterministic=not train)
+        x_ = nn.LayerNorm(name='encoder_norm')(x_)
+      output = jnp.concatenate((output,x_))
+      start_idx = end_idx
+    
+
+    # Optionally apply a clustering prediction loss.
+    cluster_pred_outputs = None
+    #if self.apply_cluster_loss:
+    cluster_pred_outputs = ProjectionHead(
+          hidden_dim=self.head_hidden_dim,
+          bottleneck_dim=self.head_bottleneck_dim,
+          output_dim=self.head_output_dim,
+          name='projection_head_for_clustering_prediction')(
+              output, train).reshape((-1, self.head_output_dim))
+    if self.loca:
+      patches_repr = x
+      # Drop some tokens (in the reference view).
+      if drop_moment == 'late':
+        rng = self.make_rng('droptok')
+        idx_kept_tokens = token_indexes_not_to_drop(
+            seqlen, self.n_ref_positions, seqlen_selection, rng)
+        if len(idx_kept_tokens) < self.n_ref_positions:
+          patches_repr = jnp.take(patches_repr, idx_kept_tokens, axis=1)
+
+      # Query patches look at those of the reference through crossrng attention.
+      if inputs_kv is None:
+        inputs_kv = copy.deepcopy(patches_repr)
+      x = CrossAttentionEncoderBlock(
+          mlp_dim=self.mlp_dim,
+          num_heads=self.num_heads,
+          dropout_rate=self.dropout_rate,
+          attention_dropout_rate=self.attention_dropout_rate,
+          name='cross_attention_block',
+          dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
+              x, inputs_kv=inputs_kv, deterministic=not train)
+      x = nn.LayerNorm(name='final_norm')(x)
+      x = nn.Dense(self.n_ref_positions, name='position_predictor')(x)
+      return x, cluster_pred_outputs, patches_repr, idx_kept_tokens
+    
+    return x, cluster_pred_outputs
 
 def norm_kernel_init_fn(rng, shape, dtype):
   """Initialize kernel with l2 normalized columns."""
@@ -292,7 +411,7 @@ class ViTDinoModel(base_model.BaseModel):
                     self.config.teacher_temp, self.config.warmup_teacher_temp_epochs),
         jnp.ones(self.config.num_training_epochs - self.config.warmup_teacher_temp_epochs) * self.config.teacher_temp
     ))
-    return ViTDINO(
+    return ViTDINONew(
         mlp_dim=self.config.model.mlp_dim,
         num_layers=self.config.model.num_layers,
         num_heads=self.config.model.num_heads,
