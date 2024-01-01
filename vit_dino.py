@@ -232,7 +232,7 @@ class ViTDINONew(nn.Module):
   loca: bool = False
 
   @nn.compact
-  def __call__(self, x:list, *jnp, inputs_kv: Optional[jnp.ndarray] = None,
+  def __call__(self, x:list, *, inputs_kv: Optional[jnp.ndarray] = None,
                train: bool, seqlen: int = -1, use_pe: bool = True,
                drop_moment: str = 'early',
                seqlen_selection: str = 'unstructured', debug: bool = False):
@@ -241,9 +241,6 @@ class ViTDINONew(nn.Module):
     if not isinstance(x, list):
       x = [x]
     
-    output = jnp.zeros(0, dtype=x[0].dtype)
-    un = jnp.array([inp.shape[-1] for inp in x])
-    print(un)
     idx_crops = jnp.cumsum(jnp.unique(jnp.array([inp.shape[-1] for inp in x]))[1], axis=0)
     print(idx_crops)
     start_idx = 0
