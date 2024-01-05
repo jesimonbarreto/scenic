@@ -324,7 +324,7 @@ def train(
           step=step,
           train_metrics=jax.tree_util.tree_map(train_utils.unreplicate_and_get,
                                                train_metrics),
-          extra_training_logs= ext_logs,
+          extra_training_logs= ext_log,
           writer=writer)
       chrono.resume()
       train_metrics = []
