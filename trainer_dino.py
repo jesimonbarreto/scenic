@@ -309,7 +309,7 @@ def train(
                                   train_batch,
                                   center,
                                   epoch)
-      tm['learning_rate'] = train_state.hyperparams['learning_rate']
+      tm['learning_rate'] = train_state.opt_state.hyperparams['learning_rate']
       train_metrics.append(tm)
     for h in hooks:
       h(step)
