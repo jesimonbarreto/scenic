@@ -253,7 +253,7 @@ def train(
   train_state = train_state.replace(metadata={})
   # Replicate the training state: optimizer, params and rng.
   train_state = jax_utils.replicate(train_state)
-  del params, ema_params
+  del params, ema_paramssteps_per_epoch
   total_steps, steps_per_epoch = train_utils.get_num_training_steps(
       config, dataset.meta_data)
 
@@ -272,7 +272,7 @@ def train(
       donate_argnums=(0,1),
   )
 
-  train_metrics, train_summary = [], None
+  train_metrics, train_summary, ext_log = [], None, []
   chrono.inform(start_step, total_steps, config.batch_size, steps_per_epoch)
   report_progress = periodic_actions.ReportProgress(num_train_steps=total_steps,
                                                     writer=writer)
@@ -290,6 +290,7 @@ def train(
       step0_log['gflops'] = gflops
     writer.write_scalars(1, step0_log)
   logging.info('Starting training loop at step %d.', start_step + 1)
+  v={}
   for step in range(start_step + 1, total_steps + 1):
     with jax.profiler.StepTraceAnnotation('train', step_num=step):
       epoch = jnp.ones((num_local_devices, 1))*step/steps_per_epoch
@@ -309,7 +310,8 @@ def train(
                                   train_batch,
                                   center,
                                   epoch)
-      tm['learning_rate'] = train_state.opt_state.hyperparams['learning_rate']
+      v['learning_rate'] = train_state.opt_state.hyperparams['learning_rate']
+      ext_log.append(v)
       train_metrics.append(tm)
     for h in hooks:
       h(step)
@@ -322,6 +324,7 @@ def train(
           step=step,
           train_metrics=jax.tree_util.tree_map(train_utils.unreplicate_and_get,
                                                train_metrics),
+          extra_training_logs= ext_logs,
           writer=writer)
       chrono.resume()
       train_metrics = []
