@@ -253,7 +253,7 @@ def train(
   train_state = train_state.replace(metadata={})
   # Replicate the training state: optimizer, params and rng.
   train_state = jax_utils.replicate(train_state)
-  del params, ema_paramssteps_per_epoch
+  del params, ema_params
   total_steps, steps_per_epoch = train_utils.get_num_training_steps(
       config, dataset.meta_data)
 
