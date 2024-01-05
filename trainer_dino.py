@@ -1,4 +1,4 @@
-"""LOCA Training Script."""
+"""DINO Training Script."""
 
 import copy
 import functools
@@ -309,6 +309,7 @@ def train(
                                   train_batch,
                                   center,
                                   epoch)
+      tm['learning_rate'] = train_state.hyperparams['learning_rate']
       train_metrics.append(tm)
     for h in hooks:
       h(step)

@@ -26,10 +26,9 @@ from scenic.train_lib import lr_schedules
 from scenic.train_lib import optimizers
 from scenic.train_lib import train_utils
 
-import knn_utils
-import vit_with_embedding
-import sampling_utils
-
+from universal_embedding import knn_utils
+from universal_embedding import vit_with_embedding
+from universal_embedding import sampling_utils
 
 
 
@@ -230,9 +229,9 @@ def representation_fn_eval(
   """
   variables = {'params': train_state.params, **train_state.model_state}
 
-  _, embedding = flax_model.apply(
+  embedding = flax_model.apply(
     variables, 
-    batch['references'],
+    batch['inputs'],
     train=False,
     return_feats = True,
     debug=False, 

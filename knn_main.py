@@ -117,11 +117,11 @@ def knn_evaluate(
     batch['image'] = jnp.resize(batch['image'], (1,224,224,3))
     batch['image'] = batch['image'].reshape(-1,224,224,3)
     print(batch['image'].shape)
-    _, pred_ = model.flax_model.apply(
+    pred_ = model.flax_model.apply(
         {'params': train_state.params},
         batch['image'], train=False)
-    predictions.append(pred_)
-    break
+    pred_ = jnp.mean(pred_, axis=1)
+    batch['predic'] = pred_
   # Concatenate individual predictions into a single array
   X_train = jnp.concatenate(predictions)
 
@@ -129,7 +129,7 @@ def knn_evaluate(
   predictions = []
   for batch in test:
     batch['image'] = jnp.float32(batch['image']) / 255.
-    _, pred_ = model.flax_model.apply(
+    pred_ = model.flax_model.apply(
         {'params': train_state.params},
         batch['image'], train=False)
     predictions.append(pred_)
