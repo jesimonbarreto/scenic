@@ -14,7 +14,8 @@ ViT_configs = {
 
 
 VARIANT = 'B/16'
-_IMAGENET_TRAIN_SIZE = 9469 #1281167
+_IMAGENET_TRAIN_SIZE = 50000 #9469 #1281167
+_IMAGENET_TEST_SIZE = 10000
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 
@@ -26,7 +27,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   config.experiment_name = '100ep_run'
   # Dataset.
-  config.dataset_name = 'dino_dataset'
+  config.dataset_name = 'eval_dataset'
   config.data_dtype_str = 'float32'
   config.dataset_configs = ml_collections.ConfigDict()
   config.dataset_configs.prefetch_to_device = 2
@@ -66,26 +67,8 @@ def get_config():
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x1"), outkey=("image", "x1"))' +
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x2"), outkey=("image", "x2"))' +
       '|value_range(0, 1, data_key="x1")' +
-      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
-      '|random_grayscale(0.2, data_key="x1")' +
-      '|random_blur(1.0, data_key="x1")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
-
-      '|value_range(0, 1, data_key="x2")' +
-      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
-      '|random_grayscale(0.2, data_key="x2")' +
-      '|random_blur(0.1, data_key="x2")' +
-      '|random_solarize(0.2, data_key="x2")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")' +
-
-      ''.join([f'|copy("image", "crops{i}")' for i in range(config.ncrops)]) +
-      ''.join([f'|generate_crops((96, 96), {config.local_crops_scale}, inkey=("crops{i}"), outkey=("crops{i}"))' for i in range(config.ncrops)]) +
-      ''.join([f'|value_range(0, 1, data_key="crops{i}")' for i in range(config.ncrops)]) +
-      ''.join([f'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="crops{i}")' for i in range(config.ncrops)]) +
-      ''.join([f'|random_grayscale(0.2, data_key="crops{i}")' for i in range(config.ncrops)]) +
-      ''.join([f'|random_blur(0.5, data_key="crops{i}")' for i in range(config.ncrops)]) +
-      ''.join([f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="crops{i}")' for i in range(config.ncrops)]))
-      #'|keep("x1, x2"' + ''.join([f', "crops{i}"' for i in range(config.ncrops)]) + ')')
+  )
 
   
   # For IMAGENET-1K
