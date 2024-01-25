@@ -27,6 +27,7 @@ import tensorflow_datasets as tfds
 import datasets
 import dino_dataset  # pylint: disable=unused-import
 from scenic.dataset_lib import tinyImagenet_dataset
+import datasets_eval
 
 import functools
 from typing import Any, Callable, Dict, Tuple, Optional, Type
