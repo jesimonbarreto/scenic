@@ -34,7 +34,6 @@ import flax
 from flax import jax_utils
 from flax import linen as nn
 
-import datasets
 import knn_utils
 
 FLAGS = flags.FLAGS
