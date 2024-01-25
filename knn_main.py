@@ -28,41 +28,10 @@ import datasets
 import dino_dataset  # pylint: disable=unused-import
 from scenic.dataset_lib import tinyImagenet_dataset
 
+import classification_with_knn_eval_trainer
+import datasets
+import knn_utils
 
-FLAGS = flags.FLAGS
-
-def get_datasets(batch=3):
-    """Load MNIST train and test datasets into memory."""
-    ds_builder = tfds.builder('imagenette')
-    ds_builder.download_and_prepare()
-    train_ds = tfds.as_numpy(ds_builder.as_dataset(split='train', batch_size=batch))
-    test_ds = tfds.as_numpy(ds_builder.as_dataset(split='validation', batch_size=batch))
-    return train_ds, test_ds
-
-def compute_diff(u, v):
-    return (u[:, None] - v[None, :]) ** 2
-
-# We pmap the built-in argsort function along the first axes.
-# We sort a matrix with shape (devices, n_test // devices, n_train)
-p_argsort = jax.pmap(jnp.argsort, in_axes=0)
-
-def compute_distance(U, V):
-    return compute_diff(U, V).mean(axis=-1)
-
-def compute_k_closest(U, V, k, devices, n_test):
-    D = compute_distance(U, V)
-    D = D.reshape(devices, n_test // devices, -1)
-    nearest = p_argsort(D)[..., 1:k+1]
-    return nearest
-
-compute_diff = jax.vmap(compute_diff, in_axes=1, out_axes=-1)
-
-# We pmap the built-in argsort function along the first axes.
-# We sort a matrix with shape (devices, n_test // devices, n_train)
-p_argsort = jax.pmap(jnp.argsort, in_axes=0)  
-
-n_train = 30_000
-n_test = 10 * 8
 
 def knn_evaluate(
   rng: jnp.ndarray,
@@ -73,17 +42,11 @@ def knn_evaluate(
 
   lead_host = jax.process_index() == 0
 
-  k=20
-
-  devices = 8
-  train, test = get_datasets(batch=1)
-
   data_rng, rng = jax.random.split(rng)
   dataset = train_utils.get_dataset(
       config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
-
 
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
@@ -109,46 +72,112 @@ def knn_evaluate(
   # Replicate the training state: optimizer, params and rng.
   train_state = jax_utils.replicate(train_state)
   del params
-
-  predictions = []
-  for batch in train:
-    batch['image'] = jnp.float32(batch['image']) / 255.
-    print(batch['image'].shape)
-    batch['image'] = jnp.resize(batch['image'], (1,224,224,3))
-    batch['image'] = batch['image'].reshape(-1,224,224,3)
-    print(batch['image'].shape)
-    pred_ = model.flax_model.apply(
-        {'params': train_state.params},
-        batch['image'], train=False)
-    pred_ = jnp.mean(pred_, axis=1)
-    batch['predic'] = pred_
-  # Concatenate individual predictions into a single array
-  X_train = jnp.concatenate(predictions)
-
-
-  predictions = []
-  for batch in test:
-    batch['image'] = jnp.float32(batch['image']) / 255.
-    pred_ = model.flax_model.apply(
-        {'params': train_state.params},
-        batch['image'], train=False)
-    predictions.append(pred_)
-    break
-  # Concatenate individual predictions into a single array
-  X_test = jnp.concatenate(predictions)
-
-  y_train = dataset['label']
-  y_test = dataset['label']
-  print(X_train.shape)
-  print(X_test.shape)
   
-  k_nearest = compute_k_closest(X_test, X_train, k)
-  if jax.process_index() == 0:
-    print(k_nearest.shape)
-    k_nearest = k_nearest.reshape(-1, k)
-    class_rate = (y_train[k_nearest, ...].mean(axis=1).round() == y_test).mean()
-    print(f"{class_rate=}")
 
+  #project feats or not
+  representation_fn_knn = functools.partial(
+    classification_with_knn_eval_trainer.representation_fn_eval,
+    flax_model = model.flax_model, 
+    project_feats = config.project_feats_knn
+  )
+
+  knn_eval_batch_size = config.get('knn_eval_batch_size') or config.batch_size
+
+  repr_fn = jax.pmap(
+        representation_fn_knn, 
+        donate_argnums=(1,), 
+        axis_name='batch',
+  )
+
+  train_dir = config.get('train_dir')
+
+  for epoch in range(config.knn_start_epoch,config.knn_end_epoch+1):
+
+    step = epoch * config.steps_per_epoch
+
+    print(f"step: {step}")
+
+    if not config.preextracted:
+      ckpt_file = os.path.join(train_dir,str(step))  
+      ckpt_info = ckpt_file.split('/')
+      ckpt_dir = '/'.join(ckpt_info[:-1])
+      ckpt_num = ckpt_info[-1].split('_')[-1]
+
+      try:
+
+        train_state, _ = train_utils.restore_checkpoint(
+          ckpt_dir, 
+          train_state, 
+          assert_exist=True, 
+          step=int(ckpt_num),
+        )
+        
+      except:
+
+        sys.exit("no checkpoint found")
+
+      train_state = jax_utils.replicate(train_state)
+
+    else:
+
+      train_state = None
+
+
+    # extract features
+    @jax.jit
+    def extract_features(batch):
+      features = repr_fn(train_state, batch)
+      return features  # Return extracted features for the batch
+      
+    for batch in next(dataset.train_iter):
+      batch['emb'] = extract_features(batch)
+
+    for batch in next(dataset.eval_iter):
+      batch['emb'] = extract_features(batch)
+    
+    @jax.vmap
+    def euclidean_distance(x1, x2):
+      return jnp.linalg.norm(x1 - x2, axis=-1)
+
+    @jax.vmap
+    def cosine_similarity(x1, x2):
+      return jnp.dot(x1, x2) / (jnp.linalg.norm(x1, axis=-1) * jnp.linalg.norm(x2, axis=-1))
+    
+    print('Dataset keys')
+    print(dataset.keys())
+    len_test = 0
+    correct_pred = 0
+    for batch_eval in next(dataset.eval_iter):
+      dist_all = []
+      labels = []
+      len_test += len(batch_eval)
+      for batch_train in next(dataset.train_iter):
+        dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(batch_eval['emb'], batch_train['emb'])
+        dist_all.append(dist_)
+        labels.append(batch_train['labels'])
+      dist_all = jnp.concatenate(dist_all)
+      labels = jnp.concatenate(labels)
+      @jax.vmap
+      def knn_vote(k, distances, train_labels):
+          # Get k nearest neighbors for each test sample
+          nearest_indices = jnp.argpartition(distances, k - 1, axis=-1)[:k]
+          # Count occurrences of each class among neighbors
+          class_counts = jnp.bincount(train_labels[nearest_indices.flatten()], axis=1)
+          # Predict class with the highest vote count
+          return jnp.argmax(class_counts, axis=-1)
+
+      predictions = knn_vote(k=5, distances=dist_all, train_labels=labels)
+    
+      # Compare predictions with actual test labels
+      correct_predictions = jnp.equal(predictions, dataset.labels)
+      correct_pred += jnp.sum(correct_predictions)
+
+    # Calculate accuracy as the ratio of correct predictions to total test samples
+    accuracy = correct_pred / len_test
+
+    print(f"Number of correct predictions: {correct_pred}")
+    print(f"Accuracy: {accuracy:.4f}")
+    
 
   train_utils.barrier_across_hosts()
 

@@ -30,7 +30,7 @@ def get_config():
 
   # Training.
   config.max_grad_norm = 1
-  config.num_training_epochs = 100
+  config.num_training_epochs = 400
   config.batch_size = 512
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -40,7 +40,7 @@ def get_config():
   config.local_crops_scale = (0.05,0.4)
   config.student_temp = 0.1
   config.center_momentum = 0.9
-  config.ncrops = 4
+  config.ncrops = 8
   config.warmup_teacher_temp = 0.04
   config.teacher_temp = 0.04
   config.warmup_teacher_temp_epochs = 0
@@ -137,13 +137,17 @@ def get_config():
                              'B': 12,
                              'L': 24,
                              'H': 32}[version]
-  config.model.head_output_dim = 4096
+  config.model.head_output_dim = 4096 #65536 
   config.model.attention_dropout_rate = 0.0
   config.model.dropout_rate = 0.0
   config.model.stochastic_depth = 0.1
   config.model_dtype_str = 'float32'
   config.model.temperature = 0.1
   config.sharpening = 0.05
+  #Verificar esses fatores no codigo
+  config.norm_last_layer = True
+  config.momentum_teacher = 0.996
+  config.use_bn_in_head = False
 
   # LOCA specific parameters.
   config.n_ref_positions = int((reference_resolution // patch)**2)
@@ -163,7 +167,13 @@ def get_config():
   config.lr_configs.alpha = 0.01
 
   # Weight decay.
-  config.weight_decay = 0.1
+  config.weight_decay = 0.04
+  #verificar
+  config.weight_decay_end = 0.4
+  config.lr=0.0005
+  config.warmup_epochs=10
+  config.optimizer = 'adamw'
+  config.drop_path_rate= 0.1
 
   # Momentum rate scheduler.
   config.momentum_rate = ml_collections.ConfigDict()

@@ -40,6 +40,18 @@ def get_config():
 
   """Returns the ViT experiment configuration."""
 
+
+  config = ml_collections.ConfigDict()
+  config.experiment_name = '100ep_run'
+  # Dataset.
+  config.dataset_name = 'dino_dataset'
+  config.data_dtype_str = 'float32'
+  config.dataset_configs = ml_collections.ConfigDict()
+  config.dataset_configs.prefetch_to_device = 2
+  config.dataset_configs.shuffle_buffer_size = 250_000
+  reference_resolution = 224
+  n_queries = 10
+
   config = ml_collections.ConfigDict()
 
   config.experiment_name = 'universal-embedding-vit'
@@ -149,34 +161,11 @@ def get_config():
 
   config.lr_configs.backbone.base_learning_rate = base_lr * 1e-2
 
-  # kNN
+  ### kNN
 
   #dir of checkpoints
   config.train_dir = '/home/jesimonbarreto/eval_knn/'
   
-  # Logging.
-
-  config.preextracted = False
-  #config.preextracted = True
-
-  config.write_summary = True
-  
-  config.test_pretrained_features = False
-
-  config.extract_only_descrs = False
-
-  config.checkpoint = False 
-
-  config.save_descriptors = True
-  #config.save_descriptors = False
-
-  config.debug_eval = False  # Debug mode during eval.
-    
-  config.eval_dataset_dir = ''
-  config.train_dataset_dir = '' 
-  
-  config.project_feats_knn = True
-  #config.project_feats_knn = False
 
   config.top_k = 5 #top k neighbors to look at
   #config.top_k = 100

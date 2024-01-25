@@ -76,21 +76,20 @@ class KNNEvaluator:
 
     print("extracting representations")
 
-    for batch in data:
+    for batch in next(data.train_iter):
+      batch['embedding'] = self.repr_fn(train_state, batch)
 
-      embeddings, mask = self.repr_fn(train_state, batch)
-      
+    for batch in next(data.eval_iter):
+      batch['embedding'] = self.repr_fn(train_state, batch)
       # We need to unreplicate the output of `lax.all_gather`.
       # Shapes at this point are:
       #   embedding: `[hosts, devices, global_batch, features]`.
-      mask = np.array(jax_utils.unreplicate(mask)).astype(bool)
-      embedding_list.append(np.array(jax_utils.unreplicate(embeddings))[mask])
-      
-    embedding = np.concatenate(embedding_list, axis=0)
+      # mask = np.array(jax_utils.unreplicate(mask)).astype(bool)
+      # embedding_list.append(np.array(jax_utils.unreplicate(embeddings))[mask])
 
     print("extracted representations")
   
-    return [embedding]
+    return data
 
 
 
@@ -440,7 +439,142 @@ class KNNEvaluator:
             np.round(np.mean([map_name_avg[knn_name][dataset_name] for dataset_name in map_name_avg[knn_name].keys()]),3)
 
     return [knn_results, mp_results, map_results], all_descriptors_dict, results_visuals_all
+  
 
+  def run_knn(
+    self,
+    train_state,
+    base_dir,
+    dataset_names,
+    batch_size,
+    data_rng,
+    dataset_service_address,
+    disabled_knns='',
+    all_descriptors_dict = None,
+    config = None,
+  ): 
+
+    results_visuals_all = {}
+
+    """Runs seperate knn evals defined in the dataset."""
+    dataset, meta_data = datasets.get_knn_eval_datasets(
+      self.config,
+      base_dir,
+      data_rng,
+      dataset_service_address,
+      dataset_names.split(','), 
+      batch_size,
+    )
+    knn_info = dataset.knn_info
+    
+    knn_results, mp_results, map_results = {}, {}, {}
+    knn_name_avg,mp_name_avg,map_name_avg = {}, {}, {}
+
+    for split in next(dataset.train_itner):
+        dataset = self._get_repr(
+                  train_state, 
+                  dataset,
+                )
+
+        for split in [val['query'], val['index']]:
+          #so that we do not extract twice for the same split
+          lookup_key = datasets.dataset_lookup_key(dataset_name, split)
+          
+          if split not in inference_lookup and train_state is not None:
+            logging.info('Getting inference for %s.', lookup_key)
+            inference_lookup[split] = self._get_repr(
+                train_state, 
+                knn_info[lookup_key],
+            )
+          else:
+            print(f"descriptors already extracted for {lookup_key}")
+
+      if dataset_name in all_descriptors_dict:
+        all_descriptors_dict[dataset_name].update(inference_lookup)
+      else:
+        all_descriptors_dict[dataset_name] = inference_lookup
+
+      if self.extract_only_descriptors:
+        continue
+
+      for knn_name, val in info.items():
+
+        if knn_name in disabled_knns:
+          logging.info(
+              'Skipping disabled knn %s in separate knn eval', knn_name
+          )
+          continue
+        
+        logging.info(
+            'Running knn on dataset %s with split %s in separate knn eval.',
+            dataset_name,
+            knn_name,
+        )
+        
+        query_split = val['query']
+        index_split = val['index']
+
+        query_labels = knn_info['json_data'][datasets.dataset_lookup_key(dataset_name, query_split)]["labels"]
+        index_labels = knn_info['json_data'][datasets.dataset_lookup_key(dataset_name, index_split)]["labels"]
+
+        query_domains = knn_info['json_data'][datasets.dataset_lookup_key(dataset_name, query_split)]["domains"]
+        index_domains = knn_info['json_data'][datasets.dataset_lookup_key(dataset_name, index_split)]["domains"]
+
+        query_paths = knn_info['json_data'][datasets.dataset_lookup_key(dataset_name, query_split)]["paths"]
+        index_paths = knn_info['json_data'][datasets.dataset_lookup_key(dataset_name, index_split)]["paths"]
+
+        logging.info(
+            'query_split: %s, index_split: %s.', query_split, index_split
+        )
+        
+        throw_1st = True if query_split == index_split else False
+        
+        logging.info('throw_1st: %s.', throw_1st)
+
+        (
+          knn_results[dataset_name + ':separate:' + knn_name + ':top_1'],
+          mp_results[dataset_name + ':separate:' + knn_name + f':mp_{dataset.meta_data["top_k"]}'],
+          map_results[dataset_name + ':separate:' + knn_name + f':map_{dataset.meta_data["top_k"]}'],
+          results_visuals
+        ) = self.compute_knn_metrics_fun(
+          datasets.dataset_lookup_key(dataset_name, query_split),
+          inference_lookup[query_split],
+          inference_lookup[index_split],
+          query_paths,
+          index_paths,
+          throw_1st,
+          dataset.meta_data['top_k'],
+          config,
+          query_labels,
+          index_labels,
+          query_domains,
+          index_domains,
+        )
+
+        results_visuals_all[f"{dataset_name}:{query_split}"] = results_visuals
+
+        if knn_name not in knn_name_avg:
+          knn_name_avg[knn_name] = {}
+        knn_name_avg[knn_name][dataset_name] = knn_results[dataset_name + ':separate:' + knn_name + ':top_1']
+
+        knn_results['average:separate:' + knn_name + ':top_1'] = \
+            np.round(np.mean([knn_name_avg[knn_name][dataset_name] for dataset_name in knn_name_avg[knn_name].keys()]),3)
+
+        if knn_name not in mp_name_avg:
+          mp_name_avg[knn_name] = {}
+        mp_name_avg[knn_name][dataset_name] = mp_results[dataset_name + ':separate:' + knn_name + f':mp_{dataset.meta_data["top_k"]}']
+
+        mp_results['average:separate:' + knn_name + f':mp_{dataset.meta_data["top_k"]}'] = \
+            np.round(np.mean([mp_name_avg[knn_name][dataset_name] for dataset_name in mp_name_avg[knn_name].keys()]),3)
+
+        if knn_name not in map_name_avg:
+          map_name_avg[knn_name] = {}
+        map_name_avg[knn_name][dataset_name] = map_results[dataset_name + ':separate:' + knn_name + f':map_{dataset.meta_data["top_k"]}']
+
+        map_results['average:separate:' + knn_name + f':map_{dataset.meta_data["top_k"]}'] = \
+            np.round(np.mean([map_name_avg[knn_name][dataset_name] for dataset_name in map_name_avg[knn_name].keys()]),3)
+
+    return [knn_results, mp_results, map_results], all_descriptors_dict, results_visuals_all
 
 
   def run_merged_knn(

@@ -229,21 +229,29 @@ def representation_fn_eval(
   """
   variables = {'params': train_state.params, **train_state.model_state}
 
-  embedding = flax_model.apply(
+  '''embedding = flax_model.apply(
     variables, 
-    batch['inputs'],
+    batch['sample'],
     train=False,
     return_feats = True,
     debug=False, 
     project_feats = project_feats,
-  )
+  )'''
+  embedding = flax_model.apply(
+        variables,
+        batch['sample'][0],
+        seqlen=-1,
+        seqlen_selection='consecutive',
+        drop_moment='late',
+        backbone = True,
+        train=False)
 
   if gather_to_host:
     embedding = jax.lax.all_gather(embedding, 'batch')
     batch = jax.lax.all_gather(batch, 'batch')
   
 
-  return embedding, batch['batch_mask']
+  return embedding
 
 
 
