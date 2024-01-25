@@ -164,7 +164,7 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/home/jesimonbarreto/scenic'
+  config.train_dir = '/home/jesimonbarreto/scenic/dino_dir_test1/'
   
 
   config.top_k = 5 #top k neighbors to look at
