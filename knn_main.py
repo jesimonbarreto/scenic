@@ -32,6 +32,7 @@ import classification_with_knn_eval_trainer
 import datasets
 import knn_utils
 
+FLAGS = flags.FLAGS
 
 def knn_evaluate(
   rng: jnp.ndarray,
