@@ -32,6 +32,24 @@ def get_config():
   config.dataset_configs = ml_collections.ConfigDict()
   config.dataset_configs.prefetch_to_device = 2
   config.dataset_configs.shuffle_buffer_size = 250_000
+   # For IMAGENET-1K
+  #config.dataset_configs.dataset = 'imagenet2012'
+  config.dataset_configs.dataset = 'cifar10'
+  config.dataset_configs.train_split = 'train'
+  config.dataset_configs.test_split = 'val'
+  config.dataset_configs.batch_size_train = 1024
+  config.dataset_configs.batch_size_test = 1024
+
+  config.dataset_configs.pp_train = (
+      'decode' +
+      '|copy("image", "x1")' +
+      '|copy("image", "x2")' +
+      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x1"), outkey=("image", "x1"))' +
+      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x2"), outkey=("image", "x2"))' +
+      '|value_range(0, 1, data_key="x1")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
+  )
+
   reference_resolution = 224
   n_queries = 10
 
@@ -60,21 +78,8 @@ def get_config():
   config.warmup_teacher_temp_epochs = 0
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
-  config.dataset_configs.pp_train = (
-      'decode' +
-      '|copy("image", "x1")' +
-      '|copy("image", "x2")' +
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x1"), outkey=("image", "x1"))' +
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x2"), outkey=("image", "x2"))' +
-      '|value_range(0, 1, data_key="x1")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
-  )
-
   
-  # For IMAGENET-1K
-  #config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.dataset = 'imagenette'
-  config.dataset_configs.train_split = 'train'
+
 
   ### kNN
 
