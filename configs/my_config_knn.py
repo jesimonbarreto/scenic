@@ -52,19 +52,12 @@ def get_config():
   reference_resolution = 224
   n_queries = 10
 
-  config = ml_collections.ConfigDict()
-
-  config.experiment_name = 'universal-embedding-vit'
-
-  # Dataset that was used for training.
-  config.dataset_name = "food2k,cars,sop,inshop,inat,met,gldv2,rp2k"
-  config.knn_eval_names = "food2k,cars,sop,inshop,inat,met,gldv2,rp2k"
 
   config.data_dtype_str = 'float32'
   #config.data_dtype_str = 'bfloat16'
 
-  config.eval_batch_size = 1024 #batch size for extracting embeddings
-  config.knn_eval_batch_size = 1024 #batch size for batch knn search 
+  config.eval_batch_size = 32 #batch size for extracting embeddings
+  config.knn_eval_batch_size = 32 #batch size for batch knn search 
   
   #merged eval
   config.disabled_separate_knns = 'train_knn,val_knn,test_knn'
