@@ -28,11 +28,74 @@ import datasets
 import dino_dataset  # pylint: disable=unused-import
 from scenic.dataset_lib import tinyImagenet_dataset
 
-import classification_with_knn_eval_trainer
+import functools
+from typing import Any, Callable, Dict, Tuple, Optional, Type
+import flax
+from flax import jax_utils
+from flax import linen as nn
+
 import datasets
 import knn_utils
 
 FLAGS = flags.FLAGS
+
+
+# Aliases for custom types:
+Batch = Dict[str, jnp.ndarray]
+MetricFn = Callable[
+    [jnp.ndarray, Dict[str, jnp.ndarray]], Dict[str, Tuple[float, int]]
+]
+LossFn = Callable[[jnp.ndarray, Batch, Optional[jnp.ndarray]], float]
+LrFn = Callable[[jnp.ndarray], jnp.ndarray]
+
+def representation_fn_eval(
+    train_state: train_utils.TrainState,
+    batch: Batch,
+    *,
+    flax_model: nn.Module,
+    project_feats = True,
+    gather_to_host: bool = True,
+) -> Tuple[jnp.ndarray, jnp.ndarray, jnp.ndarray, jnp.ndarray]:
+  """Feeds the inputs to the model and returns their representations.
+
+  Args:
+    train_state: TrainState, the state of training including the current
+      global_step, model_state, rng, and optimizer. The buffer of this argument
+      can be donated to the computation.
+    batch: A single batch of data from the dataset.
+    flax_model: A Flax model.
+    gather_to_host: Whether to gather results from all devices to the host,
+      rather than leaving them distributed.
+
+  Returns:
+    Representation learned by the model for the given inputs and the labels and
+    masks. If `gather_to_host` is True, these are collected from all hosts.
+  """
+  variables = {'params': train_state.params, **train_state.model_state}
+
+  '''embedding = flax_model.apply(
+    variables, 
+    batch['sample'],
+    train=False,
+    return_feats = True,
+    debug=False, 
+    project_feats = project_feats,
+  )'''
+  embedding = flax_model.apply(
+        variables,
+        batch['sample'][0],
+        seqlen=-1,
+        seqlen_selection='consecutive',
+        drop_moment='late',
+        backbone = True,
+        train=False)
+
+  if gather_to_host:
+    embedding = jax.lax.all_gather(embedding, 'batch')
+    batch = jax.lax.all_gather(batch, 'batch')
+  
+
+  return embedding
 
 def knn_evaluate(
   rng: jnp.ndarray,
@@ -77,7 +140,7 @@ def knn_evaluate(
 
   #project feats or not
   representation_fn_knn = functools.partial(
-    classification_with_knn_eval_trainer.representation_fn_eval,
+    representation_fn_eval,
     flax_model = model.flax_model, 
     project_feats = config.project_feats_knn
   )
