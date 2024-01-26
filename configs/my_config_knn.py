@@ -69,7 +69,37 @@ def get_config():
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
   
+  #MODEL
 
+  # Model.
+  version, patch = VARIANT.split('/')
+  patch = int(patch)
+  config.model = ml_collections.ConfigDict()
+  config.model.hidden_size = {'Ti': 192,
+                              'S': 384,
+                              'B': 768,
+                              'L': 1024,
+                              'H': 1280}[version]
+  config.model.patches = ml_collections.ConfigDict()
+  config.model.patches.size = [patch, patch]
+  config.model.num_heads = {'Ti': 3, 'S': 6, 'B': 12, 'L': 16, 'H': 16}[version]
+  config.model.mlp_dim = {'Ti': 768,
+                          'S': 1536,
+                          'B': 3072,
+                          'L': 4096,
+                          'H': 5120}[version]
+  config.model.num_layers = {'Ti': 12,
+                             'S': 12,
+                             'B': 12,
+                             'L': 24,
+                             'H': 32}[version]
+  config.model.head_output_dim = 4096 #65536 
+  config.model.attention_dropout_rate = 0.0
+  config.model.dropout_rate = 0.0
+  config.model.stochastic_depth = 0.1
+  config.model_dtype_str = 'float32'
+  config.model.temperature = 0.1
+  config.sharpening = 0.05
 
   ### kNN
 

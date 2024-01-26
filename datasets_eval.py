@@ -142,7 +142,7 @@ def get_dataset(*,
 
   input_shape = (-1,) + tuple(train_ds.element_spec['image_resized'].shape[1:])
   labels_size = train_ds.element_spec['label_onehot'].shape
-  logging.info('input_shape details %s', input_shape)
+  logging.info('input shape details %s', input_shape)
   logging.info('samples details %s', labels_size)
 
   meta_data = {
