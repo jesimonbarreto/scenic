@@ -33,7 +33,6 @@ def get_config():
       'decode' +
       '|copy("image", "x1")' +
       f'|copy_resize_file(224, inkey=("image", "x1"), outkey=("image", "x1"))' +
-      f'|copy_resize_file(224, inkey=("image", "x2"), outkey=("image", "x2"))' +
       '|value_range(0, 1, data_key="x1")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
   )
