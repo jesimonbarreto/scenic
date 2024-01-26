@@ -155,17 +155,19 @@ def knn_evaluate(
   train_dir = config.get('train_dir')
   print(f'{train_dir}')
 
-  for epoch in range(config.knn_start_epoch,config.knn_end_epoch+1):
+  for step in range(config.knn_start_step,config.knn_end_step+1, config.knn_pass):
 
-    step = epoch * config.steps_per_epoch
+    #step = epoch * config.steps_per_epoch
 
     print(f"step: {step}")
+    
 
     if not config.preextracted:
       ckpt_file = os.path.join(train_dir,str(step))  
       ckpt_info = ckpt_file.split('/')
       ckpt_dir = '/'.join(ckpt_info[:-1])
       ckpt_num = ckpt_info[-1].split('_')[-1]
+      print(f"file: {ckpt_file}")
 
       try:
 
@@ -179,6 +181,7 @@ def knn_evaluate(
       except:
 
         sys.exit("no checkpoint found")
+        continue
 
       train_state = jax_utils.replicate(train_state)
 
