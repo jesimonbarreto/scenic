@@ -32,8 +32,9 @@ def get_config():
   config.dataset_configs = ml_collections.ConfigDict()
   config.dataset_configs.prefetch_to_device = 2
   config.dataset_configs.shuffle_buffer_size = 250_000
-   # For IMAGENET-1K
+  # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
+  #for cifar 10
   config.dataset_configs.dataset = 'cifar10'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'val'
@@ -43,7 +44,6 @@ def get_config():
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "x1")' +
-      '|copy("image", "x2")' +
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x1"), outkey=("image", "x1"))' +
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x2"), outkey=("image", "x2"))' +
       '|value_range(0, 1, data_key="x1")' +

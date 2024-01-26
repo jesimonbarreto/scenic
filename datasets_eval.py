@@ -14,6 +14,7 @@ from scenic.dataset_lib import dataset_utils
 import tensorflow as tf
 from tensorflow.io import gfile
 from scenic.train_lib import train_utils
+import ops  # pylint: disable=unused-import
 
 import json
 
