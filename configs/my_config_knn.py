@@ -121,6 +121,8 @@ def get_config():
 
   config.write_summary = True
   
+  config.knn_start_epoch = 3
+  config.knn_end_epoch = 3 #set this to a lower value than start_epoch to not do knn at all
 
 
   return config
