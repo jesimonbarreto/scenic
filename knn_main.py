@@ -153,6 +153,7 @@ def knn_evaluate(
   )
 
   train_dir = config.get('train_dir')
+  print(f'{train_dir}')
 
   for epoch in range(config.knn_start_epoch,config.knn_end_epoch+1):
 
