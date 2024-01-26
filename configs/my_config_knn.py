@@ -121,37 +121,6 @@ def get_config():
 
   config.write_summary = True
   
-  config.test_pretrained_features = False
 
-  config.extract_only_descrs = False
-
-  config.checkpoint = False 
-
-  config.save_descriptors = True
-  #config.save_descriptors = False
-
-  config.debug_eval = False  # Debug mode during eval.
-    
-  config.eval_dataset_dir = ''
-  config.train_dataset_dir = '' 
-  
-  config.project_feats_knn = True
-  #config.project_feats_knn = False
-
-  config.top_k = 5 #top k neighbors to look at
-  #config.top_k = 100
-
-  config.knn_start_epoch = 3
-  config.knn_end_epoch = 3 #set this to a lower value than start_epoch to not do knn at all
-
-  config.log_csv = False
-
-  config.save_neighbors = False
-
-  config.info_files_dir = ''
-
-  #config.descr_save_path = "."
-  config.descr_save_path = None
-  
 
   return config

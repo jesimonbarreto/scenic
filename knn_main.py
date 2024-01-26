@@ -142,7 +142,6 @@ def knn_evaluate(
   representation_fn_knn = functools.partial(
     representation_fn_eval,
     flax_model = model.flax_model, 
-    project_feats = config.project_feats_knn
   )
 
   knn_eval_batch_size = config.get('knn_eval_batch_size') or config.batch_size
