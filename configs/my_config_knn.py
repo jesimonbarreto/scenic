@@ -100,6 +100,14 @@ def get_config():
   config.model_dtype_str = 'float32'
   config.model.temperature = 0.1
   config.sharpening = 0.05
+  #LOCA
+
+  # LOCA specific parameters.
+  config.n_ref_positions = int((reference_resolution // patch)**2)
+  config.apply_cluster_loss = True
+  config.reference_seqlen = -1#int(0.2 * config.n_ref_positions)  # 20% of 196 is 39
+  config.reference_seqlen_selection = 'consecutive'  # or 'unstructured' or 'first'
+  config.query_max_seqlen = 70
 
   ### kNN
 
