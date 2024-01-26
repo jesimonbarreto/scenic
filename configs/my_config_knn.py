@@ -31,10 +31,12 @@ def get_config():
 
   config.dataset_configs.pp_train = (
       'decode' +
-      '|copy("image", "x1")' +
-      f'|copy_resize_file(224, inkey=("image", "x1"), outkey=("image", "x1"))' +
-      '|value_range(0, 1, data_key="x1")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
+      '|copy("image", "image_resized")' +
+      f'|copy_resize_file(224, inkey=("image", "image_resized"), outkey=("image", "image_resized"))' +
+      '|value_range(0, 1, data_key="image_resized")' +
+      '|value_range(0, 1, data_key="image")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'
   )
 
   reference_resolution = 224
