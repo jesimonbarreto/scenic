@@ -15,6 +15,7 @@ import tensorflow as tf
 from tensorflow.io import gfile
 from scenic.train_lib import train_utils
 import ops  # pylint: disable=unused-import
+import tensorflow_datasets as tfds
 
 import json
 
@@ -77,6 +78,12 @@ def get_dataset(*,
                dataset_configs.dataset)
   #n_train_ex = dataset_utils.get_num_examples(dataset_configs.dataset,
   #                                            dataset_configs.train_split)
+
+  tfds.load(
+    dataset_configs.dataset,
+    data_dir= dataset_configs.get('dataset_dir'),
+    download = True
+  )
 
   train_ds = dataset_utils.get_data(
       dataset=dataset_configs.dataset,
