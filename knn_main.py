@@ -155,7 +155,7 @@ def knn_evaluate(
   train_dir = config.get('train_dir')
   print(f'{train_dir}')
 
-  for step in range(config.knn_start_step,config.knn_end_step+1, config.knn_pass):
+  for step in range(config.knn_start_step,config.knn_end_step+1, config.knn_pass_step):
 
     #step = epoch * config.steps_per_epoch
 
