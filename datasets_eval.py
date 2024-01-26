@@ -87,7 +87,7 @@ def get_dataset(*,
       shuffle_buffer_size=dataset_configs.shuffle_buffer_size,
       prefetch=dataset_configs.get('prefetch_to_host', 2),
       drop_remainder=True,
-      cache=False,
+      cache=True,
       ignore_errors=True)
   
   eval_ds = dataset_utils.get_data(
@@ -99,7 +99,7 @@ def get_dataset(*,
       shuffle_buffer_size=dataset_configs.shuffle_buffer_size,
       prefetch=dataset_configs.get('prefetch_to_host', 2),
       drop_remainder=True,
-      cache=False,
+      cache=True,
       ignore_errors=True)
 
   if dataset_service_address:
