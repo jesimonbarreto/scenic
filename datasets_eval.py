@@ -133,14 +133,21 @@ def get_dataset(*,
   eval_iter = map(shard_batches, eval_iter)
   eval_iter = jax_utils.prefetch_to_device(eval_iter, prefetch_buffer_size)
 
-  logging.info(f'{train_ds.element_spec.keys()}')
+  len_size = len(eval_ds.element_spec['image_resized'])
+  logging.info(f' train {train_ds.element_spec.keys()}')
+  logging.info(f' test {eval_ds.element_spec.keys()}')
+  logging.info(f' len {len_size}')
 
-  input_shape = (-1,) + tuple(train_ds.element_spec['x1'].shape[1:])
+  input_shape = (-1,) + tuple(train_ds.element_spec['image_resized'].shape[1:])
+  labels_size = train_ds.element_spec['label_onehot'].shape
   logging.info('input_shape details %s', input_shape)
+  logging.info('samples details %s', labels_size)
+
   meta_data = {
       'input_shape': input_shape,
       'num_train_examples': n_train_ex,
       'input_dtype': getattr(jnp, dtype_str),
+      'label_data' : labels_size,
   }
   return dataset_utils.Dataset(train_iter, eval_iter, None, meta_data)
 
