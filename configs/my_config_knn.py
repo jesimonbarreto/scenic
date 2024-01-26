@@ -32,7 +32,7 @@ def get_config():
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "image_resized")' +
-      '|onehot(10)' +
+      '|onehot(10, key="label", key_result="label_one")' +
       f'|copy_resize_file(224, inkey=("image", "image_resized"), outkey=("image", "image_resized"))' +
       '|value_range(0, 1, data_key="image_resized")' +
       '|value_range(0, 1, data_key="image")' +
