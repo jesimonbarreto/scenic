@@ -30,7 +30,7 @@ def get_config():
 
   # Training.
   config.max_grad_norm = 1
-  config.num_training_epochs = 400
+  config.num_training_epochs = 100#400
   config.batch_size = 512
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -186,7 +186,7 @@ def get_config():
   config.write_summary = True
   config.xprof = True  # Profile using xprof.
   config.checkpoint = True  # Do checkpointing.
-  config.checkpoint_steps = 500
+  config.checkpoint_steps = 50
   config.log_summary_steps = 5
 
   return config
