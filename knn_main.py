@@ -169,19 +169,19 @@ def knn_evaluate(
       ckpt_num = ckpt_info[-1].split('_')[-1]
       print(f"file: {ckpt_file}")
 
-      try:
+      #try:
 
-        train_state, _ = train_utils.restore_checkpoint(
+      train_state, _ = train_utils.restore_checkpoint(
           ckpt_dir, 
           train_state, 
           assert_exist=True, 
           step=int(ckpt_num),
         )
         
-      except:
+      #except:
 
-        sys.exit("no checkpoint found")
-        continue
+      #  sys.exit("no checkpoint found")
+      #  continue
 
       train_state = jax_utils.replicate(train_state)
 
