@@ -163,7 +163,7 @@ def knn_evaluate(
     
 
     if not config.preextracted:
-      ckpt_file = os.path.join(train_dir,str(step))  
+      ckpt_file = os.path.join(train_dir,'checkpoint_'+str(step))  
       ckpt_info = ckpt_file.split('/')
       ckpt_dir = '/'.join(ckpt_info[:-1])
       ckpt_num = ckpt_info[-1].split('_')[-1]
