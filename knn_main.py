@@ -244,7 +244,7 @@ def train(
     for _ in range(config.steps_per_epoch):
       batch = next(dataset.train_iter)
       print(batch['image'].shape)
-      f = extract_features(batch['image'])
+      f = extract_features(batch)
       batch['emb'] = f
 
     for batch in next(dataset.eval_iter):
