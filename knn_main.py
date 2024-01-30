@@ -173,7 +173,7 @@ def knn_evaluate(
       #try:
 
       train_state, _ = train_utils.restore_checkpoint(
-          ckpt_file, 
+          ckpt_dir, 
           train_state, 
           assert_exist=True, 
           step=int(ckpt_num),
