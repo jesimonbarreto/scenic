@@ -109,7 +109,7 @@ def get_config():
   config.reference_seqlen_selection = 'consecutive'  # or 'unstructured' or 'first'
   config.query_max_seqlen = 70
 
-  config.checkpoint = True#'/home/jesimonbarreto/scenic/checkpoint_501'
+  config.checkpoint = False#'/home/jesimonbarreto/scenic/checkpoint_501'
 
   ### kNN
 
