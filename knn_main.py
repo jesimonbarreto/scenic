@@ -218,7 +218,10 @@ def knn_evaluate(
     def extract_features(batch):
       features = repr_fn(train_state, batch)
       return features  # Return extracted features for the batch
-      
+    
+    print('Dataset keys')
+    print(dataset.keys())
+    print(dataset.meta_data)
     for batch in next(dataset.train_iter):
       print(batch[0])
       f = extract_features(batch[0])
