@@ -115,7 +115,22 @@ def knn_evaluate(
   dataset = train_utils.get_dataset(
       config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
   
-  dataset = dataset_utils.Dataset(dataset)
+  train(
+      rng=rng,
+      config=config,
+      dataset=dataset,
+      workdir=workdir,
+      writer=writer)
+  
+def train(
+    *,
+    rng: jnp.ndarray,
+    config: ml_collections.ConfigDict,
+    dataset: dataset_utils.Dataset,
+    workdir: str,
+    writer: metric_writers.MetricWriter,
+) -> Tuple[Any, Any]:
+
   
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
