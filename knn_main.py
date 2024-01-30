@@ -219,10 +219,10 @@ def knn_evaluate(
       features = repr_fn(train_state, batch)
       return features  # Return extracted features for the batch
       
-    #for batch in next(dataset.train_iter):
-    print(dataset.train_iter)
-    f = extract_features(dataset.train_iter)
-    dataset.train_iter['emb'] = f
+    for batch in next(dataset.train_iter):
+      print(batch)
+      f = extract_features(batch)
+      batch['emb'] = f
 
     for batch in next(dataset.eval_iter):
       batch['emb'] = extract_features(batch)
