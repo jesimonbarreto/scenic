@@ -240,10 +240,11 @@ def train(
       return features  # Return extracted features for the batch
     
     print(dataset.meta_data.keys)
-    batch = next(dataset.train_iter)
-    print(batch['image'].shape)
-    f = extract_features(batch['image'])
-    batch['emb'] = f
+    for _ in range(config.steps_per_epoch):
+      batch = next(dataset.train_iter)
+      print(batch['image'].shape)
+      f = extract_features(batch['image'])
+      batch['emb'] = f
 
     for batch in next(dataset.eval_iter):
       batch['emb'] = extract_features(batch)
