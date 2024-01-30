@@ -168,6 +168,7 @@ def knn_evaluate(
       ckpt_dir = '/'.join(ckpt_info[:-1])
       ckpt_num = ckpt_info[-1].split('_')[-1]
       print(f"file: {ckpt_file}")
+      print(f"ckpt_num: {ckpt_num}")
 
       #try:
 
