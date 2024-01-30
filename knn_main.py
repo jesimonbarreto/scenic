@@ -220,8 +220,8 @@ def knn_evaluate(
       return features  # Return extracted features for the batch
       
     for batch in next(dataset.train_iter):
-      print(batch)
-      f = extract_features(batch)
+      print(batch[0])
+      f = extract_features(batch[0])
       batch['emb'] = f
 
     for batch in next(dataset.eval_iter):
