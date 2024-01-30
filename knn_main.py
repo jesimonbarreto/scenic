@@ -26,6 +26,8 @@ import jax
 import jax.numpy as jnp
 import tensorflow_datasets as tfds
 import datasets
+from scenic.dataset_lib import dataset_utils
+
 import dino_dataset  # pylint: disable=unused-import
 from scenic.dataset_lib import tinyImagenet_dataset
 import datasets_eval
@@ -112,6 +114,9 @@ def knn_evaluate(
   data_rng, rng = jax.random.split(rng)
   dataset = train_utils.get_dataset(
       config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
+  
+  dataset = dataset_utils.Dataset(dataset)
+  
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
 
@@ -237,6 +242,7 @@ def knn_evaluate(
     @jax.vmap
     def cosine_similarity(x1, x2):
       return jnp.dot(x1, x2) / (jnp.linalg.norm(x1, axis=-1) * jnp.linalg.norm(x2, axis=-1))
+    
     
     print('Dataset keys')
     print(dataset.keys())
