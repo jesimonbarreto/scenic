@@ -29,6 +29,9 @@ import datasets
 import dino_dataset  # pylint: disable=unused-import
 from scenic.dataset_lib import tinyImagenet_dataset
 import datasets_eval
+import optax
+from scenic.train_lib import lr_schedules
+import copy
 
 import functools
 from typing import Any, Callable, Dict, Tuple, Optional, Type
@@ -123,19 +126,38 @@ def knn_evaluate(
 
   rng, init_rng = jax.random.split(rng)
 
-  #Load model
-  train_state = train_utils.TrainState(
-    params=params, 
-    model_state=model_state
-  )
-  #chrono = train_utils.Chrono()
+  # Only one model function but two sets of parameters.
+  ema_params = copy.deepcopy(params)
+
+  # Get learning rate and ema temperature schedulers.
+  learning_rate_fn = lr_schedules.get_learning_rate_fn(config)
+  momentum_parameter_scheduler = lr_schedules.compound_lr_scheduler(
+      config.momentum_rate)
+
+  # Create optimizer.
+  weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
+  tx = optax.inject_hyperparams(optax.adamw)(
+      learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
+      mask=weight_decay_mask,)
+  opt_state = jax.jit(tx.init, backend='cpu')(params)
+
+  # Create chrono class to track and store training statistics and metadata.
+  chrono = train_utils.Chrono()
+
+  # Create the TrainState to track training state (i.e. params and optimizer).
+  train_state = utils.TrainState(
+      global_step=0, opt_state=opt_state, tx=tx, params=params,
+      ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
+  
+  start_step = train_state.global_step
+  
   if config.checkpoint:
     train_state, start_step = utils.restore_checkpoint(workdir, train_state)
-  #chrono.load(train_state.metadata['chrono'])
+  chrono.load(train_state.metadata['chrono'])
   train_state = train_state.replace(metadata={})
   # Replicate the training state: optimizer, params and rng.
   train_state = jax_utils.replicate(train_state)
-  del params
+  del params, ema_params
   
 
   #project feats or not
