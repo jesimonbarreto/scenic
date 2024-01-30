@@ -241,8 +241,8 @@ def train(
     
     print(dataset.meta_data.keys)
     for batch in next(dataset.train_iter):
-      print(batch[0])
-      f = extract_features(batch[0])
+      print(batch['image'])
+      f = extract_features(batch['image'])
       batch['emb'] = f
 
     for batch in next(dataset.eval_iter):
