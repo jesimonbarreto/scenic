@@ -125,4 +125,30 @@ def get_config():
   config.knn_end_step = 1800 #set this to a lower value than start_epoch to not do knn at all
   config.knn_pass_step = 1299
 
+  # Learning rate.
+  #cosine schedule lr
+  config.lr_configs = ml_collections.ConfigDict()
+  config.lr_configs.learning_rate_schedule = 'compound'
+  config.lr_configs.factors = 'constant * cosine_decay * linear_warmup'
+  config.lr_configs.warmup_steps = config.steps_per_epoch * 15
+  config.lr_configs.steps_per_cycle = total_steps
+  config.lr_configs.base_learning_rate = 0.001 * config.batch_size / 1024
+  config.lr_configs.alpha = 0.01
+
+  # Weight decay.
+  config.weight_decay = 0.04
+  #verificar
+  config.weight_decay_end = 0.4
+  config.lr=0.0005
+  config.warmup_epochs=10
+  config.optimizer = 'adamw'
+  config.drop_path_rate= 0.1
+
+  # Momentum rate scheduler.
+  config.momentum_rate = ml_collections.ConfigDict()
+  config.momentum_rate.factors = 'constant*cosine_decay'
+  config.momentum_rate.steps_per_cycle = total_steps
+  config.momentum_rate.base_learning_rate = 0.996
+  config.momentum_rate.alpha = 1. / 0.996
+
   return config
