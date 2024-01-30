@@ -125,13 +125,13 @@ def get_dataset(*,
   shard_batches = functools.partial(dataset_utils.shard, n_devices=num_shards)
   train_iter = iter(train_ds)
   train_iter = map(dataset_utils.tf_to_numpy, train_iter)
-  train_iter = map(shard_batches, train_iter)
-  train_iter = jax_utils.prefetch_to_device(train_iter, prefetch_buffer_size)
+  #train_iter = map(shard_batches, train_iter)
+  #train_iter = jax_utils.prefetch_to_device(train_iter, prefetch_buffer_size)
 
   eval_iter = iter(eval_ds)
   eval_iter = map(dataset_utils.tf_to_numpy, eval_iter)
-  eval_iter = map(shard_batches, eval_iter)
-  eval_iter = jax_utils.prefetch_to_device(eval_iter, prefetch_buffer_size)
+  #eval_iter = map(shard_batches, eval_iter)
+  #eval_iter = jax_utils.prefetch_to_device(eval_iter, prefetch_buffer_size)
 
   image_size = eval_ds.element_spec['image_resized'].shape
   labels_size = train_ds.element_spec['label_onehot']
