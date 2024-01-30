@@ -239,9 +239,7 @@ def train(
       features = repr_fn(train_state, batch)
       return features  # Return extracted features for the batch
     
-    print('Dataset keys')
-    print(dataset.keys())
-    print(dataset.meta_data)
+    print(dataset.meta_data.keys)
     for batch in next(dataset.train_iter):
       print(batch[0])
       f = extract_features(batch[0])
