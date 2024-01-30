@@ -76,7 +76,7 @@ def representation_fn_eval(
     Representation learned by the model for the given inputs and the labels and
     masks. If `gather_to_host` is True, these are collected from all hosts.
   """
-  variables = {'params': train_state.params, **train_state.model_state}
+  #variables = {'params': train_state.params, **train_state.model_state}
 
   '''embedding = flax_model.apply(
     variables, 
@@ -87,14 +87,15 @@ def representation_fn_eval(
     project_feats = project_feats,
   )'''
   embedding = flax_model.apply(
-        variables,
-        batch['sample'][0],
+        {'params': train_state.params},
+        batch['sample'],
         seqlen=-1,
         seqlen_selection='consecutive',
         drop_moment='late',
         backbone = True,
         train=False)
-
+  embedding = jnp.mean(embedding, axis=1)
+  
   if gather_to_host:
     embedding = jax.lax.all_gather(embedding, 'batch')
     batch = jax.lax.all_gather(batch, 'batch')
