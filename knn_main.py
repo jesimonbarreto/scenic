@@ -160,19 +160,9 @@ def knn_evaluate(
   del params, ema_params
   
 
-  #project feats or not
-  representation_fn_knn = functools.partial(
-    representation_fn_eval,
-    flax_model = model.flax_model, 
-  )
+  
 
   knn_eval_batch_size = config.get('knn_eval_batch_size') or config.batch_size
-
-  repr_fn = jax.pmap(
-        representation_fn_knn, 
-        donate_argnums=(1,), 
-        axis_name='batch',
-  )
 
   train_dir = config.get('train_dir')
   print(f'{train_dir}')
@@ -212,6 +202,16 @@ def knn_evaluate(
 
       train_state = None
 
+    #project feats or not
+    representation_fn_knn = functools.partial(
+      representation_fn_eval,
+      flax_model = model.flax_model, 
+    )
+    repr_fn = jax.pmap(
+          representation_fn_knn, 
+          donate_argnums=(1,), 
+          axis_name='batch',
+    )
 
     # extract features
     @jax.jit
@@ -220,7 +220,9 @@ def knn_evaluate(
       return features  # Return extracted features for the batch
       
     for batch in next(dataset.train_iter):
-      batch['emb'] = extract_features(batch)
+      print(batch)
+      f = extract_features(batch)
+      batch['emb'] = f
 
     for batch in next(dataset.eval_iter):
       batch['emb'] = extract_features(batch)
