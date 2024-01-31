@@ -295,6 +295,8 @@ def train(
         labels.append(batch_train['label'][0])
       dist_all = jnp.concatenate(dist_all)
       labels = jnp.concatenate(labels)
+      print(f'shape dist_all ------------ {dist_all.shape}')
+      print(f'shape labels   ------------ {labels.shape}')
       @jax.vmap
       def knn_vote(k, distances, train_labels):
           # Get k nearest neighbors for each test sample
