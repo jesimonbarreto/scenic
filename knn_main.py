@@ -41,7 +41,7 @@ import flax
 from flax import jax_utils
 from flax import linen as nn
 
-
+from jax.lax import map as map_
 FLAGS = flags.FLAGS
 
 
@@ -99,7 +99,6 @@ def representation_fn_eval(
   if gather_to_host:
     embedding = jax.lax.all_gather(embedding, 'batch')
     batch = jax.lax.all_gather(batch, 'batch')
-  
 
   return embedding
 
@@ -241,7 +240,7 @@ def train(
       return features  # Return extracted features for the batch
     
     print(dataset.meta_data.keys)
-    for i in range(config.steps_per_epoch):
+    '''for i in range(config.steps_per_epoch):
       print(i)
       batch = next(dataset.train_iter)
       print(batch['image'].shape)
@@ -250,10 +249,19 @@ def train(
     for i in range(config.steps_per_epoch_eval):
       print(i)
       batch = next(dataset.valid_iter)
-      print(batch['image'].shape)
-      batch['emb'] = extract_features(batch)
 
+      print(batch['image'].shape)
+      batch['emb'] = extract_features(batch)'''
     
+    def my_transformation_function(batch):
+      # Existing logic for accessing desired key in batch
+      #transformed_data = ...  # Apply your transformation to the key value
+      batch["new_key"] = '1'
+      return batch
+
+    dataset.train_iter = map_(my_transformation_function, dataset.train_iter)
+    dataset.train_iter.keys()
+
     @jax.vmap
     def euclidean_distance(x1, x2):
       return jnp.linalg.norm(x1 - x2, axis=-1)
