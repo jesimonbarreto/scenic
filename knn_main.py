@@ -276,23 +276,23 @@ def train(
     for i in range(config.steps_per_epoch_eval):
       print(i)
       batch_eval = next(dataset.valid_iter)
-      emb_test = extract_features(batch_eval)
+      emb_test = extract_features(batch_eval)[0]
       print(f'embeeding shape test {emb_test.shape}')
       dist_all = []
       labels = []
       len_test += len(batch_eval)
       for i in range(config.steps_per_epoch):
         batch_train = next(dataset.train_iter)
-        emb_train = extract_features(batch_train)
-        label_train = batch_train['label']
+        emb_train = extract_features(batch_train)[0]
+        label_train = batch_train['label'][0]
         print(f'embeeding shape train {i}: {emb_train.shape}')
         
-        dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
+        dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)[0]
         print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
         print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
         dist_all.append(dist_)
-        labels.append(batch_train['label'])
+        labels.append(batch_train['label'][0])
       dist_all = jnp.concatenate(dist_all)
       labels = jnp.concatenate(labels)
       @jax.vmap
@@ -303,11 +303,15 @@ def train(
           class_counts = jnp.bincount(train_labels[nearest_indices.flatten()], axis=1)
           # Predict class with the highest vote count
           return jnp.argmax(class_counts, axis=-1)
+      
+      n = jax.local_devices()
+      dist_all = jnp.tile(dist_all, (n, 1))
+      labels = jnp.tile(labels, (n, 1))
 
-      predictions = knn_vote(k=5, distances=dist_all, train_labels=labels)
+      predictions = knn_vote(k=5, distances=dist_all, train_labels=labels)[0]
     
       # Compare predictions with actual test labels
-      correct_predictions = jnp.equal(predictions, dataset.labels)
+      correct_predictions = jnp.equal(predictions, dataset.valid_iter.labels[0])
       correct_pred += jnp.sum(correct_predictions)
       break
 
