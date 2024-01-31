@@ -242,15 +242,19 @@ def train(
     
     print(dataset.meta_data.keys)
     for i in range(config.steps_per_epoch):
-      print('i')
+      print(i)
       batch = next(dataset.train_iter)
       print(batch['image'].shape)
       batch['emb'] = extract_features(batch)
       break
 
-
-    for batch in next(dataset.eval_iter):
+    for i in range(config.steps_per_epoch_eval):
+      print(i)
+      batch = next(dataset.valid_iter)
+      print(batch['image'].shape)
       batch['emb'] = extract_features(batch)
+      break
+
     
     @jax.vmap
     def euclidean_distance(x1, x2):
@@ -261,11 +265,11 @@ def train(
       return jnp.dot(x1, x2) / (jnp.linalg.norm(x1, axis=-1) * jnp.linalg.norm(x2, axis=-1))
     
     
-    print('Dataset keys')
-    print(dataset.keys())
     len_test = 0
     correct_pred = 0
-    for batch_eval in next(dataset.eval_iter):
+    for i in range(config.steps_per_epoch_eval):
+      print(i)
+      batch_eval = next(dataset.valid_iter)
       dist_all = []
       labels = []
       len_test += len(batch_eval)
@@ -289,6 +293,7 @@ def train(
       # Compare predictions with actual test labels
       correct_predictions = jnp.equal(predictions, dataset.labels)
       correct_pred += jnp.sum(correct_predictions)
+      break
 
     # Calculate accuracy as the ratio of correct predictions to total test samples
     accuracy = correct_pred / len_test
