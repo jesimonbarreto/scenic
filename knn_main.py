@@ -183,7 +183,7 @@ def train(
 
   
 
-  knn_eval_batch_size = config.get('knn_eval_batch_size') or config.batch_size_train
+  knn_eval_batch_size = config.get('knn_eval_batch_size') or config.batch_size
 
   train_dir = config.get('train_dir')
   print(f'{train_dir}')
