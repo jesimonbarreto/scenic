@@ -307,8 +307,8 @@ def train(
           return jnp.argmax(class_counts, axis=-1)
       
       n = jax.local_devices()
-      dist_all = jnp.tile(dist_all, (n, 1))
-      labels = jnp.tile(labels, (n, 1))
+      dist_all = jnp.tile(dist_all[None, :], (n, 1)) 
+      labels = jnp.tile(labels[None, :], (n, 1))
 
       predictions = knn_vote(k=5, distances=dist_all, train_labels=labels)[0]
     
