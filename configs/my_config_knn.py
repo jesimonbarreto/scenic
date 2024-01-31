@@ -26,8 +26,8 @@ def get_config():
   config.dataset_configs.dataset = 'cifar10'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'test'
-  config.batch_size_train = 1024
-  config.batch_size_test = 1024
+  config.dataset_configs.batch_size_train = 1024
+  config.dataset_configs.batch_size_test = 1024
 
   config.dataset_configs.pp_train = (
       'decode' +
@@ -47,14 +47,14 @@ def get_config():
   config.data_dtype_str = 'float32'
   #config.data_dtype_str = 'bfloat16'
 
-  config.batch_size = config.batch_size_train #batch size for extracting embeddings
+  config.batch_size = config.dataset_configs.batch_size_train #batch size for extracting embeddings
   #config.knn_eval_batch_size = 32 #batch size for batch knn search 
   
   # Training.
   config.max_grad_norm = 1
   config.num_training_epochs = 400
-  config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size_train
-  config.steps_per_epoch_eval = _IMAGENET_TEST_SIZE // config.batch_size_test
+  config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.dataset_configs.batch_size_train
+  config.steps_per_epoch_eval = _IMAGENET_TEST_SIZE // config.dataset_configs.batch_size_test
   config.rng_seed = 42
   total_steps = config.num_training_epochs * config.steps_per_epoch
   config.global_crops_scale = (0.4, 1.0) 
