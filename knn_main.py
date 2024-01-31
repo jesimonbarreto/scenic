@@ -284,7 +284,7 @@ def train(
       for i in range(config.steps_per_epoch):
         batch_train = next(dataset.train_iter)
         emb_train = extract_features(batch_train)
-        label_train = batch_train['labels']
+        label_train = batch_train['label']
         print(f'embeeding shape train {i}: {emb_train.shape}')
         
         dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(batch_eval['emb'], batch_train['emb'])
@@ -292,7 +292,7 @@ def train(
         print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
         dist_all.append(dist_)
-        labels.append(batch_train['labels'])
+        labels.append(batch_train['label'])
       dist_all = jnp.concatenate(dist_all)
       labels = jnp.concatenate(labels)
       @jax.vmap
