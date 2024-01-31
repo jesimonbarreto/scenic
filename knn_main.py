@@ -246,14 +246,12 @@ def train(
       batch = next(dataset.train_iter)
       print(batch['image'].shape)
       batch['emb'] = extract_features(batch)
-      break
 
     for i in range(config.steps_per_epoch_eval):
       print(i)
       batch = next(dataset.valid_iter)
       print(batch['image'].shape)
       batch['emb'] = extract_features(batch)
-      break
 
     
     @jax.vmap
