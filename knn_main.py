@@ -253,14 +253,14 @@ def train(
       print(batch['image'].shape)
       batch['emb'] = extract_features(batch)'''
     
-    def my_transformation_function(batch):
+    '''def my_transformation_function(batch):
       # Existing logic for accessing desired key in batch
       #transformed_data = ...  # Apply your transformation to the key value
       batch["new_key"] = '1'
       return batch
 
     dataset.train_iter = map_(my_transformation_function, dataset.train_iter)
-    dataset.train_iter.keys()
+    dataset.train_iter.keys()'''
 
     @jax.vmap
     def euclidean_distance(x1, x2):
@@ -276,11 +276,21 @@ def train(
     for i in range(config.steps_per_epoch_eval):
       print(i)
       batch_eval = next(dataset.valid_iter)
+      emb_test = extract_features(batch_eval)
+      print(f'embeeding shape test {emb_test.shape}')
       dist_all = []
       labels = []
       len_test += len(batch_eval)
-      for batch_train in next(dataset.train_iter):
+      for i in range(config.steps_per_epoch):
+        batch_train = next(dataset.train_iter)
+        emb_train = extract_features(batch_train)
+        label_train = batch_train['labels']
+        print(f'embeeding shape train {i}: {emb_train.shape}')
+        
         dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(batch_eval['emb'], batch_train['emb'])
+        print(f'dist shape train {i}: {dist_.shape}')
+        print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
+
         dist_all.append(dist_)
         labels.append(batch_train['labels'])
       dist_all = jnp.concatenate(dist_all)
