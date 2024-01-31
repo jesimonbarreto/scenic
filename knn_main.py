@@ -287,8 +287,8 @@ def train(
         label_train = batch_train['label']
         print(f'embeeding shape train {i}: {emb_train.shape}')
         
-        dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(batch_eval['emb'], batch_train['emb'])
-        print(f'dist shape train {i}: {dist_.shape}')
+        dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
+        print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
         print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
         dist_all.append(dist_)
