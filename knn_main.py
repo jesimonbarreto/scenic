@@ -306,6 +306,7 @@ def train(
           # Predict class with the highest vote count
           return jnp.argmax(class_counts, axis=-1)
       
+      print(f'Dist all [0] : {dist_all[0]} {dist_all[0][0]}')
       n = jax.local_devices()
       dist_all = jnp.repeat(dist_all, n, axis=0) 
       labels = jnp.repeat(labels, n, axis=0)
