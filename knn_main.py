@@ -276,14 +276,14 @@ def train(
     for i in range(config.steps_per_epoch_eval):
       print(i)
       batch_eval = next(dataset.valid_iter)
-      emb_test = extract_features(batch_eval)[0]
+      emb_test = extract_features(batch_eval)
       print(f'embeeding shape test {emb_test.shape}')
       dist_all = []
       labels = []
       len_test += len(batch_eval)
       for i in range(config.steps_per_epoch):
         batch_train = next(dataset.train_iter)
-        emb_train = extract_features(batch_train)[0]
+        emb_train = extract_features(batch_train)
         label_train = batch_train['label'][0]
         print(f'embeeding shape train {i}: {emb_train.shape}')
         
