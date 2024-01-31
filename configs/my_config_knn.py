@@ -47,8 +47,8 @@ def get_config():
   config.data_dtype_str = 'float32'
   #config.data_dtype_str = 'bfloat16'
 
-  config.eval_batch_size = 32 #batch size for extracting embeddings
-  config.knn_eval_batch_size = 32 #batch size for batch knn search 
+  config.batch_size = config.batch_size_train #batch size for extracting embeddings
+  #config.knn_eval_batch_size = 32 #batch size for batch knn search 
   
   # Training.
   config.max_grad_norm = 1
