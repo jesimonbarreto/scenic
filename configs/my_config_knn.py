@@ -132,7 +132,7 @@ def get_config():
   config.lr_configs.factors = 'constant * cosine_decay * linear_warmup'
   config.lr_configs.warmup_steps = config.steps_per_epoch * 15
   config.lr_configs.steps_per_cycle = total_steps
-  config.lr_configs.base_learning_rate = 0.001 * config.batch_size_train / 1024
+  config.lr_configs.base_learning_rate = 0.001 * config.dataset_configs.batch_size_train / 1024
   config.lr_configs.alpha = 0.01
 
   # Weight decay.
