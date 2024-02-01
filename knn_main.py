@@ -114,7 +114,7 @@ def knn_evaluate(
   data_rng, rng = jax.random.split(rng)
   dataset = train_utils.get_dataset(
       config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
-  
+  print(jax.local_devices())
   train(
       rng=rng,
       config=config,
