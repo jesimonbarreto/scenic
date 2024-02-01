@@ -114,7 +114,7 @@ def knn_evaluate(
   data_rng, rng = jax.random.split(rng)
   dataset = train_utils.get_dataset(
       config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
-  print(jax.local_devices())
+  
   train(
       rng=rng,
       config=config,
@@ -307,7 +307,7 @@ def train(
           return jnp.argmax(class_counts, axis=-1)
       
       print(f'Dist all [0] : {dist_all[0]}')
-      n = jax.local_devices()
+      n = jax.device_count()
       dist_all = jnp.repeat(jnp.array(dist_all), n, axis=0) 
       labels = jnp.repeat(jnp.array(labels), n, axis=0)
 
