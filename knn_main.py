@@ -42,6 +42,10 @@ from flax import jax_utils
 from flax import linen as nn
 from jax import vmap
 from jax.lax import map as map_
+
+from functools import partial
+from jax import jit
+
 FLAGS = flags.FLAGS
 
 
@@ -297,7 +301,7 @@ def train(
       labels = jnp.concatenate(labels)
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
-
+      @partial(jit, static_argnums=0)
       def knn_vote(k, distances, train_labels):
           # Get k nearest neighbors for each test sample
           print(f'k {k}')
