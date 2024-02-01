@@ -314,7 +314,7 @@ def train(
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
 
-      predictions = knn_vote(k=[5], distances=dist_all, train_labels=labels)
+      predictions = knn_vote()(k=[5], distances=dist_all, train_labels=labels)
     
       # Compare predictions with actual test labels
       correct_predictions = jnp.equal(predictions[0], dataset.valid_iter.labels[0])
