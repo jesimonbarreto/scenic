@@ -317,7 +317,7 @@ def train(
         print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
         print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
-        dist_all.append(dist_)
+        dist_all.append(dist_[0][0])
         labels.append(batch_train['label'][0])
       dist_all = jnp.concatenate(dist_all,axis=1)
       labels = jnp.concatenate(labels)
