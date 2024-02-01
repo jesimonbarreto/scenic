@@ -98,7 +98,10 @@ def representation_fn_eval(
         drop_moment='late',
         backbone = True,
         train=False)
+  
+  print(f'shape {embedding.shape}')
   embedding = jnp.mean(embedding, axis=1)
+  print(f'shape {embedding.shape}')
 
   if gather_to_host:
     embedding = jax.lax.all_gather(embedding, 'batch')
@@ -309,23 +312,24 @@ def train(
         batch_train = next(dataset.train_iter)
         emb_train = extract_features(batch_train)
         label_train = batch_train['label'][0]
-        print(f'embeeding shape train {i}: {emb_train.shape}')
+        print(f'embeeding shape train {i}: {emb_train[0].shape}')
+        print(f'embeeding shape test {i}: {emb_test[0].shape}')
         
         #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
-        dist_ = compute_distance(emb_test, emb_train)
+        dist_ = compute_distance(emb_test[0], emb_train[0])
         
         print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
         print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
-        dist_all.append(dist_[0][0])
+        dist_all.append(dist_[0])
         labels.append(batch_train['label'][0])
-      dist_all = jnp.concatenate(dist_all,axis=1)
-      labels = jnp.concatenate(labels)
+      dist_all = jnp.concatenate(dist_all, axis=1)
+      labels = jnp.concatenate(labels, axis=1)
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
 
-      D = D.reshape(devices, n_test // devices, -1)
-      k_nearest = p_argsort(D)[..., 1:k+1]
+      dist_all = dist_all.reshape(devices, n_test // devices, -1)
+      k_nearest = p_argsort(dist_all)[..., 1:k+1]
       
       print(k_nearest.shape)
       k_nearest = k_nearest.reshape(-1, k)
