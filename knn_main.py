@@ -303,14 +303,14 @@ def train(
           print(f'k {k}')
           print(f'distances shape {distances.shape}')
           print(f'labels shape {train_labels.shape}')
-          nearest_indices = jnp.argpartition(distances, k[0] - 1, axis=-1)[:k[0]]
+          nearest_indices = jnp.argpartition(distances, k - 1, axis=-1)[:k]
           # Count occurrences of each class among neighbors
           class_counts = jnp.bincount(train_labels[nearest_indices.flatten()], axis=1)
           # Predict class with the highest vote count
           return jnp.argmax(class_counts, axis=-1)
       
       print(f'Dist all [0] : {dist_all[0]}')
-      k_ = [[5]]
+      k_ = [5]
       
       n = jax.device_count()
       dist_all = jnp.repeat(jnp.array(dist_all).reshape(1,-1), n, axis=0) 
