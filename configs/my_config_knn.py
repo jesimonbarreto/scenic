@@ -27,7 +27,7 @@ def get_config():
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'test'
   config.dataset_configs.batch_size_train = 1024
-  config.dataset_configs.batch_size_test = 1 #1024
+  config.dataset_configs.batch_size_test = 1024
 
   config.dataset_configs.pp_train = (
       'decode' +
