@@ -312,7 +312,8 @@ def train(
         batch_train = next(dataset.train_iter)
         emb_train = extract_features(batch_train)
         label_train = batch_train['label'][0]
-        print(f'batch shape train {i}: {batch_train.shape}')
+        f = batch_train['image_resized']
+        print(f'batch shape train {i}: {f.shape}')
         print(f'embeeding shape train {i}: {emb_train[0].shape}')
         print(f'embeeding shape test {i}: {emb_test[0].shape}')
         
