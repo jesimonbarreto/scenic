@@ -303,7 +303,6 @@ def train(
       print(f'shape labels   ------------ {labels.shape}')
       @partial(jit, static_argnums=0)
       def knn_vote(k, distances, train_labels):
-          k = jnp.array(k)
           # Get k nearest neighbors for each test sample
           print(f'k {k}')
           print(f'distances shape {distances.shape}')
