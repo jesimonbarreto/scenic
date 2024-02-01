@@ -274,7 +274,27 @@ def train(
     def cosine_similarity(x1, x2):
       return jnp.dot(x1, x2) / (jnp.linalg.norm(x1, axis=-1) * jnp.linalg.norm(x2, axis=-1))
     
+    def compute_diff(u, v):
+      return (u[:, None] - v[None, :]) ** 2
+
+    compute_diff = jax.vmap(compute_diff, in_axes=1, out_axes=-1)
+
+    p_argsort = jax.pmap(jnp.argsort, in_axes=0)
+
+
+    def compute_distance(U, V):
+      return compute_diff(U, V).mean(axis=-1)
     
+    devices = jax.device_count()
+    n_test = config.dataset_configs.batch_size_test
+    k = 5
+    
+    def compute_k_closest(U, V, k):
+      D = compute_distance(U, V)
+      D = D.reshape(devices, n_test // devices, -1)
+      nearest = p_argsort(D)[..., 1:k+1]
+      return nearest
+
     len_test = 0
     correct_pred = 0
     for i in range(config.steps_per_epoch_eval):
@@ -291,27 +311,38 @@ def train(
         label_train = batch_train['label'][0]
         print(f'embeeding shape train {i}: {emb_train.shape}')
         
-        dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)[0]
+        #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
+        dist_ = compute_distance(emb_test, emb_train)
+        
         print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
         print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
-        dist_all.append(dist_[0])
+        dist_all.append(dist_)
         labels.append(batch_train['label'][0])
-      dist_all = jnp.concatenate(dist_all)
+      dist_all = jnp.concatenate(dist_all,axis=1)
       labels = jnp.concatenate(labels)
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
-      @partial(jit, static_argnums=0)
+
+      D = D.reshape(devices, n_test // devices, -1)
+      k_nearest = p_argsort(D)[..., 1:k+1]
+      
+      print(k_nearest.shape)
+      k_nearest = k_nearest.reshape(-1, k)
+      class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
+      print(f"{class_rate=}")
+      
+      '''@partial(jit, static_argnums=0)
       def knn_vote(k, distances, train_labels):
           # Get k nearest neighbors for each test sample
           print(f'k {k}')
-          print(f'distances shape {distances.shape}')
-          print(f'labels shape {train_labels.shape}')
-          #k_mat = jnp.asarray(k[0])
+          print(f'distances shape {distances}')
+          print(f'labels shape {train_labels}')
+          #k_mat = int(k[0])
           #print(f'k {k_mat}')
           nearest_indices = jnp.argpartition(distances, 5 - 1, axis=-1)[:5]
           # Count occurrences of each class among neighbors
-          class_counts = jnp.bincount(train_labels[nearest_indices.flatten()].reshape(-1, train_labels.shape[1]))
+          class_counts = jnp.bincount(train_labels[nearest_indices.flatten()])
           # Predict class with the highest vote count
           return jnp.argmax(class_counts, axis=-1)
       
@@ -333,7 +364,7 @@ def train(
       labels_eval = batch_eval['label'][0]
       print(f' pred  {labels_eval}')
       correct_predictions = jnp.equal(predictions[0], labels_eval)
-      correct_pred += jnp.sum(correct_predictions)
+      correct_pred += jnp.sum(correct_predictions)'''
       break
 
     # Calculate accuracy as the ratio of correct predictions to total test samples
