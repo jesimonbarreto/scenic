@@ -40,7 +40,7 @@ from typing import Any, Callable, Dict, Tuple, Optional, Type
 import flax
 from flax import jax_utils
 from flax import linen as nn
-
+from jax import vmap
 from jax.lax import map as map_
 FLAGS = flags.FLAGS
 
@@ -297,7 +297,7 @@ def train(
       labels = jnp.concatenate(labels)
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
-      @jax.vmap
+
       def knn_vote(k, distances, train_labels):
           # Get k nearest neighbors for each test sample
           nearest_indices = jnp.argpartition(distances, k - 1, axis=-1)[:k]
@@ -314,7 +314,7 @@ def train(
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
 
-      predictions = knn_vote()(k=[5], distances=dist_all, train_labels=labels)
+      predictions = vmap(knn_vote)(k=5, distances=dist_all, train_labels=labels)
     
       # Compare predictions with actual test labels
       correct_predictions = jnp.equal(predictions[0], dataset.valid_iter.labels[0])
