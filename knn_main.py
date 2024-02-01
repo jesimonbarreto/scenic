@@ -320,7 +320,7 @@ def train(
       n = jax.device_count()
       dist_all = jnp.repeat(jnp.array(dist_all).reshape(1,-1), n, axis=0) 
       labels = jnp.repeat(jnp.array(labels).reshape(1,-1), n, axis=0)
-      k_ = jnp.repeat(jnp.array(k_), n, axis=0)
+      k_ = jnp.repeat(jnp.array(k_).reshape(1,-1), n, axis=0)
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
 
