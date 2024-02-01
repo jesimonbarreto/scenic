@@ -316,17 +316,17 @@ def train(
         print(f'batch shape train {i}: {f.shape}')
         print(f'embeeding shape train {i}: {emb_train[0].shape}')
         print(f'embeeding shape test {i}: {emb_test[0].shape}')
-        
+        print(batch_train['label'].shape)
         #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
-        dist_ = compute_distance(emb_test[0], emb_train[0])
+        dist_ = compute_distance(emb_test[0][0], emb_train[0][0])
         
         print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
         print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
-        dist_all.append(dist_[0])
+        dist_all.append(dist_)
         labels.append(batch_train['label'][0])
       dist_all = jnp.concatenate(dist_all, axis=1)
-      labels = jnp.concatenate(labels, axis=1)
+      labels = jnp.concatenate(labels)
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
 
