@@ -368,11 +368,11 @@ def train(
       break
 
     # Calculate accuracy as the ratio of correct predictions to total test samples
-    accuracy = correct_pred / len_test
+    #accuracy = correct_pred / len_test
 
-    print(f"Number of correct predictions: {correct_pred}")
-    print(f"Number of total predictions: {len_test}")
-    print(f"Accuracy: {accuracy:.4f}")
+    #print(f"Number of correct predictions: {correct_pred}")
+    #print(f"Number of total predictions: {len_test}")
+    #print(f"Accuracy: {accuracy:.4f}")
     
 
   train_utils.barrier_across_hosts()
