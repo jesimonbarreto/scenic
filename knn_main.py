@@ -323,7 +323,7 @@ def train(
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
 
-      predictions = vmap(knn_vote)(k=k_, distances=dist_all, train_labels=labels)
+      predictions = vmap(knn_vote)(k=5, distances=dist_all, train_labels=labels)
     
       # Compare predictions with actual test labels
       print('-----------------------------------')
