@@ -319,7 +319,11 @@ def train(
       predictions = vmap(knn_vote)(k=k_, distances=dist_all, train_labels=labels)
     
       # Compare predictions with actual test labels
-      correct_predictions = jnp.equal(predictions[0], batch_eval['label'][0])
+      print('-----------------------------------')
+      print(f' pred  {predictions[0]}')
+      labels_eval = batch_eval['label'][0]
+      print(f' pred  {labels_eval}')
+      correct_predictions = jnp.equal(predictions[0], labels_eval)
       correct_pred += jnp.sum(correct_predictions)
       break
 
@@ -327,6 +331,7 @@ def train(
     accuracy = correct_pred / len_test
 
     print(f"Number of correct predictions: {correct_pred}")
+    print(f"Number of total predictions: {len_test}")
     print(f"Accuracy: {accuracy:.4f}")
     
 
