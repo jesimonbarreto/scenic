@@ -300,7 +300,10 @@ def train(
 
       def knn_vote(k, distances, train_labels):
           # Get k nearest neighbors for each test sample
-          nearest_indices = jnp.argpartition(distances, k - 1, axis=-1)[:k]
+          print(f'k {k}')
+          print(f'distances shape {distances.shape}')
+          print(f'labels shape {train_labels.shape}')
+          nearest_indices = jnp.argpartition(distances, k[0] - 1, axis=-1)[:k[0]]
           # Count occurrences of each class among neighbors
           class_counts = jnp.bincount(train_labels[nearest_indices.flatten()], axis=1)
           # Predict class with the highest vote count
