@@ -307,17 +307,19 @@ def train(
           return jnp.argmax(class_counts, axis=-1)
       
       print(f'Dist all [0] : {dist_all[0]}')
+      k_ = [[5]]
+      
       n = jax.device_count()
       dist_all = jnp.repeat(jnp.array(dist_all).reshape(1,-1), n, axis=0) 
       labels = jnp.repeat(jnp.array(labels).reshape(1,-1), n, axis=0)
-
+      k_ = jnp.repeat(jnp.array(k_), n, axis=0)
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
 
-      predictions = vmap(knn_vote)(k=5, distances=dist_all, train_labels=labels)
+      predictions = vmap(knn_vote)(k=k_, distances=dist_all, train_labels=labels)
     
       # Compare predictions with actual test labels
-      correct_predictions = jnp.equal(predictions[0], dataset.valid_iter.labels[0])
+      correct_predictions = jnp.equal(predictions[0], batch_eval['label'][0])
       correct_pred += jnp.sum(correct_predictions)
       break
 
