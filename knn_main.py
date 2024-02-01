@@ -307,9 +307,9 @@ def train(
           print(f'k {k}')
           print(f'distances shape {distances.shape}')
           print(f'labels shape {train_labels.shape}')
-          k_mat = jnp.asarray(k[0])
-          print(f'k {k_mat}')
-          nearest_indices = jnp.argpartition(distances, k_mat - 1, axis=-1)[:k_mat]
+          #k_mat = jnp.asarray(k[0])
+          #print(f'k {k_mat}')
+          nearest_indices = jnp.argpartition(distances, 5 - 1, axis=-1)[:5]
           # Count occurrences of each class among neighbors
           class_counts = jnp.bincount(train_labels[nearest_indices.flatten()], axis=1)
           # Predict class with the highest vote count
