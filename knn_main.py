@@ -307,7 +307,7 @@ def train(
           print(f'k {k}')
           print(f'distances shape {distances.shape}')
           print(f'labels shape {train_labels.shape}')
-          nearest_indices = jnp.argpartition(distances, k - 1, axis=-1)[:k]
+          nearest_indices = jnp.argpartition(distances, k[0] - 1, axis=-1)[:k[0]]
           # Count occurrences of each class among neighbors
           class_counts = jnp.bincount(train_labels[nearest_indices.flatten()], axis=1)
           # Predict class with the highest vote count
@@ -319,11 +319,11 @@ def train(
       n = jax.device_count()
       dist_all = jnp.repeat(jnp.array(dist_all).reshape(1,-1), n, axis=0) 
       labels = jnp.repeat(jnp.array(labels).reshape(1,-1), n, axis=0)
-      k_ = jnp.repeat(jnp.array(k_), n, axis=0)
+      #k_ = jnp.repeat(jnp.array(k_), n, axis=0)
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
 
-      predictions = vmap(knn_vote)(k=5, distances=dist_all, train_labels=labels)
+      predictions = vmap(knn_vote)(k=jnp.array(k_), distances=dist_all, train_labels=labels)
     
       # Compare predictions with actual test labels
       print('-----------------------------------')
