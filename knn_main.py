@@ -339,12 +339,12 @@ def train(
       
       k_nearest_labels = labels[k_nearest]  # Shape: (n, 5)
 
-      most_repetitive_labels = jnp.apply_along_axis(lambda row: jnp.bincount(row).argmax(), axis=1, arr=k_nearest_labels)
+      most_repetitive_labels = jnp.apply_along_axis(lambda row: jnp.bincount(jnp.asarray(row)).argmax(), axis=1, arr=jnp.asarray(k_nearest_labels))
 
       comparison = most_repetitive_labels == batch_eval['label'][0]
       accuracy = comparison.mean()  # Proportion of correct matches
       print(f"Accuracy: {accuracy:.4f}")
-      
+
       #class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
       #print(f"{class_rate=}")
       
