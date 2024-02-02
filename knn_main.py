@@ -99,10 +99,8 @@ def representation_fn_eval(
         backbone = True,
         train=False)
   
-  print(f'shape {embedding.shape}')
   embedding = jnp.mean(embedding, axis=1)
-  print(f'shape {embedding.shape}')
-
+  
   if gather_to_host:
     embedding = jax.lax.all_gather(embedding, 'batch')
     batch = jax.lax.all_gather(batch, 'batch')
@@ -193,9 +191,10 @@ def train(
 
   train_dir = config.get('train_dir')
   print(f'{train_dir}')
+  steps = [501,6501,7001,7200]
 
-  for step in range(config.knn_start_step,config.knn_end_step+1, config.knn_pass_step):
-
+  #for step in range(config.knn_start_step,config.knn_end_step+1, config.knn_pass_step):
+  for step in steps:
     #step = epoch * config.steps_per_epoch
 
     print(f"step: {step}")
@@ -246,7 +245,7 @@ def train(
       features = repr_fn(train_state, batch)
       return features  # Return extracted features for the batch
     
-    print(dataset.meta_data.keys)
+    #print(dataset.meta_data.keys)
     '''for i in range(config.steps_per_epoch):
       print(i)
       batch = next(dataset.train_iter)
@@ -300,11 +299,12 @@ def train(
 
     len_test = 0
     correct_pred = 0
+    predicts_acc = []
     for i in range(config.steps_per_epoch_eval):
-      print(i)
+      print(f'processing step eval {i}')
       batch_eval = next(dataset.valid_iter)
       emb_test = extract_features(batch_eval)
-      print(f'embeeding shape test {emb_test.shape}')
+      #print(f'embeeding shape test {emb_test.shape}')
       dist_all = []
       labels = []
       len_test += len(batch_eval)
@@ -313,22 +313,22 @@ def train(
         emb_train = extract_features(batch_train)
         label_train = batch_train['label'][0]
         f = batch_train['image_resized']
-        print(f'batch shape train {i}: {f.shape}')
-        print(f'embeeding shape train {i}: {emb_train[0].shape}')
-        print(f'embeeding shape test {i}: {emb_test[0].shape}')
-        print(batch_train['label'].shape)
+        #print(f'batch shape train {i}: {f.shape}')
+        #print(f'embeeding shape train {i}: {emb_train[0].shape}')
+        #print(f'embeeding shape test {i}: {emb_test[0].shape}')
+        #print(batch_train['label'].shape)
         #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
         dist_ = compute_distance(emb_test[0][0], emb_train[0][0])
         
-        print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
-        print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
+        #print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
+        #print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
         dist_all.append(dist_)
         labels.append(batch_train['label'][0])
       dist_all = jnp.concatenate(dist_all, axis=1)
       labels = jnp.concatenate(labels)
-      print(f'shape dist_all ------------ {dist_all.shape}')
-      print(f'shape labels   ------------ {labels.shape}')
+      #print(f'shape dist_all ------------ {dist_all.shape}')
+      #print(f'shape labels   ------------ {labels.shape}')
 
       #dist_all = dist_all.reshape(devices, n_test // devices, -1)
       dist_all = jnp.repeat(jnp.expand_dims(dist_all,axis=0), devices, axis=0)
@@ -346,6 +346,7 @@ def train(
       comparison = jnp.asarray(most_repetitive_labels) == batch_eval['label'][0]
       accuracy = comparison.mean()  # Proportion of correct matches
       print(f"Accuracy: {accuracy:.4f}")
+      predicts_acc.append(accuracy)
 
       #class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
       #print(f"{class_rate=}")
@@ -383,8 +384,12 @@ def train(
       print(f' pred  {labels_eval}')
       correct_predictions = jnp.equal(predictions[0], labels_eval)
       correct_pred += jnp.sum(correct_predictions)'''
-      break
-
+    
+    predicts_acc = jnp.asarray(predicts_acc)
+    result = jnp.mean(predicts_acc)
+    
+    print(f"Accuracy total : {result:.4f} ---- executions {predicts_acc.shape} ----- step {step}")
+    
     # Calculate accuracy as the ratio of correct predictions to total test samples
     #accuracy = correct_pred / len_test
 
