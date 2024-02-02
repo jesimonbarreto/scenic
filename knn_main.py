@@ -330,7 +330,7 @@ def train(
       print(f'shape dist_all ------------ {dist_all.shape}')
       print(f'shape labels   ------------ {labels.shape}')
 
-      dist_all = dist_all.reshape(devices, n_test // devices, -1)
+      #dist_all = dist_all.reshape(devices, n_test // devices, -1)
       k_nearest = p_argsort(dist_all)[..., 1:k+1]
       
       print(k_nearest.shape)
