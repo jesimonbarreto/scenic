@@ -331,6 +331,7 @@ def train(
       print(f'shape labels   ------------ {labels.shape}')
 
       #dist_all = dist_all.reshape(devices, n_test // devices, -1)
+      labels = jnp.repeat(jnp.expand_dims(dist_all,axis=0), devices, axis=0)
       k_nearest = p_argsort(dist_all)[..., 1:k+1]
       
       print(k_nearest.shape)
