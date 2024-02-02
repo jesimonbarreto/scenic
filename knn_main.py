@@ -331,13 +331,22 @@ def train(
       print(f'shape labels   ------------ {labels.shape}')
 
       #dist_all = dist_all.reshape(devices, n_test // devices, -1)
-      labels = jnp.repeat(jnp.expand_dims(dist_all,axis=0), devices, axis=0)
-      k_nearest = p_argsort(dist_all)[..., 1:k+1]
+      dist_all = jnp.repeat(jnp.expand_dims(dist_all,axis=0), devices, axis=0)
+      k_nearest = p_argsort(dist_all)[0][..., 1:k+1]
       
       print(k_nearest.shape)
       k_nearest = k_nearest.reshape(-1, k)
-      class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
-      print(f"{class_rate=}")
+      
+      k_nearest_labels = labels[k_nearest]  # Shape: (n, 5)
+
+      most_repetitive_labels = jnp.apply_along_axis(lambda row: jnp.bincount(row).argmax(), axis=1, arr=k_nearest_labels)
+
+      comparison = most_repetitive_labels == batch_eval['label'][0]
+      accuracy = comparison.mean()  # Proportion of correct matches
+      print(f"Accuracy: {accuracy:.4f}")
+      
+      #class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
+      #print(f"{class_rate=}")
       
       '''@partial(jit, static_argnums=0)
       def knn_vote(k, distances, train_labels):
