@@ -343,7 +343,7 @@ def train(
 
       most_repetitive_labels = [9 - jnp.bincount(row, minlength=10)[::-1].argmax() for row in k_nearest_labels]
 
-      comparison = most_repetitive_labels == batch_eval['label'][0]
+      comparison = jnp.asarray(most_repetitive_labels) == batch_eval['label'][0]
       accuracy = comparison.mean()  # Proportion of correct matches
       print(f"Accuracy: {accuracy:.4f}")
 
