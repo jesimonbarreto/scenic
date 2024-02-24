@@ -141,7 +141,7 @@ class ViTDINO(nn.Module):
     #if self.classifier == 'token':
     cls = self.param('cls', nn.initializers.zeros, (1, 1, c), x.dtype)
     print(f' data  {cls[0]}')
-    cls = jnp.tile(cls, [n, 1, 1])
+    cls = jnp.tile(list(cls), [n, 1, 1])
     x = jnp.concatenate([cls, x], axis=1)
     
     # Input image -> sequence of patch tokens.
