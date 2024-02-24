@@ -140,8 +140,9 @@ class ViTDINO(nn.Module):
     # If we want to add a class token, add it here.
     #if self.classifier == 'token':
     cls = self.param('cls', nn.initializers.zeros, (1, 1, c), x.dtype)
+    
+    cls = jnp.asarray(cls)
     print(f' data  {cls}')
-    cls = cls.untraced()
     cls = jnp.tile(cls, [n, 1, 1])
     x = jnp.concatenate([cls, x], axis=1)
     
