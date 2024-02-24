@@ -275,7 +275,6 @@ class ViTDINONew(nn.Module):
       output = jnp.concatenate((output,x_))
       #start_idx = end_idx
     
-    print(f' before pass to projection Head  {output.shape}')
     # Optionally apply a clustering prediction loss.
     cluster_pred_outputs = None
     #if self.apply_cluster_loss:
@@ -337,6 +336,7 @@ class ProjectionHead(nn.Module):
 
   @nn.compact
   def __call__(self, x: jnp.ndarray, train: bool) -> jnp.ndarray:
+    print(f'shape x beginning  {x.shape}')
     for i in range(self.n_layers):
       x = nn.Dense(self.hidden_dim)(x)
       x = nn.gelu(x)
