@@ -341,7 +341,9 @@ class ProjectionHead(nn.Module):
       x = nn.Dense(self.hidden_dim)(x)
       x = nn.gelu(x)
       x = nn_layers.IdentityLayer(name=f'mlp_{i}')(x)
+    print(f'shape x antes antes {x.shape}')
     x = nn.Dense(self.bottleneck_dim)(x)
+    print(f'shape x antes {x.shape}')
     # Normalize.
     #x = nn.WeightNorm(nn.Dense(self.output_dim, use_bias=False))(x)
     x = nn.Dense(self.output_dim, use_bias=False)(x)
