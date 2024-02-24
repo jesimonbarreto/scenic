@@ -343,11 +343,13 @@ class ProjectionHead(nn.Module):
       x = nn_layers.IdentityLayer(name=f'mlp_{i}')(x)
     x = nn.Dense(self.bottleneck_dim)(x)
     # Normalize.
-    x = nn.WeightNorm(nn.Dense(self.output_dim, use_bias=False))(x)
+    #x = nn.WeightNorm(nn.Dense(self.output_dim, use_bias=False))(x)
+    x = nn.Dense(self.output_dim, use_bias=False)(x)
     print(f'shape x in final bootleneck {x.shape}')
     x /= jnp.linalg.norm(x, axis=-1, keepdims=True)
-    #x = WeightNormDense(self.output_dim, use_bias=False, name='prototypes',
-    #                    kernel_init=norm_kernel_init_fn)(x)
+    x = WeightNormDense(self.output_dim, use_bias=False, name='prototypes',
+                        kernel_init=norm_kernel_init_fn)(x)
+    print(f'shape x in final bootleneck after normalization {x.shape}')
     return x
 
 
