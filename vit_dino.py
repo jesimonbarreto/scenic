@@ -275,7 +275,7 @@ class ViTDINONew(nn.Module):
       output = jnp.concatenate((output,x_))
       #start_idx = end_idx
     
-
+    print(f' before pass to projection Head  {output.shape}')
     # Optionally apply a clustering prediction loss.
     cluster_pred_outputs = None
     #if self.apply_cluster_loss:
