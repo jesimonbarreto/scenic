@@ -17,7 +17,6 @@ from scenic.model_lib.base_models import model_utils
 from scenic.model_lib.layers import attention_layers
 from scenic.model_lib.layers import nn_layers
 from scenic.projects.baselines import vit
-from einops import rearrange, repeat
 
 class ToTokenSequence(nn.Module):
   """Transform a batch of views into a sequence of tokens."""
@@ -151,10 +150,7 @@ class ViTDINO(nn.Module):
     # If we want to add a class token, add it here.
     #if self.classifier == 'token':
     cls = self.param('cls', nn.initializers.zeros, (1, 1, c), x.dtype)
-    print(f' data  {cls}')
     cls = jnp.tile(cls, [n, 1, 1])
-    #cls_tokens = repeat(cls, '() n d -> b n d', b=n)
-
     x = jnp.concatenate([cls, x], axis=1)
 
     # ViT Encoder.
@@ -181,8 +177,9 @@ class ViTDINO(nn.Module):
         stochastic_depth=self.stochastic_depth,
         dtype=self.dtype,
         name='Transformer')(x, train=train)'''
-
+    print(f'shape x beginning  {x.shape}')
     x = x[:, 0]
+    print(f'shape x beginning after {x.shape}')
     x = ProjectionHead(
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
@@ -241,7 +238,6 @@ class ProjectionHead(nn.Module):
 
   @nn.compact
   def __call__(self, x: jnp.ndarray, train: bool) -> jnp.ndarray:
-    print(f'shape x beginning  {x.shape}')
     for i in range(self.n_layers):
       x = nn.Dense(self.hidden_dim)(x)
       x = nn.gelu(x)
@@ -251,7 +247,6 @@ class ProjectionHead(nn.Module):
     x /= jnp.linalg.norm(x, axis=-1, keepdims=True)
     x = WeightNormDense(self.output_dim, use_bias=False, name='prototypes',
                         kernel_init=norm_kernel_init_fn)(x)
-    print(f'shape x in final bootleneck after normalization {x.shape}')
     return x
 
 
