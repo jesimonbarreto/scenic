@@ -337,7 +337,6 @@ class ViTDinoModel(base_model.BaseModel):
         num_layers=self.config.model.num_layers,
         num_heads=self.config.model.num_heads,
         patches=self.config.model.patches,
-        ,
         hidden_size=self.config.model.hidden_size,
         n_ref_positions=self.config.n_ref_positions,
         apply_cluster_loss=self.config.apply_cluster_loss,
