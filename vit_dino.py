@@ -115,6 +115,7 @@ class ViTDINO(nn.Module):
   hidden_size: int
   apply_cluster_loss: bool
   head_hidden_dim: int
+  n_ref_positions: int
   head_bottleneck_dim: int
   head_output_dim: int
   positional_embedding: str = 'learned_1d'
