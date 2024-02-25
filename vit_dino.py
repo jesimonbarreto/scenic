@@ -113,6 +113,7 @@ class ViTDINO(nn.Module):
   num_heads: int
   patches: ml_collections.ConfigDict
   hidden_size: int
+  positional_embedding: str = 'learned_1d'
   n_ref_positions: int
   apply_cluster_loss: bool
   head_hidden_dim: int
@@ -136,16 +137,24 @@ class ViTDINO(nn.Module):
     
     
     # Input image -> sequence of patch tokens.
-    to_token_fn = ToTokenSequence(
+    '''to_token_fn = ToTokenSequence(
         patches=self.patches,
         hidden_size=self.hidden_size,
         posembs=self.posembs)
     x, idx_kept_tokens = to_token_fn(
         x, seqlen=seqlen if drop_moment == 'early' else -1,
         positional_embedding=None if use_pe else 'pe_not_in_use',
-        seqlen_selection=seqlen_selection)
+        seqlen_selection=seqlen_selection)'''
     
-    n, v, c = x.shape
+    fh, fw = self.patches.size
+    # Extracting patches and then embedding is in fact a single convolution.
+    x = nn.Conv(
+        self.hidden_size, (fh, fw),
+        strides=(fh, fw),
+        padding='VALID',
+        name='embedding')(x)
+    n, h, w, c = x.shape
+    x = jnp.reshape(x, [n, h * w, c])
 
     # If we want to add a class token, add it here.
     #if self.classifier == 'token':
@@ -153,8 +162,19 @@ class ViTDINO(nn.Module):
     cls = jnp.tile(cls, [n, 1, 1])
     x = jnp.concatenate([cls, x], axis=1)
 
+    x = vit.Encoder(
+        mlp_dim=self.mlp_dim,
+        num_layers=self.num_layers,
+        num_heads=self.num_heads,
+        positional_embedding=self.positional_embedding,
+        dropout_rate=self.dropout_rate,
+        attention_dropout_rate=self.attention_dropout_rate,
+        stochastic_depth=self.stochastic_depth,
+        dtype=self.dtype,
+        name='Transformer')(x, train=train)
+
     # ViT Encoder.
-    for lyr in range(self.num_layers):
+    '''for lyr in range(self.num_layers):
       x = vit.Encoder1DBlock(
           mlp_dim=self.mlp_dim,
           num_heads=self.num_heads,
@@ -165,18 +185,8 @@ class ViTDINO(nn.Module):
           name=f'encoderblock_{lyr}',
           dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
               x, deterministic=not train)
-    x = nn.LayerNorm(name='encoder_norm')(x)
+    x = nn.LayerNorm(name='encoder_norm')(x)'''
 
-    '''x = vit.Encoder(
-        mlp_dim=self.mlp_dim,
-        num_layers=self.num_layers,
-        num_heads=self.num_heads,
-        positional_embedding=self.positional_embedding,
-        dropout_rate=self.dropout_rate,
-        attention_dropout_rate=self.attention_dropout_rate,
-        stochastic_depth=self.stochastic_depth,
-        dtype=self.dtype,
-        name='Transformer')(x, train=train)'''
     print(f'shape x beginning  {x.shape}')
     x = x[:, 0]
     print(f'shape x beginning after {x.shape}')
