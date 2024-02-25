@@ -127,7 +127,7 @@ class ViTDINO(nn.Module):
   loca: bool = False
 
   @nn.compact
-  def __call__(self, x: jnp.ndarray, *jnp, inputs_kv: Optional[jnp.ndarray] = None,
+  def __call__(self, x: jnp.ndarray, *, inputs_kv: Optional[jnp.ndarray] = None,
                train: bool, seqlen: int = -1, use_pe: bool = True,
                drop_moment: str = 'early',
                seqlen_selection: str = 'unstructured', 
@@ -141,8 +141,8 @@ class ViTDINO(nn.Module):
     #if self.classifier == 'token':
     cls = self.param('cls', nn.initializers.zeros, (1, 1, c), x.dtype)
     print(f' data  {cls}')
-    #cls = jnp.tile(cls, [n, 1, 1])
-    cls_tokens = repeat(cls, '() n d -> b n d', b=n)
+    cls = jnp.tile(cls, [n, 1, 1])
+    #cls_tokens = repeat(cls, '() n d -> b n d', b=n)
 
     x = jnp.concatenate([cls, x], axis=1)
     
