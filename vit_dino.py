@@ -52,6 +52,15 @@ class ToTokenSequence(nn.Module):
     fh, fw = self.patches.size
     x = nn.Conv(self.hidden_size, (fh, fw), strides=(fh, fw), padding='VALID',
                 name='embedding')(x)
+    
+    n, h, w, c = x.shape
+    x = jnp.reshape(x, [n, h * w, c])
+
+    # If we want to add a class token, add it here.
+    #if self.classifier == 'token':
+    cls = self.param('cls', nn.initializers.zeros, (1, 1, c), x.dtype)
+    cls = jnp.tile(cls, [n, 1, 1])
+    x = jnp.concatenate([cls, x], axis=1)
 
     # Adding positional encodings.
     x = self.add_positional_encodings(x, positional_embedding)
@@ -137,16 +146,16 @@ class ViTDINO(nn.Module):
     
     
     # Input image -> sequence of patch tokens.
-    '''to_token_fn = ToTokenSequence(
+    to_token_fn = ToTokenSequence(
         patches=self.patches,
         hidden_size=self.hidden_size,
         posembs=self.posembs)
     x, idx_kept_tokens = to_token_fn(
         x, seqlen=seqlen if drop_moment == 'early' else -1,
         positional_embedding=None if use_pe else 'pe_not_in_use',
-        seqlen_selection=seqlen_selection)'''
+        seqlen_selection=seqlen_selection)
     
-    fh, fw = self.patches.size
+    '''fh, fw = self.patches.size
     # Extracting patches and then embedding is in fact a single convolution.
     x = nn.Conv(
         self.hidden_size, (fh, fw),
@@ -169,10 +178,10 @@ class ViTDINO(nn.Module):
         dropout_rate=self.dropout_rate,
         attention_dropout_rate=self.attention_dropout_rate,
         stochastic_depth=self.stochastic_depth,
-        dtype=self.dtype)(x, train=train)
+        dtype=self.dtype)(x, train=train)'''
 
     # ViT Encoder.
-    '''for lyr in range(self.num_layers):
+    for lyr in range(self.num_layers):
       x = vit.Encoder1DBlock(
           mlp_dim=self.mlp_dim,
           num_heads=self.num_heads,
@@ -185,7 +194,7 @@ class ViTDINO(nn.Module):
               x, deterministic=not train)
     x = nn.LayerNorm(name='encoder_norm')(x)
 
-    x = vit.Encoder(
+    '''x = vit.Encoder(
         mlp_dim=self.mlp_dim,
         num_layers=self.num_layers,
         num_heads=self.num_heads,
