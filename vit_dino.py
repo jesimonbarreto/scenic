@@ -151,8 +151,7 @@ class ViTDINO(nn.Module):
     x = nn.Conv(
         self.hidden_size, (fh, fw),
         strides=(fh, fw),
-        padding='VALID',
-        name='embedding')(x)
+        padding='VALID')(x)
     n, h, w, c = x.shape
     x = jnp.reshape(x, [n, h * w, c])
 
@@ -170,8 +169,7 @@ class ViTDINO(nn.Module):
         dropout_rate=self.dropout_rate,
         attention_dropout_rate=self.attention_dropout_rate,
         stochastic_depth=self.stochastic_depth,
-        dtype=self.dtype,
-        name='Transformer')(x, train=train)
+        dtype=self.dtype)(x, train=train)
 
     # ViT Encoder.
     '''for lyr in range(self.num_layers):
