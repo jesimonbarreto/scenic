@@ -135,7 +135,18 @@ class ViTDINO(nn.Module):
                debug: bool = False):
     del debug
     
-    n, h, w, c = x.shape
+    
+    # Input image -> sequence of patch tokens.
+    to_token_fn = ToTokenSequence(
+        patches=self.patches,
+        hidden_size=self.hidden_size,
+        posembs=self.posembs)
+    x, idx_kept_tokens = to_token_fn(
+        x, seqlen=seqlen if drop_moment == 'early' else -1,
+        positional_embedding=None if use_pe else 'pe_not_in_use',
+        seqlen_selection=seqlen_selection)
+    
+    n, v, c = x.shape
 
     # If we want to add a class token, add it here.
     #if self.classifier == 'token':
@@ -145,16 +156,6 @@ class ViTDINO(nn.Module):
     #cls_tokens = repeat(cls, '() n d -> b n d', b=n)
 
     x = jnp.concatenate([cls, x], axis=1)
-    
-    # Input image -> sequence of patch tokens.
-    '''to_token_fn = ToTokenSequence(
-        patches=self.patches,
-        hidden_size=self.hidden_size,
-        posembs=self.posembs)
-    x, idx_kept_tokens = to_token_fn(
-        x, seqlen=seqlen if drop_moment == 'early' else -1,
-        positional_embedding=None if use_pe else 'pe_not_in_use',
-        seqlen_selection=seqlen_selection)'''
 
     # ViT Encoder.
     '''for lyr in range(self.num_layers):
