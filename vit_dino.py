@@ -96,6 +96,7 @@ class ViTDINO(nn.Module):
     num_heads: Number of self-attention heads.
     patches: Configuration of the patches extracted in the stem of the model.
     hidden_size: Size of the hidden state of the output of model's stem.
+    n_ref_positions: Number of position in the reference view.
     apply_cluster_loss: Whether to apply the clustering loss.
     head_hidden_dim: Dimension of the hidden layer in the projection mlp.
     head_bottleneck_dim: Dimension of the bottleneck.
@@ -112,11 +113,11 @@ class ViTDINO(nn.Module):
   num_heads: int
   patches: ml_collections.ConfigDict
   hidden_size: int
-  positional_embedding: str = 'learned_1d'
   apply_cluster_loss: bool
   head_hidden_dim: int
   head_bottleneck_dim: int
   head_output_dim: int
+  positional_embedding: str = 'learned_1d'
   dropout_rate: float = 0.0
   attention_dropout_rate: float = 0.0
   stochastic_depth: float = 0.1
@@ -183,8 +184,18 @@ class ViTDINO(nn.Module):
           name=f'encoderblock_{lyr}',
           dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
               x, deterministic=not train)
-    x = nn.LayerNorm(name='encoder_norm')(x)'''
+    x = nn.LayerNorm(name='encoder_norm')(x)
 
+    x = vit.Encoder(
+        mlp_dim=self.mlp_dim,
+        num_layers=self.num_layers,
+        num_heads=self.num_heads,
+        positional_embedding=self.positional_embedding,
+        dropout_rate=self.dropout_rate,
+        attention_dropout_rate=self.attention_dropout_rate,
+        stochastic_depth=self.stochastic_depth,
+        dtype=self.dtype,
+        name='Transformer')(x, train=train)'''
     print(f'shape x beginning  {x.shape}')
     x = x[:, 0]
     print(f'shape x beginning after {x.shape}')
@@ -194,6 +205,31 @@ class ViTDINO(nn.Module):
           output_dim=self.head_output_dim,
           name='projection_head')(
               x, train)#.reshape((-1, self.head_output_dim))
+    if self.loca:
+      patches_repr = x
+      # Drop some tokens (in the reference view).
+      if drop_moment == 'late':
+        rng = self.make_rng('droptok')
+        idx_kept_tokens = token_indexes_not_to_drop(
+            seqlen, self.n_ref_positions, seqlen_selection, rng)
+        if len(idx_kept_tokens) < self.n_ref_positions:
+          patches_repr = jnp.take(patches_repr, idx_kept_tokens, axis=1)
+
+      # Query patches look at those of the reference through crossrng attention.
+      if inputs_kv is None:
+        inputs_kv = copy.deepcopy(patches_repr)
+      x = CrossAttentionEncoderBlock(
+          mlp_dim=self.mlp_dim,
+          num_heads=self.num_heads,
+          dropout_rate=self.dropout_rate,
+          attention_dropout_rate=self.attention_dropout_rate,
+          name='cross_attention_block',
+          dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
+              x, inputs_kv=inputs_kv, deterministic=not train)
+      x = nn.LayerNorm(name='final_norm')(x)
+      x = nn.Dense(self.n_ref_positions, name='position_predictor')(x)
+      return x, patches_repr, idx_kept_tokens
+    
     return x
 
 def norm_kernel_init_fn(rng, shape, dtype):
@@ -301,7 +337,9 @@ class ViTDinoModel(base_model.BaseModel):
         num_layers=self.config.model.num_layers,
         num_heads=self.config.model.num_heads,
         patches=self.config.model.patches,
+        ,
         hidden_size=self.config.model.hidden_size,
+        n_ref_positions=self.config.n_ref_positions,
         apply_cluster_loss=self.config.apply_cluster_loss,
         head_hidden_dim=self.config.model.get('head_hidden_dim', 2048),
         head_bottleneck_dim=self.config.model.get('head_bottleneck_dim', 256),
