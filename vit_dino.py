@@ -158,7 +158,7 @@ class ViTDINO(nn.Module):
     x = jnp.concatenate([cls, x], axis=1)
 
     # ViT Encoder.
-    '''for lyr in range(self.num_layers):
+    for lyr in range(self.num_layers):
       x = vit.Encoder1DBlock(
           mlp_dim=self.mlp_dim,
           num_heads=self.num_heads,
@@ -169,9 +169,9 @@ class ViTDINO(nn.Module):
           name=f'encoderblock_{lyr}',
           dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
               x, deterministic=not train)
-    x = nn.LayerNorm(name='encoder_norm')(x)'''
+    x = nn.LayerNorm(name='encoder_norm')(x)
 
-    x = vit.Encoder(
+    '''x = vit.Encoder(
         mlp_dim=self.mlp_dim,
         num_layers=self.num_layers,
         num_heads=self.num_heads,
@@ -180,7 +180,7 @@ class ViTDINO(nn.Module):
         attention_dropout_rate=self.attention_dropout_rate,
         stochastic_depth=self.stochastic_depth,
         dtype=self.dtype,
-        name='Transformer')(x, train=train)
+        name='Transformer')(x, train=train)'''
 
     x = x[:, 0]
     x = ProjectionHead(
