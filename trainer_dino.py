@@ -139,9 +139,6 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    teacher_out = jnp.mean(teacher_out, axis=1) 
-    cc = jnp.mean(cc, axis=1)
-    st = jnp.mean(st, axis=1)
     student_out = jnp.concatenate([st,cc])
 
     loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
