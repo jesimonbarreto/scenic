@@ -99,7 +99,7 @@ def representation_fn_eval(
         backbone = True,
         train=False)
   
-  embedding = jnp.mean(embedding, axis=1)
+  #embedding = jnp.mean(embedding, axis=1)
   
   if gather_to_host:
     embedding = jax.lax.all_gather(embedding, 'batch')
