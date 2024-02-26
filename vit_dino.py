@@ -49,6 +49,7 @@ class ToTokenSequence(nn.Module):
       x = x + pe
     elif positional_embedding == 'sinusoidal_2d':
       x = attention_layers.AddFixedSinCosPositionEmbedding()(x)
+    
     #x = jnp.reshape(x, (-1, h * w, c))
     return x
 
@@ -61,7 +62,7 @@ class ToTokenSequence(nn.Module):
                 name='embedding')(x)
     
     n, h, w, c = x.shape
-    #x = jnp.reshape(x, [n, h * w, c])
+    x = jnp.reshape(x, [n, h * w, c])
     cls = self.param('cls', nn.initializers.zeros, (1, 1, c), x.dtype)
     cls = jnp.tile(cls, [n, 1, 1])
     x = jnp.concatenate([cls, x], axis=1)
@@ -182,8 +183,10 @@ class ViTDINO(nn.Module):
         hidden_size=self.hidden_size,
         posembs=self.posembs)
     x, idx_kept_tokens = to_token_fn(
-        x, seqlen=seqlen if drop_moment == 'early' else -1,
-        positional_embedding=None if use_pe else 'pe_not_in_use',
+        x,
+        self.positional_embedding, 
+        seqlen=seqlen if drop_moment == 'early' else -1,
+        #positional_embedding=None if use_pe else 'pe_not_in_use',
         seqlen_selection=seqlen_selection)
     
     # ViT Encoder.
