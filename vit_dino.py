@@ -27,10 +27,9 @@ class ToTokenSequence(nn.Module):
   positional_embedding: str = 'learned'
 
   def add_positional_encodings(self, x: jnp.ndarray,
-                               shape,
                                positional_embedding: str = '') -> jnp.ndarray:
     """Add positional encodings to the input patch sequence."""
-    _, w, h, c =shape
+    _, w, h, c = x.shape
     positional_embedding = positional_embedding or self.positional_embedding
     if positional_embedding == 'learned':
       posemb = self.param(
