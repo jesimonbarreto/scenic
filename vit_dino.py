@@ -50,7 +50,7 @@ class ToTokenSequence(nn.Module):
                         x.dtype)
       else:
         pos_emb_shape = (1, (w*h) + 1, c)
-        pe = self.param('pos_embedding',
+        pe = self.param('pos_embedding_c',
                         nn.initializers.normal(stddev=1/np.sqrt(c)),
                         pos_emb_shape,
                         x.dtype)
