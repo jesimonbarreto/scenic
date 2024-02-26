@@ -41,6 +41,7 @@ class ToTokenSequence(nn.Module):
       if (h, w) != self.posembs:
         posemb = jax.image.resize(posemb, (1, h, w, c), 'bilinear')
       x = x + posemb
+    
     elif positional_embedding == 'learned_1d':
       if w*h == 196:
         pos_emb_shape = (1, (w*h) + 1, c)
@@ -59,7 +60,7 @@ class ToTokenSequence(nn.Module):
     elif positional_embedding == 'sinusoidal_2d':
       x = attention_layers.AddFixedSinCosPositionEmbedding()(x)
     
-    #x = jnp.reshape(x, (-1, h * w, c))
+    x = jnp.reshape(x, (-1, h * w, c))
     return x
 
   @nn.compact
@@ -71,13 +72,13 @@ class ToTokenSequence(nn.Module):
                 name='embedding')(x)
     
     n, h, w, c = x.shape
-    x = jnp.reshape(x, [n, h * w, c])
-    cls = self.param('cls', nn.initializers.zeros, (1, 1, c), x.dtype)
-    cls = jnp.tile(cls, [n, 1, 1])
+    #x = jnp.reshape(x, [n, h * w, c])
+    cls = self.param('cls', nn.initializers.zeros, (1, h, w, c), x.dtype)
+    cls = jnp.tile(cls, [n, 1, 1, 1])
     x = jnp.concatenate([cls, x], axis=1)
 
     # Adding positional encodings.
-    x = self.add_positional_encodings(x, (n,h,w,c), positional_embedding)
+    x = self.add_positional_encodings(x, positional_embedding)
 
     # Possibly dropping some tokens.
     idx_kept_tokens = None
