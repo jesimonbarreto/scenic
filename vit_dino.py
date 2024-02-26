@@ -193,9 +193,9 @@ class ViTDINO(nn.Module):
         posembs=self.posembs)
     x, idx_kept_tokens = to_token_fn(
         x,
-        self.positional_embedding, 
+        #self.positional_embedding, 
         seqlen=seqlen if drop_moment == 'early' else -1,
-        #positional_embedding=None if use_pe else 'pe_not_in_use',
+        positional_embedding=None if use_pe else 'pe_not_in_use',
         seqlen_selection=seqlen_selection)
     
     # ViT Encoder.
