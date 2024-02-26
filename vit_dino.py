@@ -73,12 +73,13 @@ class ToTokenSequence(nn.Module):
     
     n, h, w, c = x.shape
     #x = jnp.reshape(x, [n, h * w, c])
-    cls = self.param('cls', nn.initializers.zeros, (1, h, w, c), x.dtype)
-    cls = jnp.tile(cls, [n, 1, 1, 1])
-    x = jnp.concatenate([cls, x], axis=1)
 
     # Adding positional encodings.
     x = self.add_positional_encodings(x, positional_embedding)
+
+    cls = self.param('cls', nn.initializers.zeros, (1, 1, c), x.dtype)
+    cls = jnp.tile(cls, [n, 1, 1])
+    x = jnp.concatenate([cls, x], axis=1)
 
     # Possibly dropping some tokens.
     idx_kept_tokens = None
