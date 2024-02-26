@@ -42,7 +42,7 @@ class ToTokenSequence(nn.Module):
         posemb = jax.image.resize(posemb, (1, h, w, c), 'bilinear')
       x = x + posemb
     elif positional_embedding == 'learned_1d':
-      pos_emb_shape = (1, d + 1, c)
+      pos_emb_shape = (1, d, c)
       pe = self.param('pos_embedding',
                       nn.initializers.normal(stddev=1/np.sqrt(c)),
                       pos_emb_shape,
