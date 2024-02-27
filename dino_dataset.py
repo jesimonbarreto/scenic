@@ -43,7 +43,8 @@ def get_dataset(*,
   logging.info('Loading train split of the %s for Dino training.',
                dataset_configs.dataset)
   n_train_ex = dataset_utils.get_num_examples(dataset_configs.dataset,
-                                              dataset_configs.train_split)
+                                              dataset_configs.train_split,
+                                              dataset_configs.dataset_dir)
   train_ds = dataset_utils.get_data(
       dataset=dataset_configs.dataset,
       split=dataset_configs.train_split,
