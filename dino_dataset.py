@@ -67,8 +67,8 @@ def get_dataset(*,
     assert dataset_configs.shuffle_buffer_size is not None
     train_ds = dataset_utils.distribute(train_ds, dataset_service_address)
 
-  n_train_ex = dataset_utils.get_num_examples(dataset_configs.dataset,
-                                              dataset_configs.train_split)
+  #n_train_ex = dataset_utils.get_num_examples(dataset_configs.dataset,
+  #                                            dataset_configs.train_split)
   shard_batches = functools.partial(dataset_utils.shard, n_devices=num_shards)
   train_iter = iter(train_ds)
   train_iter = map(dataset_utils.tf_to_numpy, train_iter)
