@@ -42,8 +42,6 @@ def get_dataset(*,
   del eval_batch_size, rng
   logging.info('Loading train split of the %s for Dino training.',
                dataset_configs.dataset)
-  import datasets
-  datasets.builder.has_sufficient_disk_space = lambda needed_bytes, directory='.': True
   n_train_ex = dataset_utils.get_num_examples(dataset_configs.dataset,
                                               dataset_configs.train_split,
                                               data_dir=dataset_configs.dataset_dir)
