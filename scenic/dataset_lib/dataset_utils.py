@@ -493,9 +493,7 @@ def get_num_examples(dataset, split, data_dir=None):
   """Returns the total number of examples in a dataset split."""
   builder = get_builder(dataset, data_dir)
   # Download dataset:
-  print(f'root dir {builder.data_dir_root}')
   builder.download_and_prepare()
-  
   num_examples = builder.info.splits[split].num_examples
   remainder = num_examples % jax.process_count()
   if remainder:
