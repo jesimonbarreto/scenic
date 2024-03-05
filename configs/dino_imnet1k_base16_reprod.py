@@ -77,7 +77,7 @@ def get_config():
   # For IMAGENET-1K
   config.dataset_configs.dataset = 'imagenet2012'
   config.dataset_configs.train_split = 'train'
-  config.dataset_configs.dataset_dir = '/home/jesimonbarreto/storage/'
+  config.dataset_configs.dataset_dir = '~/storage/'
 
   # Model.
   version, patch = VARIANT.split('/')
