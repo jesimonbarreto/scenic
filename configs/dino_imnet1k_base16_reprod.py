@@ -31,7 +31,7 @@ def get_config():
   # Training.
   config.max_grad_norm = 1
   config.num_training_epochs = 300
-  config.batch_size = 64 #512
+  config.batch_size = 1024
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
   total_steps = config.num_training_epochs * config.steps_per_epoch
