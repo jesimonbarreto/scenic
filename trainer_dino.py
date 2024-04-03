@@ -220,6 +220,20 @@ def train(
        input_spec=[(dataset.meta_data['input_shape'],
                     dataset.meta_data.get('input_dtype', jnp.float32))],
        config=config, rngs=init_rng)
+  
+  '''=============================================='''
+  print('Here... trying load')
+  from load_params import load_params
+
+  load_params('dinov2_vitb14.npz','gs://my_stg/weights/', params,
+                params_key='teacher_weights',
+                force_random_init= None)
+
+
+  print('Here... finished load')
+  '''=============================================='''
+
+
   # Only one model function but two sets of parameters.
   ema_params = copy.deepcopy(params)
 
