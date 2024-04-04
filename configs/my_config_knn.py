@@ -3,7 +3,7 @@ import ml_collections, os
 
 VARIANT = 'B/16'
 _IMAGENET_TRAIN_SIZE = 1281167 #9469 #1281167
-_IMAGENET_TEST_SIZE = 100000
+_IMAGENET_TEST_SIZE = 50000
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 
@@ -24,10 +24,9 @@ def get_config():
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
   config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.train_split = 'train'
   config.dataset_configs.dataset_dir = 'gs://my_stg/storage/'
-
-  config.dataset_configs.test_split = 'test'
+  config.dataset_configs.train_split = 'train'
+  config.dataset_configs.test_split = 'validation'
   config.dataset_configs.batch_size_train = 1024
   config.dataset_configs.batch_size_test = 1024
 
