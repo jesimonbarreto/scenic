@@ -267,6 +267,18 @@ def train(
   del params, ema_params
   total_steps, steps_per_epoch = train_utils.get_num_training_steps(
       config, dataset.meta_data)
+  
+  chrono.pause(wait_for=(train_state.params, train_state.opt_state))
+  with report_progress.timed('checkpoint'):
+    if lead_host:
+      # Take the first replica.
+      unrep_train_state = jax_utils.unreplicate(train_state)
+      metadata = unrep_train_state.metadata
+      metadata['chrono'] = chrono.save()
+      unrep_train_state.replace(metadata=metadata)  # pytype: disable=attribute-error
+      utils.save_checkpoint(workdir, unrep_train_state)
+      del unrep_train_state
+  chrono.resume()  # Un-pause now.
 
   # The function that performs one step of loca training.
   dino_train_step_pmapped = jax.pmap(
