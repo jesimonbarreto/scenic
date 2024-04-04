@@ -31,3 +31,7 @@ def main(rng: jnp.ndarray, config: ml_collections.ConfigDict, workdir: str,
 
 if __name__ == '__main__':
   app.run(main=main)
+
+#fazer o google clound terminal nao fechar com a execução -> tmux na configuração
+#Rodar o train
+#Corrigir arquivo de entrada do 

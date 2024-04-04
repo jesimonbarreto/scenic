@@ -225,7 +225,7 @@ def train(
   print('Here... trying load')
   from load_params import load_params
 
-  load_params('dinov2_vitb14.npz','gs://my_stg/weights/', params,
+  load_params('dinov2_vitb14','gs://my_stg/weights/', params,
                 params_key='teacher_weights',
                 force_random_init= None)
 
