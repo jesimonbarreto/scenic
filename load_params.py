@@ -440,7 +440,7 @@ def load_params(checkpoint_name: str, checkpoint_path: str, params: Any,
 
 # pylint: disable=line-too-long
 PYTORCH_STYLE_WEIGHTS = {
-    'dinov2_vits14': '',
-    'dinov2_vitb14': '',
-    'dinov2_vitl14': '',
+    'dinov2_vits14': '/home/jesimonbarreto/',
+    'dinov2_vitb14': '/home/jesimonbarreto/',
+    'dinov2_vitl14': '/home/jesimonbarreto/',
 }
