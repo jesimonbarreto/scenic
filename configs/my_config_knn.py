@@ -114,7 +114,7 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/home/jesimonbarreto/scenic/dino_dir_test_eval/'
+  config.train_dir = '/home/jesimonbarreto/exp_test_now/'
 
   config.preextracted = False
   #config.preextracted = True
