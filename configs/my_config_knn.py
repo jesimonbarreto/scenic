@@ -121,9 +121,10 @@ def get_config():
 
   config.write_summary = True
   
-  config.knn_start_step = 501
-  config.knn_end_step = 1800 #set this to a lower value than start_epoch to not do knn at all
-  config.knn_pass_step = 1299
+  config.steps_checkpoints = [0]
+  config.ks = [5]
+
+  config.dir_files = '/mnt/disks/persist/eval_files/'
 
   # Learning rate.
   #cosine schedule lr

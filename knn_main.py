@@ -191,11 +191,10 @@ def train(
 
   train_dir = config.get('train_dir')
   print(f'{train_dir}')
-  steps = [501,6501,7001,7200]
+  steps = config.get('steps_checkpoints')
+  files_save = config.get('dir_files')
 
-  #for step in range(config.knn_start_step,config.knn_end_step+1, config.knn_pass_step):
   for step in steps:
-    #step = epoch * config.steps_per_epoch
 
     print(f"step: {step}")
     
@@ -245,6 +244,15 @@ def train(
       features = repr_fn(train_state, batch)
       return features  # Return extracted features for the batch
     
+    print('Starting to extract features')
+    for i in range(config.steps_per_epoch):
+      batch_train = next(dataset.train_iter)
+      emb_train = extract_features(batch_train)
+      label_train = batch_train['label'][0]
+      f = batch_train['image_resized']
+      jnp.savez(files_save+f'{i}', emb=emb_train, label=label_train)
+
+    print('Finishing extract features')
     #print(dataset.meta_data.keys)
     '''for i in range(config.steps_per_epoch):
       print(i)
@@ -289,107 +297,111 @@ def train(
     
     devices = jax.device_count()
     n_test = config.dataset_configs.batch_size_test
-    k = 5
+    
+    ks = config.get('ks')
     
     def compute_k_closest(U, V, k):
       D = compute_distance(U, V)
       D = D.reshape(devices, n_test // devices, -1)
       nearest = p_argsort(D)[..., 1:k+1]
       return nearest
+    
+    for k in ks:
+      print(f'K: {k}')
+      len_test = 0
+      correct_pred = 0
+      predicts_acc = []
+      for i in range(config.steps_per_epoch_eval):
+        print(f'processing step eval {i}')
+        batch_eval = next(dataset.valid_iter)
+        emb_test = extract_features(batch_eval)
+        #print(f'embeeding shape test {emb_test.shape}')
+        dist_all = []
+        labels = []
+        len_test += len(batch_eval)
+        for i in range(config.steps_per_epoch):
+          #batch_train = next(dataset.train_iter)
+          data_load = jnp.load(files_save+f'{i}.npz')
+          emb_train = data_load['emb']#extract_features(batch_train)
+          label_train = data_load['label']#batch_train['label'][0]
+          #f = batch_train['image_resized']
+          #print(f'batch shape train {i}: {f.shape}')
+          #print(f'embeeding shape train {i}: {emb_train[0].shape}')
+          #print(f'embeeding shape test {i}: {emb_test[0].shape}')
+          #print(batch_train['label'].shape)
+          #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
+          dist_ = compute_distance(emb_test[0][0], emb_train[0][0])
+          
+          #print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
+          #print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
-    len_test = 0
-    correct_pred = 0
-    predicts_acc = []
-    for i in range(config.steps_per_epoch_eval):
-      print(f'processing step eval {i}')
-      batch_eval = next(dataset.valid_iter)
-      emb_test = extract_features(batch_eval)
-      #print(f'embeeding shape test {emb_test.shape}')
-      dist_all = []
-      labels = []
-      len_test += len(batch_eval)
-      for i in range(config.steps_per_epoch):
-        batch_train = next(dataset.train_iter)
-        emb_train = extract_features(batch_train)
-        label_train = batch_train['label'][0]
-        f = batch_train['image_resized']
-        #print(f'batch shape train {i}: {f.shape}')
-        #print(f'embeeding shape train {i}: {emb_train[0].shape}')
-        #print(f'embeeding shape test {i}: {emb_test[0].shape}')
-        #print(batch_train['label'].shape)
-        #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
-        dist_ = compute_distance(emb_test[0][0], emb_train[0][0])
+          dist_all.append(dist_)
+          labels.append(label_train['label'][0])
+        dist_all = jnp.concatenate(dist_all, axis=1)
+        labels = jnp.concatenate(labels)
+        #print(f'shape dist_all ------------ {dist_all.shape}')
+        #print(f'shape labels   ------------ {labels.shape}')
+
+        #dist_all = dist_all.reshape(devices, n_test // devices, -1)
+        dist_all = jnp.repeat(jnp.expand_dims(dist_all,axis=0), devices, axis=0)
+        k_nearest = p_argsort(dist_all)[0][..., 1:k+1]
         
-        #print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
-        #print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
+        print(k_nearest.shape)
+        k_nearest = k_nearest.reshape(-1, k)
+        
+        k_nearest_labels = labels[k_nearest]  # Shape: (n, 5)
 
-        dist_all.append(dist_)
-        labels.append(batch_train['label'][0])
-      dist_all = jnp.concatenate(dist_all, axis=1)
-      labels = jnp.concatenate(labels)
-      #print(f'shape dist_all ------------ {dist_all.shape}')
-      #print(f'shape labels   ------------ {labels.shape}')
+        #most_repetitive_labels = jnp.apply_along_axis(lambda row: jnp.bincount(jnp.asarray(row)).argmax(), axis=1, arr=jnp.asarray(k_nearest_labels))
 
-      #dist_all = dist_all.reshape(devices, n_test // devices, -1)
-      dist_all = jnp.repeat(jnp.expand_dims(dist_all,axis=0), devices, axis=0)
-      k_nearest = p_argsort(dist_all)[0][..., 1:k+1]
+        most_repetitive_labels = [9 - jnp.bincount(row, minlength=10)[::-1].argmax() for row in k_nearest_labels]
+
+        comparison = jnp.asarray(most_repetitive_labels) == batch_eval['label'][0]
+        accuracy = comparison.mean()  # Proportion of correct matches
+        print(f"Accuracy: {accuracy:.4f}")
+        predicts_acc.append(accuracy)
+
+        #class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
+        #print(f"{class_rate=}")
+        
+        '''@partial(jit, static_argnums=0)
+        def knn_vote(k, distances, train_labels):
+            # Get k nearest neighbors for each test sample
+            print(f'k {k}')
+            print(f'distances shape {distances}')
+            print(f'labels shape {train_labels}')
+            #k_mat = int(k[0])
+            #print(f'k {k_mat}')
+            nearest_indices = jnp.argpartition(distances, 5 - 1, axis=-1)[:5]
+            # Count occurrences of each class among neighbors
+            class_counts = jnp.bincount(train_labels[nearest_indices.flatten()])
+            # Predict class with the highest vote count
+            return jnp.argmax(class_counts, axis=-1)
+        
+        print(f'Dist all [0] : {dist_all[0]}')
+        k_ = [5]
+        
+        n = jax.device_count()
+        dist_all = jnp.repeat(jnp.array(dist_all).reshape(1,-1), n, axis=0) 
+        labels = jnp.repeat(jnp.array(labels).reshape(1,-1), n, axis=0)
+        k_ = jnp.repeat(jnp.array(k_).reshape(1,-1), n, axis=0)
+        print(f'shape dist_all ------------ {dist_all.shape}')
+        print(f'shape labels   ------------ {labels.shape}')
+
+        predictions = vmap(knn_vote)(k=jnp.array(k_), distances=dist_all, train_labels=labels)
       
-      print(k_nearest.shape)
-      k_nearest = k_nearest.reshape(-1, k)
+        # Compare predictions with actual test labels
+        print('-----------------------------------')
+        print(f' pred  {predictions[0]}')
+        labels_eval = batch_eval['label'][0]
+        print(f' pred  {labels_eval}')
+        correct_predictions = jnp.equal(predictions[0], labels_eval)
+        correct_pred += jnp.sum(correct_predictions)'''
       
-      k_nearest_labels = labels[k_nearest]  # Shape: (n, 5)
-
-      #most_repetitive_labels = jnp.apply_along_axis(lambda row: jnp.bincount(jnp.asarray(row)).argmax(), axis=1, arr=jnp.asarray(k_nearest_labels))
-
-      most_repetitive_labels = [9 - jnp.bincount(row, minlength=10)[::-1].argmax() for row in k_nearest_labels]
-
-      comparison = jnp.asarray(most_repetitive_labels) == batch_eval['label'][0]
-      accuracy = comparison.mean()  # Proportion of correct matches
-      print(f"Accuracy: {accuracy:.4f}")
-      predicts_acc.append(accuracy)
-
-      #class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
-      #print(f"{class_rate=}")
+      predicts_acc = jnp.asarray(predicts_acc)
+      result = jnp.mean(predicts_acc)
       
-      '''@partial(jit, static_argnums=0)
-      def knn_vote(k, distances, train_labels):
-          # Get k nearest neighbors for each test sample
-          print(f'k {k}')
-          print(f'distances shape {distances}')
-          print(f'labels shape {train_labels}')
-          #k_mat = int(k[0])
-          #print(f'k {k_mat}')
-          nearest_indices = jnp.argpartition(distances, 5 - 1, axis=-1)[:5]
-          # Count occurrences of each class among neighbors
-          class_counts = jnp.bincount(train_labels[nearest_indices.flatten()])
-          # Predict class with the highest vote count
-          return jnp.argmax(class_counts, axis=-1)
-      
-      print(f'Dist all [0] : {dist_all[0]}')
-      k_ = [5]
-      
-      n = jax.device_count()
-      dist_all = jnp.repeat(jnp.array(dist_all).reshape(1,-1), n, axis=0) 
-      labels = jnp.repeat(jnp.array(labels).reshape(1,-1), n, axis=0)
-      k_ = jnp.repeat(jnp.array(k_).reshape(1,-1), n, axis=0)
-      print(f'shape dist_all ------------ {dist_all.shape}')
-      print(f'shape labels   ------------ {labels.shape}')
-
-      predictions = vmap(knn_vote)(k=jnp.array(k_), distances=dist_all, train_labels=labels)
-    
-      # Compare predictions with actual test labels
-      print('-----------------------------------')
-      print(f' pred  {predictions[0]}')
-      labels_eval = batch_eval['label'][0]
-      print(f' pred  {labels_eval}')
-      correct_predictions = jnp.equal(predictions[0], labels_eval)
-      correct_pred += jnp.sum(correct_predictions)'''
-    
-    predicts_acc = jnp.asarray(predicts_acc)
-    result = jnp.mean(predicts_acc)
-    
-    print(f"Accuracy total : {result:.4f} ---- executions {predicts_acc.shape} ----- step {step}")
-    
+      print(f"{k} Neighborhood: Accuracy total : {result:.4f} ---- executions {predicts_acc.shape} ----- step {step}")
+  
     # Calculate accuracy as the ratio of correct predictions to total test samples
     #accuracy = correct_pred / len_test
 
