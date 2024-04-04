@@ -10,7 +10,7 @@ import jax.profiler
 import numpy as np
 from scenic.train_lib import pretrain_utils
 from tensorflow.io import gfile
-import os,io,  
+import os,io
 
 def split_qkv_w(qkv, nheads):
   # qkv in pytorch is for example [2304, 768], in bv it's 3x [768, 12, 64]
