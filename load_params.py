@@ -11,6 +11,9 @@ import numpy as np
 from scenic.train_lib import pretrain_utils
 from tensorflow.io import gfile
 import os,io
+from typing import Mapping
+import dataclasses
+
 
 def split_qkv_w(qkv, nheads):
   # qkv in pytorch is for example [2304, 768], in bv it's 3x [768, 12, 64]
@@ -257,6 +260,31 @@ def npload(fname):
     return loaded
   else:
     return dict(loaded)
+
+def _traverse_with_names(tree, with_inner_nodes=False):
+  """Traverses nested dicts/dataclasses and emits (leaf_name, leaf_val)."""
+  if dataclasses.is_dataclass(tree):
+    tree = flax.serialization.to_state_dict(tree)
+  # Don't output the non-leaf nodes. If the optimizer doesn't have a state
+  # the tree leaves can be Nones which was interpreted as a leaf by this
+  # function but not by the other functions (like jax.tree_util.tree_map).
+  if tree is None:
+    return
+  elif isinstance(tree, Mapping):
+    keys = sorted(tree.keys())
+    for key in keys:
+      for path, v in _traverse_with_names(tree[key], with_inner_nodes):
+        yield (key + "/" + path).rstrip("/"), v
+    if with_inner_nodes:
+      yield "", tree
+  elif isinstance(tree, (list, tuple)):
+    for idx in range(len(tree)):
+      for path, v in _traverse_with_names(tree[idx], with_inner_nodes):
+        yield (str(idx) + "/" + path).rstrip("/"), v
+    if with_inner_nodes:
+      yield "", tree
+  else:
+    yield "", tree
 
 def tree_flatten_with_names(tree):
   """Populates tree_flatten with leaf names.
