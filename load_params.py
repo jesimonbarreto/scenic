@@ -243,6 +243,7 @@ def load_augreg(checkpoint_path: str, params: Any) -> Any:
 def npload(fname):
   """Loads `fname` and returns an np.ndarray or dict thereof."""
   # Load the data; use local paths directly if possible:
+  print(fname)
   if os.path.exists(fname):
     loaded = np.load(fname, allow_pickle=False)
   else:
