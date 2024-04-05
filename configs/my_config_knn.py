@@ -24,7 +24,7 @@ def get_config():
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
   config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.dataset_dir = '/mnt/disks/persist/imagenet2012/5.1.0/'
+  config.dataset_configs.dataset_dir = '/mnt/disks/persist/dataset/imagenet2012/5.1.0/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
   config.dataset_configs.batch_size_train = 1024
