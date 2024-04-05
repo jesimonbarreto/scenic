@@ -1,4 +1,4 @@
-"""Data generators for a LOCA dataset."""
+"""Data generators for a DINO dataset."""
 
 import functools
 from typing import Optional
