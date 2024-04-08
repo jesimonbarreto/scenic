@@ -76,8 +76,9 @@ def get_dataset(*,
   del eval_batch_size, rng
   logging.info('Loading train split of the %s for eval training.',
                dataset_configs.dataset)
-  #n_train_ex = dataset_utils.get_num_examples(dataset_configs.dataset,
-  #                                            dataset_configs.train_split)
+  n_train_ex = dataset_utils.get_num_examples(dataset_configs.dataset,
+                                              dataset_configs.train_split,
+                                              data_dir=dataset_configs.get('dataset_dir'))
 
   tfds.load(
     dataset_configs.dataset,
