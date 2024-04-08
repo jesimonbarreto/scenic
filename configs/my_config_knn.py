@@ -30,25 +30,41 @@ def get_config():
   config.dataset_configs.batch_size_train = 1024
   config.dataset_configs.batch_size_test = 1024
   config.num_classes = 1000
+  reference_resolution = 224
+
 
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "image_resized")' +
       f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
-      f'|copy_resize_file(224, inkey=("image", "image_resized"), outkey=("image", "image_resized"))' +
+      f'|copy_resize_file({reference_resolution}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))' +
       '|value_range(0, 1, data_key="image_resized")' +
       '|value_range(0, 1, data_key="image")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'
   )
 
-  reference_resolution = 224
-  n_queries = 10
+  ### kNN
 
+  #dir of checkpoints
+  config.train_dir = '/home/jesimonbarreto/exp_test_now/'
+
+  config.preextracted = False
+  #config.preextracted = True
+
+  config.write_summary = True
+  
+  config.steps_checkpoints = [0]
+  config.ks = [5]
+
+  config.dir_files = '/mnt/disks/persist/eval_files/'
 
   config.data_dtype_str = 'float32'
   #config.data_dtype_str = 'bfloat16'
 
+
+  n_queries = 10
+  
   config.batch_size = config.dataset_configs.batch_size_train #batch size for extracting embeddings
   #config.knn_eval_batch_size = 32 #batch size for batch knn search 
   
@@ -112,21 +128,6 @@ def get_config():
   config.query_max_seqlen = 70
 
   config.checkpoint = False#'/home/jesimonbarreto/scenic/checkpoint_501'
-
-  ### kNN
-
-  #dir of checkpoints
-  config.train_dir = '/home/jesimonbarreto/exp_test_now/'
-
-  config.preextracted = False
-  #config.preextracted = True
-
-  config.write_summary = True
-  
-  config.steps_checkpoints = [0]
-  config.ks = [5]
-
-  config.dir_files = '/mnt/disks/persist/eval_files/'
 
   # Learning rate.
   #cosine schedule lr

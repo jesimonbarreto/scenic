@@ -237,7 +237,8 @@ def copy_resize_file(resize_size=224, global_scale=None):
     
     seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
     image_cropped = tf.image.stateless_random_flip_left_right(image_cropped, seed)
-    image = tf.image.resize(image, [resize_size, resize_size], resize_method)
+    image = tf.image.resize(image, [resize_size, resize_size])
+    print(image.shape)
 
     return image, image_cropped
   return copy_resize_file

@@ -39,7 +39,7 @@ class DETRTrainerTest(parameterized.TestCase):
     with tfds.testing.mock_data(
         num_examples=50,
         as_dataset_fn=test_util.generate_fake_dataset(num_examples=50)):
-       = datasets.get_dataset(self.config.dataset_name)
+      dataset_builder = datasets.get_dataset(self.config.dataset_name)
       self.dataset = dataset_builder(
           batch_size=self.config.batch_size,
           eval_batch_size=self.config.eval_batch_size,
