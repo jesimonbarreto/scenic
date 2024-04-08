@@ -92,7 +92,7 @@ def representation_fn_eval(
   )'''
   embedding = flax_model.apply(
         {'params': train_state.params},
-        batch['image_resized'],
+        batch['image'],
         seqlen=-1,
         seqlen_selection='consecutive',
         drop_moment='late',
@@ -193,6 +193,7 @@ def train(
   print(f'{train_dir}')
   steps = config.get('steps_checkpoints')
   files_save = config.get('dir_files')
+  num_classes = config.get('num_classes')
 
   for step in steps:
 
@@ -249,7 +250,7 @@ def train(
       batch_train = next(dataset.train_iter)
       emb_train = extract_features(batch_train)
       label_train = batch_train['label'][0]
-      f = batch_train['image_resized']
+      f = batch_train['image']
       jnp.savez(files_save+f'{i}', emb=emb_train, label=label_train)
 
     print('Finishing extract features')
@@ -353,7 +354,7 @@ def train(
 
         #most_repetitive_labels = jnp.apply_along_axis(lambda row: jnp.bincount(jnp.asarray(row)).argmax(), axis=1, arr=jnp.asarray(k_nearest_labels))
 
-        most_repetitive_labels = [9 - jnp.bincount(row, minlength=10)[::-1].argmax() for row in k_nearest_labels]
+        most_repetitive_labels = [(num_classes-1) - jnp.bincount(row, minlength=num_classes)[::-1].argmax() for row in k_nearest_labels]
 
         comparison = jnp.asarray(most_repetitive_labels) == batch_eval['label'][0]
         accuracy = comparison.mean()  # Proportion of correct matches
