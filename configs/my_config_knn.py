@@ -1,7 +1,7 @@
 import ml_collections, os
 
 
-VARIANT = 'B/16'
+VARIANT = 'B/14'
 _IMAGENET_TRAIN_SIZE = 1281167 #9469 #1281167
 _IMAGENET_TEST_SIZE = 50000
 MEAN_RGB = [0.485, 0.456, 0.406]
@@ -48,15 +48,11 @@ def get_config():
 
   #dir of checkpoints
   config.train_dir = '/home/jesimonbarreto/exp_test_now/'
-
   config.preextracted = False
   #config.preextracted = True
-
   config.write_summary = True
-  
   config.steps_checkpoints = [0]
   config.ks = [5]
-
   config.dir_files = '/mnt/disks/persist/eval_files/'
 
   config.data_dtype_str = 'float32'
