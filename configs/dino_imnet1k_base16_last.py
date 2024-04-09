@@ -3,7 +3,7 @@
 
 import ml_collections
 
-VARIANT = 'B/16'
+VARIANT = 'B/14'
 _IMAGENET_TRAIN_SIZE = 9469 #1281167
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]

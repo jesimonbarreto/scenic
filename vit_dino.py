@@ -329,7 +329,7 @@ class CrossAttentionEncoderBlock(vit.Encoder1DBlock):
 
 
 class ViTDinoModel(base_model.BaseModel):
-  """Vision Transformer model for LOCA training."""
+  """Vision Transformer model for DINO training."""
 
   
   def build_flax_model(self)-> nn.Module:
