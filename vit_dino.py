@@ -188,7 +188,7 @@ class ViTDINO(nn.Module):
         attention_dropout_rate=self.attention_dropout_rate,
         stochastic_depth=self.stochastic_depth,
         dtype=self.dtype)(x, train=train)'''
-    jax.debug.print("🤯 paches: {patches} 🤯", patches=self.patches)
+    jax.debug.print("🤯 paches: {patches} 🤯", patches=self.patches.size)
     # Input image -> sequence of patch tokens.
     to_token_fn = ToTokenSequence(
         patches=self.patches,
