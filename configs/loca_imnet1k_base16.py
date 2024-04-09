@@ -103,6 +103,7 @@ def get_config():
   config.lr_configs.steps_per_cycle = total_steps
   config.lr_configs.base_learning_rate = 0.001 * config.batch_size / 1024
   config.lr_configs.alpha = 0.01
+  config.model.posembs = (8,8)
 
   # Weight decay.
   config.weight_decay = 0.1

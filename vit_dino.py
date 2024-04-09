@@ -67,10 +67,12 @@ class ToTokenSequence(nn.Module):
                seqlen: int = -1, seqlen_selection: str = 'unstructured'):
     # Extracting patches and then embedding is in fact a single convolution.
     fh, fw = self.patches.size
+    jax.debug.print("🤯 size image: {fh} {fw} 🤯", fh=fh, fw=fw)
     x = nn.Conv(self.hidden_size, (fh, fw), strides=(fh, fw), padding='VALID',
                 name='embedding')(x)
     
     n, h, w, c = x.shape
+    jax.debug.print("🤯 size image after: {h} {w} 🤯", h=h, w=w)
     #x = jnp.reshape(x, [n, h * w, c])
 
     # Adding positional encodings.
@@ -186,7 +188,7 @@ class ViTDINO(nn.Module):
         attention_dropout_rate=self.attention_dropout_rate,
         stochastic_depth=self.stochastic_depth,
         dtype=self.dtype)(x, train=train)'''
-
+    jax.debug.print("🤯 paches: {patches} 🤯", patches=self.patches)
     # Input image -> sequence of patch tokens.
     to_token_fn = ToTokenSequence(
         patches=self.patches,
