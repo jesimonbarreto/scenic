@@ -255,7 +255,7 @@ def train(
       emb_train = emb_train[0]
       bl, bg, emb = emb_train.shape
       emb_train = emb_train.reshape((bl*bg, emb))
-      label_train = label_train.reshape((bl*bg, emb))
+      label_train = label_train.reshape((bl*bg))
       jnp.savez(files_save+f'{i}', emb=emb_train, label=label_train)
       break
 
@@ -339,7 +339,7 @@ def train(
           #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
           bl, bg, emb = emb_test.shape
           emb_test = emb_test.reshape((bl*bg, emb))
-          label_eval = batch_eval['label'].reshape((bl*bg, emb))
+          label_eval = batch_eval['label'].reshape((bl*bg))
           dist_ = compute_distance(emb_test, emb_train)
           
           #print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
