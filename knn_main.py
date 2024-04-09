@@ -249,7 +249,7 @@ def train(
     for i in range(config.steps_per_epoch):
       batch_train = next(dataset.train_iter)
       jax.debug.print("🤯 shape of batch: {shape} 🤯", shape=len(batch_train))
-      jax.debug.print("🤯 shape of batch: {shape} 🤯", shape=batch_train.keys())
+      jax.debug.print("🤯 shape of batch: {shape} 🤯", shape=batch_train['image'].shape)
       emb_train = extract_features(batch_train)
       label_train = batch_train['label'][0]
       f = batch_train['image']
