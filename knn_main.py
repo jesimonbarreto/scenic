@@ -248,6 +248,7 @@ def train(
     print('Starting to extract features')
     for i in range(config.steps_per_epoch):
       batch_train = next(dataset.train_iter)
+      jax.debug.print("🤯 shape of batch: {shape} 🤯", shape=batch_train.shape)
       emb_train = extract_features(batch_train)
       label_train = batch_train['label'][0]
       f = batch_train['image']
@@ -337,7 +338,7 @@ def train(
           #print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
           dist_all.append(dist_)
-          labels.append(label_train['label'][0])
+          labels.append(label_train['label'])
         dist_all = jnp.concatenate(dist_all, axis=1)
         labels = jnp.concatenate(labels)
         #print(f'shape dist_all ------------ {dist_all.shape}')
