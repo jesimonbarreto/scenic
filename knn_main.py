@@ -235,7 +235,7 @@ def train(
     )
     repr_fn = jax.pmap(
           representation_fn_knn, 
-          donate_argnums=(1,), 
+          #donate_argnums=(1,), 
           axis_name='batch',
     )
 
@@ -251,9 +251,13 @@ def train(
       jax.debug.print("🤯 shape of batch: {shape} 🤯", shape=len(batch_train))
       jax.debug.print("🤯 shape of batch: {shape} 🤯", shape=batch_train['image'].shape)
       emb_train = extract_features(batch_train)
-      label_train = batch_train['label'][0]
-      f = batch_train['image']
+      label_train = batch_train['label']
+      emb_train = emb_train[0]
+      bl, bg, emb = emb_train.shape
+      emb_train = emb_train.reshape((bl*bg, emb))
+      label_train = label_train.reshape((bl*bg, emb))
       jnp.savez(files_save+f'{i}', emb=emb_train, label=label_train)
+      break
 
     print('Finishing extract features')
     #print(dataset.meta_data.keys)
@@ -333,13 +337,17 @@ def train(
           #print(f'embeeding shape test {i}: {emb_test[0].shape}')
           #print(batch_train['label'].shape)
           #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
-          dist_ = compute_distance(emb_test[0][0], emb_train[0][0])
+          bl, bg, emb = emb_test.shape
+          emb_test = emb_test.reshape((bl*bg, emb))
+          label_eval = batch_eval['label'].reshape((bl*bg, emb))
+          dist_ = compute_distance(emb_test, emb_train)
           
           #print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
           #print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
           dist_all.append(dist_)
           labels.append(label_train['label'])
+          break
         dist_all = jnp.concatenate(dist_all, axis=1)
         labels = jnp.concatenate(labels)
         #print(f'shape dist_all ------------ {dist_all.shape}')
@@ -358,10 +366,11 @@ def train(
 
         most_repetitive_labels = [(num_classes-1) - jnp.bincount(row, minlength=num_classes)[::-1].argmax() for row in k_nearest_labels]
 
-        comparison = jnp.asarray(most_repetitive_labels) == batch_eval['label'][0]
+        comparison = jnp.asarray(most_repetitive_labels) == label_eval
         accuracy = comparison.mean()  # Proportion of correct matches
-        print(f"Accuracy: {accuracy:.4f}")
+        print(f"Step {step} -----> Accuracy: {accuracy:.4f}")
         predicts_acc.append(accuracy)
+        break
 
         #class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
         #print(f"{class_rate=}")
