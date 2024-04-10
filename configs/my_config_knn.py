@@ -27,8 +27,8 @@ def get_config():
   config.dataset_configs.dataset_dir = '/mnt/disks/persist/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
-  config.dataset_configs.batch_size_train = 8
-  config.dataset_configs.batch_size_test = 8
+  config.dataset_configs.batch_size_train = 256
+  config.dataset_configs.batch_size_test = 256
   config.num_classes = 1000
   reference_resolution = 224
 
@@ -52,7 +52,7 @@ def get_config():
   #config.preextracted = True
   config.write_summary = True
   config.steps_checkpoints = [0]
-  config.ks = [5]
+  config.ks = [5, 7]
   config.dir_files = '/mnt/disks/persist/eval_files/'
 
   config.data_dtype_str = 'float32'
