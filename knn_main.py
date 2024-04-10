@@ -267,6 +267,7 @@ def train(
       emb_train = emb_train.reshape((bl*bg, emb))
       label_train = label_train.reshape((bl*bg))
       jnp.savez(path_file, emb=emb_train, label=label_train)
+      break
 
     print('Finishing extract features train')
     #print(dataset.meta_data.keys)
@@ -357,6 +358,7 @@ def train(
 
           dist_all.append(dist_)
           labels.append(label_train)
+          break
         dist_all = jnp.concatenate(dist_all, axis=1)
         labels = jnp.concatenate(labels)
         #print(f'shape dist_all ------------ {dist_all.shape}')
