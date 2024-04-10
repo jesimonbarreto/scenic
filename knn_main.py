@@ -246,9 +246,13 @@ def train(
       return features  # Return extracted features for the batch
     
     dir_save_ckp = os.path.join(files_save,f'ckp_{step}')
+    dir_save_y = os.path.join(files_save,f'y_{step}')
 
     if not os.path.exists(dir_save_ckp):
       os.makedirs(dir_save_ckp)
+    
+    if not os.path.exists(dir_save_y):
+      os.makedirs(dir_save_y)
 
     print('Starting to extract features train')
     for i in range(config.steps_per_epoch):
@@ -380,9 +384,12 @@ def train(
 
         jax.debug.print("🤯 label eval : {shape} 🤯", shape=label_eval)
         jax.debug.print("🤯 label : {shape} 🤯", shape=labels)
+        y_pred = most_repetitive_labels
+        path_file = os.path.join(dir_save_y,f'y_pred_{step}_b{i}')
+        jnp.savez(path_file, emb=emb_train, label=label_train)
 
 
-        comparison = jnp.asarray(most_repetitive_labels) == label_eval
+        comparison = jnp.asarray(y_pred) == label_eval
         jax.debug.print("🤯 comparison : {shape} 🤯", shape=comparison)
         accuracy = comparison.mean()  # Proportion of correct matches
         print(f"Step {step} -----> Accuracy: {accuracy:.4f}")
