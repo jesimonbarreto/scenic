@@ -52,7 +52,7 @@ def get_config():
   #config.preextracted = True
   config.write_summary = True
   config.steps_checkpoints = [0]
-  config.ks = [5, 7]
+  config.ks = [5]
   config.dir_files = '/mnt/disks/persist/eval_files/'
 
   config.data_dtype_str = 'float32'
