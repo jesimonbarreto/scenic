@@ -364,6 +364,7 @@ def train(
 
         #dist_all = dist_all.reshape(devices, n_test // devices, -1)
         dist_all = jnp.repeat(jnp.expand_dims(dist_all,axis=0), devices, axis=0)
+        jax.debug.print("🤯 dist_all : {shape} 🤯", shape=dist_all)
         k_nearest = p_argsort(dist_all)[0][..., 1:k+1]
         jax.debug.print("🤯 k_nearest : {shape} 🤯", shape=k_nearest[0][0])
         print(k_nearest.shape)
@@ -375,14 +376,14 @@ def train(
 
         most_repetitive_labels = [(num_classes-1) - jnp.bincount(row, minlength=num_classes)[::-1].argmax() for row in k_nearest_labels]
         
-        jax.debug.print("🤯 most_repetitive_labels : {shape} 🤯", shape=len(most_repetitive_labels))
+        jax.debug.print("🤯 most_repetitive_labels : {shape} 🤯", shape=most_repetitive_labels)
 
         jax.debug.print("🤯 label eval : {shape} 🤯", shape=label_eval)
         jax.debug.print("🤯 label : {shape} 🤯", shape=labels)
 
 
         comparison = jnp.asarray(most_repetitive_labels) == label_eval
-        jax.debug.print("🤯 comparison : {shape} 🤯", shape=comparison.shape)
+        jax.debug.print("🤯 comparison : {shape} 🤯", shape=comparison)
         accuracy = comparison.mean()  # Proportion of correct matches
         print(f"Step {step} -----> Accuracy: {accuracy:.4f}")
         predicts_acc.append(accuracy)
