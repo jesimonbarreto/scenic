@@ -257,8 +257,8 @@ def train(
     print('Starting to extract features train')
     for i in range(config.steps_per_epoch):
       path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
-      #if os.path.isfile(path_file):
-      #  continue
+      if os.path.isfile(path_file):
+        continue
       batch_train = next(dataset.train_iter)
       emb_train = extract_features(batch_train)
       label_train = batch_train['label']
@@ -347,6 +347,7 @@ def train(
           #print(f'embeeding shape test {i}: {emb_test[0].shape}')
           #print(batch_train['label'].shape)
           #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
+          print(f'shape {emb_test.shape}')
           bl, bg, emb = emb_test.shape
           emb_test = emb_test.reshape((bl*bg, emb))
           label_eval = batch_eval['label'].reshape((bl*bg))
