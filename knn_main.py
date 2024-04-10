@@ -349,7 +349,7 @@ def train(
           emb_test = emb_test.reshape((bl*bg, emb))
           label_eval = batch_eval['label'].reshape((bl*bg))
           dist_ = compute_distance(emb_test, emb_train)
-          jax.debug.print("🤯 Dist : {shape} 🤯", shape=dist_.shape)
+          jax.debug.print("🤯 Dist : {shape} 🤯", shape=dist_)
           jax.debug.print("🤯 Dist : {shape} 🤯", shape=dist_[0][0])
           #print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
           #print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
@@ -378,7 +378,7 @@ def train(
         jax.debug.print("🤯 most_repetitive_labels : {shape} 🤯", shape=len(most_repetitive_labels))
 
         jax.debug.print("🤯 label eval : {shape} 🤯", shape=label_eval)
-        jax.debug.print("🤯 label eval : {shape} 🤯", shape=label_eval)
+        jax.debug.print("🤯 label : {shape} 🤯", shape=labels)
 
 
         comparison = jnp.asarray(most_repetitive_labels) == label_eval
