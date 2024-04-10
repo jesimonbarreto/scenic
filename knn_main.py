@@ -378,7 +378,7 @@ def train(
         jax.debug.print("🤯 most_repetitive_labels : {shape} 🤯", shape=most_repetitive_labels.shape)
 
         comparison = jnp.asarray(most_repetitive_labels) == label_eval
-        jax.debug.print("🤯 most_repetitive_labels : {shape} 🤯", shape=comparison.shape)
+        jax.debug.print("🤯 comparison : {shape} 🤯", shape=comparison.shape)
         accuracy = comparison.mean()  # Proportion of correct matches
         print(f"Step {step} -----> Accuracy: {accuracy:.4f}")
         predicts_acc.append(accuracy)
