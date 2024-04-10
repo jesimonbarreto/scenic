@@ -248,8 +248,6 @@ def train(
     print('Starting to extract features')
     for i in range(config.steps_per_epoch):
       batch_train = next(dataset.train_iter)
-      jax.debug.print("🤯 shape of batch: {shape} 🤯", shape=len(batch_train))
-      jax.debug.print("🤯 shape of batch: {shape} 🤯", shape=batch_train['image'].shape)
       emb_train = extract_features(batch_train)
       label_train = batch_train['label']
       emb_train = emb_train[0]
@@ -321,7 +319,7 @@ def train(
       for i in range(config.steps_per_epoch_eval):
         print(f'processing step eval {i}')
         batch_eval = next(dataset.valid_iter)
-        emb_test = extract_features(batch_eval)
+        emb_test = extract_features(batch_eval)[0]
         #print(f'embeeding shape test {emb_test.shape}')
         dist_all = []
         labels = []
@@ -337,6 +335,7 @@ def train(
           #print(f'embeeding shape test {i}: {emb_test[0].shape}')
           #print(batch_train['label'].shape)
           #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
+          jax.debug.print("🤯 shape of batch: {shape} 🤯", shape=emb_test.shape)
           bl, bg, emb = emb_test.shape
           emb_test = emb_test.reshape((bl*bg, emb))
           label_eval = batch_eval['label'].reshape((bl*bg))
