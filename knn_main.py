@@ -332,13 +332,13 @@ def train(
         print(f'processing step eval {i}')
         batch_eval = next(dataset.valid_iter)
         emb_test = extract_features(batch_eval)[0]
+        bl, bg, emb = emb_test.shape
+        emb_test = emb_test.reshape((bl*bg, emb))
+        label_eval = batch_eval['label'].reshape((bl*bg))
         #print(f'embeeding shape test {emb_test.shape}')
         dist_all = []
         labels = []
         len_test += len(batch_eval)
-        bl, bg, emb = emb_test.shape
-        emb_test = emb_test.reshape((bl*bg, emb))
-        label_eval = batch_eval['label'].reshape((bl*bg))
         for j in range(config.steps_per_epoch):
           #batch_train = next(dataset.train_iter)
           emb_file_save = os.path.join(dir_save_ckp,f'ckp_{step}_b{j}')
