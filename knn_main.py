@@ -375,7 +375,11 @@ def train(
 
         most_repetitive_labels = [(num_classes-1) - jnp.bincount(row, minlength=num_classes)[::-1].argmax() for row in k_nearest_labels]
         
-        jax.debug.print("🤯 most_repetitive_labels : {shape} 🤯", shape=most_repetitive_labels.shape)
+        jax.debug.print("🤯 most_repetitive_labels : {shape} 🤯", shape=len(most_repetitive_labels))
+
+        jax.debug.print("🤯 label eval : {shape} 🤯", shape=label_eval)
+        jax.debug.print("🤯 label eval : {shape} 🤯", shape=label_eval)
+
 
         comparison = jnp.asarray(most_repetitive_labels) == label_eval
         jax.debug.print("🤯 comparison : {shape} 🤯", shape=comparison.shape)

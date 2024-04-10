@@ -10,6 +10,7 @@ from scenic.dataset_lib import dataset_utils
 from scenic.dataset_lib import datasets
 from scenic.dataset_lib.big_transfer import builder
 
+#tamanho das amostras estao indo é diferente para o batch
 
 @datasets.add_dataset('dino_dataset')
 def get_dataset(*,
