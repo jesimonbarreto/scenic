@@ -336,6 +336,9 @@ def train(
         dist_all = []
         labels = []
         len_test += len(batch_eval)
+        bl, bg, emb = emb_test.shape
+        emb_test = emb_test.reshape((bl*bg, emb))
+        label_eval = batch_eval['label'].reshape((bl*bg))
         for j in range(config.steps_per_epoch):
           #batch_train = next(dataset.train_iter)
           emb_file_save = os.path.join(dir_save_ckp,f'ckp_{step}_b{j}')
@@ -348,10 +351,6 @@ def train(
           #print(f'embeeding shape test {i}: {emb_test[0].shape}')
           #print(batch_train['label'].shape)
           #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
-          print(f'shape {emb_test.shape}')
-          bl, bg, emb = emb_test.shape
-          emb_test = emb_test.reshape((bl*bg, emb))
-          label_eval = batch_eval['label'].reshape((bl*bg))
           dist_ = compute_distance(emb_test, emb_train)
           #print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
           #print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
