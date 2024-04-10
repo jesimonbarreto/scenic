@@ -245,8 +245,16 @@ def train(
       features = repr_fn(train_state, batch)
       return features  # Return extracted features for the batch
     
-    print('Starting to extract features')
+    dir_save_ckp = os.path.join(files_save,f'ckp_{step}')
+
+    if not os.path.exists(dir_save_ckp):
+      os.makedirs(dir_save_ckp)
+
+    print('Starting to extract features train')
     for i in range(config.steps_per_epoch):
+      path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
+      if os.path.isfile(path_file):
+        continue
       batch_train = next(dataset.train_iter)
       emb_train = extract_features(batch_train)
       label_train = batch_train['label']
@@ -254,10 +262,10 @@ def train(
       bl, bg, emb = emb_train.shape
       emb_train = emb_train.reshape((bl*bg, emb))
       label_train = label_train.reshape((bl*bg))
-      jnp.savez(files_save+f'{i}', emb=emb_train, label=label_train)
+      jnp.savez(path_file, emb=emb_train, label=label_train)
       break
 
-    print('Finishing extract features')
+    print('Finishing extract features train')
     #print(dataset.meta_data.keys)
     '''for i in range(config.steps_per_epoch):
       print(i)
@@ -324,9 +332,10 @@ def train(
         dist_all = []
         labels = []
         len_test += len(batch_eval)
-        for i in range(config.steps_per_epoch):
+        for j in range(config.steps_per_epoch):
           #batch_train = next(dataset.train_iter)
-          data_load = jnp.load(files_save+f'{i}.npz')
+          emb_file_save = os.path.join(dir_save_ckp,f'ckp_{step}_b{j}')
+          data_load = jnp.load(emb_file_save+'.npz')
           emb_train = data_load['emb']#extract_features(batch_train)
           label_train = data_load['label']#batch_train['label'][0]
           #f = batch_train['image_resized']
