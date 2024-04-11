@@ -257,16 +257,19 @@ def train(
     print('Starting to extract features train')
     for i in range(config.steps_per_epoch):
       path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
-      if os.path.isfile(path_file):
-        continue
+      #if os.path.isfile(path_file):
+      #  continue
       batch_train = next(dataset.train_iter)
       emb_train = extract_features(batch_train)
+      print(f'shape {emb_train.shape}')
       label_train = batch_train['label']
       emb_train = emb_train[0]
       bl, bg, emb = emb_train.shape
       emb_train = emb_train.reshape((bl*bg, emb))
       label_train = label_train.reshape((bl*bg))
       jnp.savez(path_file, emb=emb_train, label=label_train)
+      break
+
 
     print('Finishing extract features train')
     #print(dataset.meta_data.keys)
@@ -356,6 +359,7 @@ def train(
 
           dist_all.append(dist_)
           labels.append(label_train)
+          break
         dist_all = jnp.concatenate(dist_all, axis=1)
         labels = jnp.concatenate(labels)
         #print(f'shape dist_all ------------ {dist_all.shape}')
@@ -379,7 +383,7 @@ def train(
         corrects = comparison.sum()  # Proportion of correct matches
         print(f"Step {step} -----> Corrects: {corrects:.4f} / total {len(comparison)}")
         predicts_acc.append(corrects)
-
+        break
         #class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
         #print(f"{class_rate=}")
         
