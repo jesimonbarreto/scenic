@@ -214,12 +214,12 @@ class ViTDINO(nn.Module):
               x, deterministic=not train)
     x = nn.LayerNorm(name='encoder_norm')(x)
     x = x[:, 0]
-    x = ProjectionHead(
+    '''x = ProjectionHead(
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
           output_dim=self.head_output_dim,
           name='projection_head')(
-              x, train)#.reshape((-1, self.head_output_dim))
+              x, train)#.reshape((-1, self.head_output_dim))'''
     if self.loca:
       patches_repr = x
       # Drop some tokens (in the reference view).

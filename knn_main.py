@@ -376,9 +376,9 @@ def train(
         jnp.savez(path_file, y_pred=y_pred, label=label_train)
 
         comparison = jnp.asarray(y_pred) == label_eval
-        accuracy = comparison.mean()  # Proportion of correct matches
-        print(f"Step {step} -----> Accuracy: {accuracy:.4f}")
-        predicts_acc.append(accuracy)
+        corrects = comparison.sum()  # Proportion of correct matches
+        print(f"Step {step} -----> Corrects: {corrects:.4f} / total {len(comparison)}")
+        predicts_acc.append(corrects)
 
         #class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
         #print(f"{class_rate=}")
@@ -418,7 +418,7 @@ def train(
         correct_pred += jnp.sum(correct_predictions)'''
       
       predicts_acc = jnp.asarray(predicts_acc)
-      result = jnp.mean(predicts_acc)
+      result = jnp.sum(predicts_acc)/50000
       
       print(f"{k} Neighborhood: Accuracy total : {result:.4f} ---- executions {predicts_acc.shape} ----- step {step}")
   
