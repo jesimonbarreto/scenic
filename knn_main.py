@@ -359,7 +359,6 @@ def train(
 
           dist_all.append(dist_)
           labels.append(label_train)
-          break
         dist_all = jnp.concatenate(dist_all, axis=1)
         labels = jnp.concatenate(labels)
         #print(f'shape dist_all ------------ {dist_all.shape}')
