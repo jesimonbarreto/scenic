@@ -268,7 +268,6 @@ def train(
       emb_train = emb_train.reshape((bl*bg, emb))
       label_train = label_train.reshape((bl*bg))
       jnp.savez(path_file, emb=emb_train, label=label_train)
-      break
 
 
     print('Finishing extract features train')
