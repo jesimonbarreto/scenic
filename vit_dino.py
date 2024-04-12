@@ -213,7 +213,7 @@ class ViTDINO(nn.Module):
           dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
               x, deterministic=not train)
     x = nn.LayerNorm(name='encoder_norm')(x)
-    #x = jnp.IdentityLayer(x)
+    x = jnp.IdentityLayer(x)
     #x = x.reshape((x.shape[0], -1))  # flatten
     x = x[:, 0]
     #x = jnp.linalg.norm(x, ord=2, axis=1)
