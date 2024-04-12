@@ -381,7 +381,6 @@ def train(
         corrects = comparison.sum()  # Proportion of correct matches
         print(f"Step {step} -----> Corrects: {corrects:.4f} / total {len(comparison)}")
         predicts_acc.append(corrects)
-        break
         #class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
         #print(f"{class_rate=}")
         
