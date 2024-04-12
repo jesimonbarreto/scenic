@@ -215,7 +215,7 @@ class ViTDINO(nn.Module):
     x = nn.LayerNorm(name='encoder_norm')(x)
     #x = jnp.IdentityLayer(x)
     #x = x.reshape((x.shape[0], -1))  # flatten
-    x = x[:, 0]
+    #x = x[:, 0]
     x = jnp.linalg.norm(x, ord=2, axis=1, keepdims=True)
     '''x = ProjectionHead(
           hidden_dim=self.head_hidden_dim,
