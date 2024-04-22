@@ -223,7 +223,7 @@ def copy_resize_file(resize_size=224, global_scale=None):
   """Crop and flip an image and keep track of these operations with a mask."""
   def copy_resize_file(image, image_):
 
-    resize_method=tf.image.ResizeMethod.BILINEAR
+    resize_method=tf.image.ResizeMethod.BICUBIC
     #resized_image = tf.image.resize(image, [resize_size, resize_size], resize_method)
     begin, size, _ = tf.image.sample_distorted_bounding_box(
         tf.shape(image), tf.zeros([0, 0, 4], tf.float32),
@@ -237,7 +237,7 @@ def copy_resize_file(resize_size=224, global_scale=None):
     
     seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
     image_cropped = tf.image.stateless_random_flip_left_right(image_cropped, seed)
-    image = tf.image.resize(image, [resize_size, resize_size])
+    image = tf.image.resize(image, [resize_size, resize_size], resize_method)
 
     return image, image_cropped
   return copy_resize_file

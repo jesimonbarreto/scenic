@@ -38,8 +38,8 @@ def get_config():
       '|copy("image", "image_resized")' +
       f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
       f'|copy_resize_file({reference_resolution}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))' +
-      '|value_range(0, 1, data_key="image_resized")' +
-      '|value_range(0, 1, data_key="image")' +
+      #'|value_range(0, 1, data_key="image_resized")' +
+      #'|value_range(0, 1, data_key="image")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'
   )
