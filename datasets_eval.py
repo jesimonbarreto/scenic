@@ -138,10 +138,9 @@ def get_dataset(*,
   logging.info(f' test {eval_ds.element_spec.keys()}')
   logging.info(f' image {image_size}')
   logging.info(f' labels {labels_size}')
-  logging.info(f' label {train_ds.element_spec['label'][0]}')
 
   input_shape = (-1,) + tuple(train_ds.element_spec['image_resized'].shape[1:])
-  labels_size = train_ds.element_spec['label'].shape
+  labels_size = train_ds.element_spec['label_onehot'].shape
   logging.info(' input shape details %s', input_shape)
   logging.info(' samples details %s', labels_size)
 
