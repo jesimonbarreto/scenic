@@ -101,9 +101,16 @@ def representation_fn_eval(
   
   #embedding = jnp.mean(embedding, axis=1)
   
+
   if gather_to_host:
     embedding = jax.lax.all_gather(embedding, 'batch')
     batch = jax.lax.all_gather(batch, 'batch')
+  
+  def normalize(input, p=2.0, axis=1, eps=1e-12):
+    norms = jnp.linalg.norm(input, ord=p, axis=axis, keepdims=True)
+    return input / jnp.maximum(norms, eps)
+  
+  embedding = normalize(embedding)
 
   return embedding
 
