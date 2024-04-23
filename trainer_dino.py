@@ -225,7 +225,7 @@ def train(
   print('Here... trying load')
   from load_params import load_params
 
-  load_params('dinov2_vitb14','/home/jesimonbarreto/', params,
+  params = load_params('dinov2_vitb14','/home/jesimonbarreto/', params,
                 params_key='teacher_weights',
                 force_random_init= None)
 
