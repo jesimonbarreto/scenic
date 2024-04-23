@@ -148,44 +148,7 @@ def train(
        input_spec=[(dataset.meta_data['input_shape'],
                     dataset.meta_data.get('input_dtype', jnp.float32))],
        config=config, rngs=init_rng)
-
   rng, init_rng = jax.random.split(rng)
-
-  # Only one model function but two sets of parameters.
-  ema_params = copy.deepcopy(params)
-
-  # Get learning rate and ema temperature schedulers.
-  learning_rate_fn = lr_schedules.get_learning_rate_fn(config)
-  momentum_parameter_scheduler = lr_schedules.compound_lr_scheduler(
-      config.momentum_rate)
-
-  # Create optimizer.
-  weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
-  tx = optax.inject_hyperparams(optax.adamw)(
-      learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
-      mask=weight_decay_mask,)
-  opt_state = jax.jit(tx.init, backend='cpu')(params)
-
-  # Create chrono class to track and store training statistics and metadata.
-  chrono = train_utils.Chrono()
-
-  # Create the TrainState to track training state (i.e. params and optimizer).
-  train_state = utils.TrainState(
-      global_step=0, opt_state=opt_state, tx=tx, params=params,
-      ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
-  
-  start_step = train_state.global_step
-  
-  if config.checkpoint:
-    train_state, start_step = utils.restore_checkpoint(workdir, train_state)
-  chrono.load(train_state.metadata['chrono'])
-  train_state = train_state.replace(metadata={})
-  # Replicate the training state: optimizer, params and rng.
-  train_state = jax_utils.replicate(train_state)
-  del params, ema_params
-  
-
-  
 
   knn_eval_batch_size = config.get('knn_eval_batch_size') or config.batch_size
 
@@ -225,9 +188,40 @@ def train(
       train_state = jax_utils.replicate(train_state)
 
     else:
+      '''=============================================='''
+      print('Here... trying load')
+      from load_params import load_params
 
-      train_state = None
+      load_params('dinov2_vitb14','/home/jesimonbarreto/', params,
+                    params_key='teacher_weights',
+                    force_random_init= None)
 
+
+      print('Here... finished load')
+      '''=============================================='''
+      # Only one model function but two sets of parameters.
+      ema_params = copy.deepcopy(params)
+
+      # Get learning rate and ema temperature schedulers.
+      learning_rate_fn = lr_schedules.get_learning_rate_fn(config)
+      momentum_parameter_scheduler = lr_schedules.compound_lr_scheduler(
+          config.momentum_rate)
+
+      # Create optimizer.
+      weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
+      tx = optax.inject_hyperparams(optax.adamw)(
+          learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
+          mask=weight_decay_mask,)
+      opt_state = jax.jit(tx.init, backend='cpu')(params)
+
+      # Create chrono class to track and store training statistics and metadata.
+      chrono = train_utils.Chrono()
+
+      # Create the TrainState to track training state (i.e. params and optimizer).
+      train_state = utils.TrainState(
+          global_step=0, opt_state=opt_state, tx=tx, params=params,
+          ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
+  
     #project feats or not
     representation_fn_knn = functools.partial(
       representation_fn_eval,
@@ -261,7 +255,7 @@ def train(
       #  continue
       batch_train = next(dataset.train_iter)
       emb_train = extract_features(batch_train)
-      print(f'shape {emb_train.shape}')
+      #print(f'shape {emb_train.shape}')
       label_train = batch_train['label']
       emb_train = emb_train[0]
       bl, bg, emb = emb_train.shape
