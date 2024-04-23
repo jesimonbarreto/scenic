@@ -229,7 +229,7 @@ def train(
     )
     repr_fn = jax.pmap(
           representation_fn_knn, 
-          #donate_argnums=(1,), 
+          #donate_argnums=(1,),
           axis_name='batch',
     )
 
@@ -254,7 +254,7 @@ def train(
       #if os.path.isfile(path_file):
       #  continue
       batch_train = next(dataset.train_iter)
-      print(f' shape batch {batch_train.shape}')
+      print(f' shape batch {batch_train.keys()}')
       emb_train = extract_features(batch_train)
       print(f'shape {emb_train.shape}')
       label_train = batch_train['label']
