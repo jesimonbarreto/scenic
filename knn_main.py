@@ -254,8 +254,9 @@ def train(
       #if os.path.isfile(path_file):
       #  continue
       batch_train = next(dataset.train_iter)
+      print(f' shape batch {batch_train}')
       emb_train = extract_features(batch_train)
-      #print(f'shape {emb_train.shape}')
+      print(f'shape {emb_train.shape}')
       label_train = batch_train['label']
       emb_train = emb_train[0]
       bl, bg, emb = emb_train.shape
