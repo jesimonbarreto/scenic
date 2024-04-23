@@ -222,7 +222,7 @@ def train(
        config=config, rngs=init_rng)
   
   '''=============================================='''
-  print(f'Here... trying load {params}')
+  print(f'Here... trying load {params[0][0]}')
   from load_params import load_params
 
   params = load_params('dinov2_vitb14','/home/jesimonbarreto/', params,
@@ -230,7 +230,7 @@ def train(
                 force_random_init= None)
 
 
-  print(f'Here... finished load {params}')
+  print(f'Here... finished load {params[0][0]}')
   '''=============================================='''
 
   # Only one model function but two sets of parameters.
