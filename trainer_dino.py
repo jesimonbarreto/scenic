@@ -222,7 +222,7 @@ def train(
        config=config, rngs=init_rng)
   
   '''=============================================='''
-  print('Here... trying load')
+  print(f'Here... trying load {params}')
   from load_params import load_params
 
   params = load_params('dinov2_vitb14','/home/jesimonbarreto/', params,
@@ -230,7 +230,7 @@ def train(
                 force_random_init= None)
 
 
-  print('Here... finished load')
+  print(f'Here... finished load {params}')
   '''=============================================='''
 
   # Only one model function but two sets of parameters.
@@ -255,6 +255,13 @@ def train(
   train_state = utils.TrainState(
       global_step=0, opt_state=opt_state, tx=tx, params=params,
       ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
+  
+  unrep_train_state = jax_utils.unreplicate(train_state)
+  metadata = unrep_train_state.metadata
+  metadata['chrono'] = chrono.save()
+  unrep_train_state.replace(metadata=metadata)  # pytype: disable=attribute-error
+  utils.save_checkpoint(workdir, unrep_train_state)
+  del unrep_train_state
 
   start_step = train_state.global_step
   if config.checkpoint:
