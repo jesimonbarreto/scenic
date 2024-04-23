@@ -222,7 +222,7 @@ def train(
        config=config, rngs=init_rng)
   
   '''=============================================='''
-  print(f'Here... trying load {params}')
+  print(f'Here... trying load {params.keys()}')
   from load_params import load_params
 
   params = load_params('dinov2_vitb14','/home/jesimonbarreto/', params,
@@ -230,7 +230,7 @@ def train(
                 force_random_init= None)
 
 
-  print(f'Here... finished load {params}')
+  print(f'Here... finished load {params.keys()}')
   '''=============================================='''
 
   # Only one model function but two sets of parameters.
@@ -260,6 +260,12 @@ def train(
   start_step = train_state.global_step
   if config.checkpoint:
     train_state, start_step = utils.restore_checkpoint(workdir, train_state)
+  unrep_train_state = jax_utils.unreplicate(train_state)
+  metadata = unrep_train_state.metadata
+  metadata['chrono'] = chrono.save()
+  unrep_train_state.replace(metadata=metadata)  # pytype: disable=attribute-error
+  utils.save_checkpoint(workdir, unrep_train_state)
+  del unrep_train_state
   chrono.load(train_state.metadata['chrono'])
   train_state = train_state.replace(metadata={})
   # Replicate the training state: optimizer, params and rng.
@@ -267,12 +273,6 @@ def train(
   del params, ema_params
   total_steps, steps_per_epoch = train_utils.get_num_training_steps(
       config, dataset.meta_data)
-  unrep_train_state = jax_utils.unreplicate(train_state)
-  metadata = unrep_train_state.metadata
-  metadata['chrono'] = chrono.save()
-  unrep_train_state.replace(metadata=metadata)  # pytype: disable=attribute-error
-  utils.save_checkpoint(workdir, unrep_train_state)
-  del unrep_train_state
 
   # The function that performs one step of loca training.
   dino_train_step_pmapped = jax.pmap(
