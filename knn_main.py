@@ -228,7 +228,8 @@ def train(
       train_state = utils.TrainState(
           global_step=0, opt_state=opt_state, tx=tx, params=params,
           ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
-  
+      train_state = jax_utils.replicate(train_state)
+    
     #project feats or not
     representation_fn_knn = functools.partial(
       representation_fn_eval,
