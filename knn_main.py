@@ -150,6 +150,29 @@ def train(
        config=config, rngs=init_rng)
   rng, init_rng = jax.random.split(rng)
 
+  # Only one model function but two sets of parameters.
+  ema_params = copy.deepcopy(params)
+
+  # Get learning rate and ema temperature schedulers.
+  learning_rate_fn = lr_schedules.get_learning_rate_fn(config)
+  momentum_parameter_scheduler = lr_schedules.compound_lr_scheduler(
+      config.momentum_rate)
+
+  # Create optimizer.
+  weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
+  tx = optax.inject_hyperparams(optax.adamw)(
+      learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
+      mask=weight_decay_mask,)
+  opt_state = jax.jit(tx.init, backend='cpu')(params)
+
+  # Create chrono class to track and store training statistics and metadata.
+  chrono = train_utils.Chrono()
+
+  # Create the TrainState to track training state (i.e. params and optimizer).
+  train_state = utils.TrainState(
+      global_step=0, opt_state=opt_state, tx=tx, params=params,
+      ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
+
   knn_eval_batch_size = config.get('knn_eval_batch_size') or config.batch_size
 
   train_dir = config.get('train_dir')
