@@ -404,6 +404,7 @@ def train(
         #k_nearest = k_nearest.reshape(-1, k)
         k_nearest_labels = labels.squeeze()[k_nearest]  # Shape: (n, 5)
         print(f' shape kneares labels{k_nearest_labels.shape}')
+        print(f' shape kneares labels{k_nearest_labels}')
         #most_repetitive_labels = jnp.apply_along_axis(lambda row: jnp.bincount(jnp.asarray(row)).argmax(), axis=1, arr=jnp.asarray(k_nearest_labels))
 
         #most_repetitive_labels = [(num_classes-1) - jnp.bincount(row, minlength=num_classes)[::-1].argmax() for row in k_nearest_labels]
@@ -413,9 +414,9 @@ def train(
         jnp.savez(path_file, y_pred=y_pred, label=label_train)
         jnp.savez(path_file_d, y_pred=y_pred, label=label_train)
 
-        comparison = jnp.array(y_pred) == label_eval
+        comparison = jnp.array(y_pred).squeeze() == label_eval.squeeze()
         corrects = comparison.sum()  # Proportion of correct matches
-        print(f"Step {step} -----> Corrects: {corrects:.4f} / total {len(comparison)}")
+        print(f"Step {step} -----> Corrects: {corrects:.1f} / total {len(comparison)}")
         predicts_acc.append(corrects)
         #class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
         #print(f"{class_rate=}")
