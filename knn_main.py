@@ -445,7 +445,7 @@ def train(
         correct_pred += jnp.sum(correct_predictions)'''
       
       predicts_acc = jnp.asarray(predicts_acc)
-      result = jnp.sum(predicts_acc)/50000
+      result = jnp.sum(predicts_acc)/len(predicts_acc)
       
       print(f"{k} Neighborhood: Accuracy total : {result:.4f} ---- executions {predicts_acc.shape} ----- step {step}")
   
