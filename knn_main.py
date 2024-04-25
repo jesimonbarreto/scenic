@@ -29,7 +29,7 @@ import datasets
 from scenic.dataset_lib import dataset_utils
 
 import dino_dataset  # pylint: disable=unused-import
-from scenic.dataset_lib import tinyImagenet_dataset
+#from scenic.dataset_lib import tinyImagenet_dataset
 import datasets_eval
 import optax
 from scenic.train_lib import lr_schedules
@@ -56,6 +56,10 @@ MetricFn = Callable[
 ]
 LossFn = Callable[[jnp.ndarray, Batch, Optional[jnp.ndarray]], float]
 LrFn = Callable[[jnp.ndarray], jnp.ndarray]
+
+def normalize(input, p=2.0, axis=1, eps=1e-12):
+    norms = jnp.linalg.norm(input, ord=p, axis=axis, keepdims=True)
+    return input / jnp.maximum(norms, eps)
 
 def representation_fn_eval(
     train_state: train_utils.TrainState,
@@ -99,18 +103,12 @@ def representation_fn_eval(
         backbone = True,
         train=False)
   
-  #embedding = jnp.mean(embedding, axis=1)
-  
+  embedding = normalize(embedding)
 
   if gather_to_host:
     embedding = jax.lax.all_gather(embedding, 'batch')
     batch = jax.lax.all_gather(batch, 'batch')
   
-  def normalize(input, p=2.0, axis=1, eps=1e-12):
-    norms = jnp.linalg.norm(input, ord=p, axis=axis, keepdims=True)
-    return input / jnp.maximum(norms, eps)
-  
-  embedding = normalize(embedding)
 
   return embedding
 
@@ -221,11 +219,10 @@ def train(
       '''=============================================='''
       print('Here... trying load')
       from load_params import load_params
-
-      params = load_params('dinov2_vitb14','/home/jesimonbarreto/', params,
+      print(f' {config.dir_weight} {config.weight_load}')
+      params = load_params(config.weight_load,config.dir_weight, params,
                     params_key='teacher_weights',
                     force_random_init= None)
-
 
       print('Here... finished load')
       '''=============================================='''
@@ -271,7 +268,10 @@ def train(
       batch_train = next(dataset.train_iter)
       #print(f' shape batch {batch_train.keys()}')
       emb_train = extract_features(batch_train)
-      print(f'shape {emb_train.shape}')
+      norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0]]), ord=2))==1
+      print(f'processing batch {i} shape {emb_train.shape}. Norma 1 {norm_res}')
+      if not norm_res:
+        emb_train = normalize(emb_train)
       label_train = batch_train['label']
       emb_train = emb_train[0]
       bl, bg, emb = emb_train.shape
@@ -323,6 +323,9 @@ def train(
     def compute_distance(U, V):
       return compute_diff(U, V).mean(axis=-1)
     
+    def compute_dist(u, v):
+      return jnp.linalg.norm(u[:, None] - v[None, :], axis=-1)
+    
     devices = jax.device_count()
     n_test = config.dataset_configs.batch_size_test
     
@@ -346,6 +349,11 @@ def train(
         bl, bg, emb = emb_test.shape
         emb_test = emb_test.reshape((bl*bg, emb))
         label_eval = batch_eval['label'].reshape((bl*bg))
+        norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2))==1
+        print(f'processing batch test {i} shape {emb_test.shapeshape}. Norma 1 {norm_res}')
+        if not norm_res:
+          emb_test = normalize(emb_test)
+      
         #print(f'embeeding shape test {emb_test.shape}')
         dist_all = []
         labels = []
@@ -362,7 +370,13 @@ def train(
           #print(f'embeeding shape test {i}: {emb_test[0].shape}')
           #print(batch_train['label'].shape)
           #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
-          dist_ = compute_distance(emb_test, emb_train)
+          #####MUdar distancia
+          #####Montar a matriz certo, nao é so concatenar
+          #####Mudar a função de distancia para a padrão pq vmap ta com fulerage
+          dist_ = compute_dist(emb_test, emb_train)
+          if i ==0:
+            print(f' shape: emb train {emb_train.shape} emb test {emb_test.shape}')
+            print(f' shape: dist {dist_.shape} emb test {emb_test.shape}')
           #print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
           #print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
 
@@ -370,6 +384,8 @@ def train(
           labels.append(label_train)
         dist_all = jnp.concatenate(dist_all, axis=1)
         labels = jnp.concatenate(labels)
+        if i ==0:
+          print(f' shape: dist_all {dist_all.shape} labels {labels.shape}')
         #print(f'shape dist_all ------------ {dist_all.shape}')
         #print(f'shape labels   ------------ {labels.shape}')
 

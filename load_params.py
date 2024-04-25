@@ -339,9 +339,7 @@ def restore_params(checkpoint_name: str, checkpoint_path: str, params: Any,
   """Returns restored params."""
   restored_params = None
   # Option 1: We load weights from a pytorch like dict.
-  print('Chegou')
   if checkpoint_name in PYTORCH_STYLE_WEIGHTS.keys():
-    print('entrou')
     params_key = ''
     checkpoint_path = PYTORCH_STYLE_WEIGHTS[checkpoint_name]
     logging.info('Loading pytorch style weights from %s', checkpoint_path)

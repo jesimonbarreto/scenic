@@ -123,6 +123,7 @@ def get_config():
   config.query_max_seqlen = 70
 
   config.checkpoint = False#'/home/jesimonbarreto/scenic/checkpoint_501'
+  config.dir_weight = '/home/jesimonbarreto/'
 
   # Learning rate.
   #cosine schedule lr

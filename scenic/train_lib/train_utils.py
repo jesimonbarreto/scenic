@@ -1084,7 +1084,7 @@ class Chrono:
       purposes, as it includes significant compilation overheads, which distort
       estimates.
   3. `accumulates` (i.e. integrates) timings, and saves/loads them across
-      restarts.
+      restarts.chrono
   """
 
   def __init__(self, example_type: str = 'img', warmup: int = 2):
