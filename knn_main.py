@@ -395,24 +395,25 @@ def train(
           jnp.savez(path_file_d, emb_test=emb_test, label_eval=label_eval)
 
         #dist_all = dist_all.reshape(devices, n_test // devices, -1)
-        dist_all = jnp.repeat(jnp.expand_dims(dist_all,axis=0), devices, axis=0)
+        #dist_all = jnp.repeat(jnp.expand_dims(dist_all,axis=0), devices, axis=0)
         
         path_file = os.path.join(dir_save_y,f'y_k{k}_b{i}')
 
-        k_nearest = p_argsort(dist_all)[0][..., 1:k+1]
-        #print(k_nearest.shape)
-        k_nearest = k_nearest.reshape(-1, k)
-        k_nearest_labels = labels[k_nearest]  # Shape: (n, 5)
+        k_nearest = jnp.argsort(dist_all)[:, :k]
+        print(f' shape kneares {k_nearest.shape}')
+        #k_nearest = k_nearest.reshape(-1, k)
+        k_nearest_labels = labels.squeeze()[k_nearest]  # Shape: (n, 5)
+        print(f' shape kneares labels{k_nearest_labels.shape}')
         #most_repetitive_labels = jnp.apply_along_axis(lambda row: jnp.bincount(jnp.asarray(row)).argmax(), axis=1, arr=jnp.asarray(k_nearest_labels))
 
-        most_repetitive_labels = [(num_classes-1) - jnp.bincount(row, minlength=num_classes)[::-1].argmax() for row in k_nearest_labels]
-        
+        #most_repetitive_labels = [(num_classes-1) - jnp.bincount(row, minlength=num_classes)[::-1].argmax() for row in k_nearest_labels]
+        most_repetitive_labels = jnp.array([jnp.bincount(row).argmax() for row in k_nearest_labels])
         y_pred = most_repetitive_labels
         path_file = os.path.join(dir_save_y,f'y_k{k}_b{i}')
         jnp.savez(path_file, y_pred=y_pred, label=label_train)
         jnp.savez(path_file_d, y_pred=y_pred, label=label_train)
 
-        comparison = jnp.asarray(y_pred) == label_eval
+        comparison = jnp.array(y_pred) == label_eval
         corrects = comparison.sum()  # Proportion of correct matches
         print(f"Step {step} -----> Corrects: {corrects:.4f} / total {len(comparison)}")
         predicts_acc.append(corrects)
