@@ -375,7 +375,7 @@ def train(
           #####Montar a matriz certo, nao é so concatenar
           #####Mudar a função de distancia para a padrão pq vmap ta com fulerage
           dist_ = compute_dist(emb_test, emb_train)
-          if i ==0:
+          if j == 0:
             print(f' shape: emb train {emb_train.shape} emb test {emb_test.shape}')
             print(f' shape: dist {dist_.shape} emb test {emb_test.shape}')
           #print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
@@ -389,9 +389,16 @@ def train(
           print(f' shape: dist_all {dist_all.shape} labels {labels.shape}')
         #print(f'shape dist_all ------------ {dist_all.shape}')
         #print(f'shape labels   ------------ {labels.shape}')
+          path_file_d = os.path.join(dir_save_y,f'dist_all{k}_b{i}')
+          jnp.savez(path_file_d, dist_all=dist_all)
+          path_file_d = os.path.join(dir_save_y,f'emb_test{k}_b{i}')
+          jnp.savez(path_file_d, emb_test=emb_test, label_eval=label_eval)
 
         #dist_all = dist_all.reshape(devices, n_test // devices, -1)
         dist_all = jnp.repeat(jnp.expand_dims(dist_all,axis=0), devices, axis=0)
+        
+        path_file = os.path.join(dir_save_y,f'y_k{k}_b{i}')
+
         k_nearest = p_argsort(dist_all)[0][..., 1:k+1]
         #print(k_nearest.shape)
         k_nearest = k_nearest.reshape(-1, k)
@@ -403,6 +410,7 @@ def train(
         y_pred = most_repetitive_labels
         path_file = os.path.join(dir_save_y,f'y_k{k}_b{i}')
         jnp.savez(path_file, y_pred=y_pred, label=label_train)
+        jnp.savez(path_file_d, y_pred=y_pred, label=label_train)
 
         comparison = jnp.asarray(y_pred) == label_eval
         corrects = comparison.sum()  # Proportion of correct matches
