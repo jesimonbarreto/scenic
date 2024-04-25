@@ -261,7 +261,7 @@ def train(
       os.makedirs(dir_save_y)
 
     print('Starting to extract features train')
-    for i in range(config.steps_per_epoch):
+    '''for i in range(config.steps_per_epoch):
       path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
       #if os.path.isfile(path_file):
       #  continue
@@ -279,7 +279,7 @@ def train(
       emb_train = emb_train.reshape((bl*bg, emb))
       label_train = label_train.reshape((bl*bg))
       jnp.savez(path_file, emb=emb_train, label=label_train)
-
+    '''
 
     print('Finishing extract features train')
     #print(dataset.meta_data.keys)
@@ -350,8 +350,8 @@ def train(
         bl, bg, emb = emb_test.shape
         emb_test = emb_test.reshape((bl*bg, emb))
         label_eval = batch_eval['label'].reshape((bl*bg))
-        norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2))==1
-        print(f'processing batch test {i} shape {emb_test.shapeshape}. Norma 1 {norm_res}')
+        norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0,0,0]]), ord=2))==1
+        print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
         if not norm_res:
           emb_test = normalize(emb_test)
       
