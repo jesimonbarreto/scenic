@@ -268,6 +268,7 @@ def train(
       batch_train = next(dataset.train_iter)
       #print(f' shape batch {batch_train.keys()}')
       emb_train = extract_features(batch_train)
+      print(f'shape emb_train {emb_train.shape}')
       norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0]]), ord=2))==1
       print(f'processing batch {i} shape {emb_train.shape}. Norma 1 {norm_res}')
       if not norm_res:
