@@ -124,7 +124,7 @@ def get_config():
 
   config.checkpoint = False#'/home/jesimonbarreto/scenic/checkpoint_501'
   config.dir_weight = '/home/jesimonbarreto/'
-
+  config.weight_load = 'dinov2_vit'+version.lower()+'14'
   # Learning rate.
   #cosine schedule lr
   config.lr_configs = ml_collections.ConfigDict()
