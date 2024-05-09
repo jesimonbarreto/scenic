@@ -20,16 +20,17 @@ from scenic.projects.baselines import vit
 
 class ToTokenSequence(nn.Module):
   """Transform a batch of views into a sequence of tokens."""
-
+  
   patches: ml_collections.ConfigDict
   hidden_size: int
   posembs: Tuple[int, int] = (14, 14)
   positional_embedding: str = 'learned'
 
-  def add_positional_encodings(self, x: jnp.ndarray,
+  def add_positional_encodings(self, x: jnp.ndarray, w:int,h:int,
                                positional_embedding: str = '') -> jnp.ndarray:
     """Add positional encodings to the input patch sequence."""
-    _, w, h, c = x.shape
+    c = x.shape[2]
+
     positional_embedding = positional_embedding or self.positional_embedding
     if positional_embedding == 'learned':
       posemb = self.param(
@@ -38,7 +39,11 @@ class ToTokenSequence(nn.Module):
           (1, self.posembs[0], self.posembs[1], c), x.dtype)
       # Optionally resize the positional encodings.
       if (h, w) != self.posembs:
-        posemb = jax.image.resize(posemb, (1, h, w, c), 'bilinear')
+        #class_emb = posemb[:, 0]
+        #posemb = posemb[:,1:].reshape(1,self.posembs[0],self.posembs[1],c)
+        posemb = jax.image.resize(posemb, (1, h, w, c), 'bicubic')
+        posemb = posemb.reshape((1, w*h, c))
+        #posemb = jnp.concatenate([class_emb.reshape(1,1,-1), posemb], axis=1)
       x = x + posemb
     
     elif positional_embedding == 'learned_1d':
@@ -59,28 +64,36 @@ class ToTokenSequence(nn.Module):
     elif positional_embedding == 'sinusoidal_2d':
       x = attention_layers.AddFixedSinCosPositionEmbedding()(x)
     
-    x = jnp.reshape(x, (-1, h * w, c))
+    #x = jnp.reshape(x, (-1, h * w, c))
     return x
 
   @nn.compact
-  def __call__(self, x: jnp.ndarray, positional_embedding: str = '',
-               seqlen: int = -1, seqlen_selection: str = 'unstructured'):
+  def __call__(self, x: jnp.ndarray, 
+               positional_embedding:str = '',
+               seqlen: int = -1, 
+               seqlen_selection: str = 'unstructured'):
     # Extracting patches and then embedding is in fact a single convolution.
     fh, fw = self.patches.size
-    n, h, w, c = x.shape
+    n, c, h, w = x.shape
+    x = jnp.transpose(x, (0, 2, 3, 1))
     x = nn.Conv(self.hidden_size, (fh, fw), strides=(fh, fw), padding='VALID',
                 name='embedding')(x)
+    x = jnp.transpose(x, (0, 3, 1, 2))
+    n, c, h, w = x.shape
+    x = jnp.reshape(x, [n, c, h * w])
+    x = jnp.transpose(x, (0, 2, 1))
+
+    is_initialized = self.has_variable('params','cls')
+    if not is_initialized:
+      cls = self.param('cls', nn.initializers.normal(1e-6), (1, 1, self.hidden_size), x.dtype)
+    else:
+      cls = self.get_variable('params','cls')
     
-    n, h, w, c = x.shape
-    #jax.debug.print("🤯 size image after: {h} {w} 🤯", h=h, w=w)
-    #x = jnp.reshape(x, [n, h * w, c])
-
+    jax.debug.print("🤯 Epoca: {x} 🤯", x=cls)
     # Adding positional encodings.
-    x = self.add_positional_encodings(x, positional_embedding)
-
-    cls = self.param('cls', nn.initializers.zeros, (1, 1, c), x.dtype)
-    cls = jnp.tile(cls, [n, 1, 1])
-    x = jnp.concatenate([cls, x], axis=1)
+    x = self.add_positional_encodings(x, w, h, positional_embedding)
+    cls_exp = jnp.tile(cls, (x.shape[0], 1, 1))
+    x = jnp.concatenate((cls_exp, x), axis=1)
 
     # Possibly dropping some tokens.
     idx_kept_tokens = None
@@ -144,7 +157,7 @@ class ViTDINO(nn.Module):
   n_ref_positions: int
   head_bottleneck_dim: int
   head_output_dim: int
-  positional_embedding: str = 'learned_1d'
+  positional_embedding: str = 'learned'
   dropout_rate: float = 0.0
   attention_dropout_rate: float = 0.0
   stochastic_depth: float = 0.1
@@ -188,16 +201,18 @@ class ViTDINO(nn.Module):
         attention_dropout_rate=self.attention_dropout_rate,
         stochastic_depth=self.stochastic_depth,
         dtype=self.dtype)(x, train=train)'''
+    
     # Input image -> sequence of patch tokens.
     to_token_fn = ToTokenSequence(
         patches=self.patches,
         hidden_size=self.hidden_size,
-        posembs=self.posembs)
+        posembs=self.posembs,
+        positional_embedding=self.positional_embedding) 
     x, idx_kept_tokens = to_token_fn(
         x,
         #self.positional_embedding, 
         seqlen=seqlen if drop_moment == 'early' else -1,
-        positional_embedding=None if use_pe else 'pe_not_in_use',
+        positional_embedding=self.positional_embedding if use_pe else 'pe_not_in_use',
         seqlen_selection=seqlen_selection)
     
     # ViT Encoder.
@@ -212,10 +227,10 @@ class ViTDINO(nn.Module):
           name=f'encoderblock_{lyr}',
           dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
               x, deterministic=not train)
-    x = nn.LayerNorm(name='encoder_norm')(x)
+    x_norm = nn.LayerNorm(name='encoder_norm')(x)
     #x = jnp.IdentityLayer(x)
     #x = x.reshape((x.shape[0], -1))  # flatten
-    x = x[:, 0]
+    #x = x[:, 1:]
     #x = jnp.linalg.norm(x, ord=2, axis=1)
     '''x = ProjectionHead(
           hidden_dim=self.head_hidden_dim,
@@ -224,7 +239,12 @@ class ViTDINO(nn.Module):
           name='projection_head')(
               x, train)#.reshape((-1, self.head_output_dim))'''
 
-    return x
+    return {
+            "x_norm_clstoken": x_norm[:, 0],
+            "x_norm_patchtokens": x_norm[:, 1:],
+            "x_prenorm": x,
+            "masks": None,
+        }
 
 def norm_kernel_init_fn(rng, shape, dtype):
   """Initialize kernel with l2 normalized columns."""
@@ -341,7 +361,7 @@ class ViTDinoModel(base_model.BaseModel):
         attention_dropout_rate=self.config.model.get('attention_dropout_rate',
                                                      0.0),
         stochastic_depth=self.config.model.get('stochastic_depth', 0.0),
-        posembs=self.config.model.get('posembs', (14, 14)),
+        posembs=self.config.model.get('posembs', (16, 16)),
         dtype=model_dtype,
     )
 
