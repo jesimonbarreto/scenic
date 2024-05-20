@@ -1,6 +1,5 @@
 import ml_collections, os
 
-
 VARIANT = 'S/14'
 _IMAGENET_TRAIN_SIZE = 1281167 #9469 #1281167
 _IMAGENET_TEST_SIZE = 50000
@@ -40,8 +39,10 @@ def get_config():
       'decode' +
       '|copy("image", "image_resized")' +
       f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
-      f'|dino_transform(size={reference_resolution}, crop_size={crop_size}, mean={MEAN}, std={STD}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))'
+      f'|get_resize_small({reference_resolution}, method="area", antialias=True, inkey=("image"), outkey=("image"))' +
+      f'|get_resize_small({reference_resolution}, method="area", antialias=True, inkey=("image_resized"), outkey=("image_resized"))' +
       #f'|copy_resize_file({reference_resolution}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))' +
+      f'|dino_transform(size={reference_resolution}, crop_size={crop_size}, mean={MEAN}, std={STD}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))'
       #'|value_range(0, 1, data_key="image_resized")' +
       #'|value_range(0, 1, data_key="image")' +
       #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")' +
