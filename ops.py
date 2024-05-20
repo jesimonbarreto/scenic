@@ -4,7 +4,7 @@ import functools
 from scenic.dataset_lib.big_transfer import registry
 from scenic.dataset_lib.big_transfer.preprocessing import utils
 import tensorflow as tf
-
+import tensorflow.compat.v2 as tf2
 
 # The two following decorators mimic the support for single-input
 # single-output ops already in scenic.dataset_lib.big_transfer.preprocessing and
@@ -243,6 +243,39 @@ def copy_resize_file(resize_size=224, global_scale=None):
 
     return image, image_cropped
   return copy_resize_file
+
+@Registry.register("preprocess_ops.resize_small", "function")
+@utils.InKeyOutKey()
+@utils.BatchedImagePreprocessing()
+def get_resize_small(smaller_size, method="area", antialias=True):
+  """Resizes the smaller side to `smaller_size` keeping aspect ratio.
+
+  Args:
+    smaller_size: an integer, that represents a new size of the smaller side of
+      an input image.
+    method: the resize method. `area` is a meaningful, bwd-compat default.
+    antialias: See TF's image.resize method.
+
+  Returns:
+    A function, that resizes an image and preserves its aspect ratio.
+
+  """
+
+  def _resize_small(image):  # pylint: disable=missing-docstring
+    h, w = tf.shape(image)[0], tf.shape(image)[1]
+
+    # Figure out the necessary h/w.
+    ratio = (
+        tf.cast(smaller_size, tf.float32) /
+        tf.cast(tf.minimum(h, w), tf.float32))
+    h = tf.cast(tf.round(tf.cast(h, tf.float32) * ratio), tf.int32)
+    w = tf.cast(tf.round(tf.cast(w, tf.float32) * ratio), tf.int32)
+
+    dtype = image.dtype
+    image = tf2.image.resize(image, (h, w), method, antialias)
+    return tf.cast(image, dtype)
+
+  return _resize_small
 
 @registry.Registry.register("preprocess_ops.dino_transform", "function")
 @TwoInKeysTwoOutKeys()
