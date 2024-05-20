@@ -39,11 +39,8 @@ class ToTokenSequence(nn.Module):
           (1, self.posembs[0], self.posembs[1], c), x.dtype)
       # Optionally resize the positional encodings.
       if (h, w) != self.posembs:
-        #class_emb = posemb[:, 0]
-        #posemb = posemb[:,1:].reshape(1,self.posembs[0],self.posembs[1],c)
         posemb = jax.image.resize(posemb, (1, h, w, c), 'bicubic')
         posemb = posemb.reshape((1, w*h, c))
-        #posemb = jnp.concatenate([class_emb.reshape(1,1,-1), posemb], axis=1)
       x = x + posemb
     
     elif positional_embedding == 'learned_1d':
@@ -64,7 +61,6 @@ class ToTokenSequence(nn.Module):
     elif positional_embedding == 'sinusoidal_2d':
       x = attention_layers.AddFixedSinCosPositionEmbedding()(x)
     
-    #x = jnp.reshape(x, (-1, h * w, c))
     return x
 
   @nn.compact
@@ -89,7 +85,6 @@ class ToTokenSequence(nn.Module):
     else:
       cls = self.get_variable('params','cls')
     
-    jax.debug.print("🤯 Epoca: {x} 🤯", x=cls)
     # Adding positional encodings.
     x = self.add_positional_encodings(x, w, h, positional_embedding)
     cls_exp = jnp.tile(cls, (x.shape[0], 1, 1))
@@ -175,33 +170,6 @@ class ViTDINO(nn.Module):
     del debug
     
     
-    '''
-    fh, fw = self.patches.size
-    # Extracting patches and then embedding is in fact a single convolution.
-    x = nn.Conv(
-        self.hidden_size, (fh, fw),
-        strides=(fh, fw),
-        padding='VALID',
-        name='embedding')(x)
-    n, h, w, c = x.shape
-    x = jnp.reshape(x, [n, h * w, c])
-
-    # If we want to add a class token, add it here.
-    #if self.classifier == 'token':
-    cls = self.param('cls', nn.initializers.zeros, (1, 1, c), x.dtype)
-    cls = jnp.tile(cls, [n, 1, 1])
-    x = jnp.concatenate([cls, x], axis=1)
-
-    x = vit.Encoder(
-        mlp_dim=self.mlp_dim,
-        num_layers=self.num_layers,
-        num_heads=self.num_heads,
-        positional_embedding=self.positional_embedding,
-        dropout_rate=self.dropout_rate,
-        attention_dropout_rate=self.attention_dropout_rate,
-        stochastic_depth=self.stochastic_depth,
-        dtype=self.dtype)(x, train=train)'''
-    
     # Input image -> sequence of patch tokens.
     to_token_fn = ToTokenSequence(
         patches=self.patches,
@@ -228,10 +196,7 @@ class ViTDINO(nn.Module):
           dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
               x, deterministic=not train)
     x_norm = nn.LayerNorm(name='encoder_norm')(x)
-    #x = jnp.IdentityLayer(x)
-    #x = x.reshape((x.shape[0], -1))  # flatten
-    #x = x[:, 1:]
-    #x = jnp.linalg.norm(x, ord=2, axis=1)
+    
     '''x = ProjectionHead(
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
@@ -426,8 +391,6 @@ class ViTDinoModel(base_model.BaseModel):
             total_loss += jnp.mean(loss)
             n_loss_terms += 1
     total_loss /= n_loss_terms
-    #total_loss = jnp.array(total_loss, float)
-    #jax.debug.print("🤯 Center Antes: {center} 🤯", center=center)
     center = self.update_center(teacher_output, center)
     #jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
     return total_loss, center
