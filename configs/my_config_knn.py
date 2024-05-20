@@ -6,6 +6,8 @@ _IMAGENET_TRAIN_SIZE = 1281167 #9469 #1281167
 _IMAGENET_TEST_SIZE = 50000
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
+MEAN = [0.5]
+STD = [0.5]
 
 def get_config():
 
@@ -31,17 +33,19 @@ def get_config():
   config.dataset_configs.batch_size_test = 64
   config.num_classes = 1000
   reference_resolution = 224
+  crop_size = 224
 
 
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "image_resized")' +
       f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
-      f'|copy_resize_file({reference_resolution}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))' +
+      f'|dino_transform(size={reference_resolution}, crop_size={crop_size}, mean={MEAN}, std={STD}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))'
+      #f'|copy_resize_file({reference_resolution}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))' +
       #'|value_range(0, 1, data_key="image_resized")' +
       #'|value_range(0, 1, data_key="image")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'
+      #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")' +
+      #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'
   )
 
   ### kNN

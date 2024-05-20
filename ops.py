@@ -244,6 +244,64 @@ def copy_resize_file(resize_size=224, global_scale=None):
     return image, image_cropped
   return copy_resize_file
 
+@registry.Registry.register("preprocess_ops.dino_transform", "function")
+@TwoInKeysTwoOutKeys()
+def dino_transform(size=224, crop_size=224, mean=[0.5], std=[0.5]):
+  """Crop and flip an image and keep track of these operations with a mask."""
+  def dino_transform(image, image_):
+
+    def to_tensor(image):
+      image = tf.convert_to_tensor(image, dtype=tf.float32) / 255.0
+      # Transpose to (C x H x W) format
+      image = tf.transpose(image, perm=[2, 0, 1])
+      return image
+  
+    def center_crop(image, crop_size):
+      pad_width = 2
+      # Define the padding configuration
+      padding = [[pad_width, pad_width], [pad_width, pad_width], [0, 0]]
+      image = tf.pad(image, padding, mode='CONSTANT', constant_values=0)
+      
+      # Get the dimensions of the image
+      height, width = image.shape[0], image.shape[1]
+
+      # Calculate the crop offsets
+      offset_height = int((height - crop_size[0]) / 2)
+      offset_width = int((width - crop_size[1]) / 2)
+
+      # Crop the image
+      cropped_image = tf.image.crop_to_bounding_box(image, offset_height, offset_width, crop_size[0], crop_size[1])
+      return cropped_image
+    
+    def resize(image, target_size):
+      # Get the dimensions of the image
+      height, width = image.shape[0], image.shape[1]
+
+      # Determine the scaling factor to make the smaller dimension 224
+      scale_factor = tf.cond(height < width,
+                            lambda: target_size / height,
+                            lambda: target_size / width)
+
+      # Resize the image while preserving the aspect ratio
+      new_height = int(height * scale_factor)
+      new_width = int(width * scale_factor)
+      resized_image = tf.image.resize(image, [new_height, new_width])
+
+      return resized_image
+    
+    # Define image transformation pipeline using tf.image
+    def transform_image(image):
+        image = tf.convert_to_tensor(image, dtype=tf.float32)
+        image = resize(image, size)  # Resize image
+        image = center_crop(image, crop_size=(crop_size, crop_size))  # Center crop image
+        image = to_tensor(image)  # Convert image to float32
+        image = (image - mean) / std  # Normalize using provided mean and std dev
+        return image
+    
+    image_ = transform_image(image)
+    return image, image_
+  return dino_transform
+
 @registry.Registry.register("preprocess_ops.flip_with_mask", "function")
 @utils.InKeyOutKey()
 @utils.BatchedImagePreprocessing
