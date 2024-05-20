@@ -244,7 +244,7 @@ def copy_resize_file(resize_size=224, global_scale=None):
     return image, image_cropped
   return copy_resize_file
 
-@Registry.register("preprocess_ops.resize_small", "function")
+@registry.Registry.register("preprocess_ops.resize_small", "function")
 @utils.InKeyOutKey()
 @utils.BatchedImagePreprocessing()
 def get_resize_small(smaller_size, method="area", antialias=True):
