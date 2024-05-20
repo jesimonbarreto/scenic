@@ -244,7 +244,7 @@ def copy_resize_file(resize_size=224, global_scale=None):
     return image, image_cropped
   return copy_resize_file
 
-@registry.Registry.register("preprocess_ops.resize_small", "function")
+'''@registry.Registry.register("preprocess_ops.resize_small", "function")
 @utils.InKeyOutKey()
 @utils.BatchedImagePreprocessing()
 def get_resize_small(smaller_size, method="area", antialias=True):
@@ -276,7 +276,7 @@ def get_resize_small(smaller_size, method="area", antialias=True):
     return tf.cast(image, dtype)
 
   return _resize_small
-
+'''
 @registry.Registry.register("preprocess_ops.dino_transform", "function")
 @TwoInKeysTwoOutKeys()
 def dino_transform(size=224, crop_size=224, mean=[0.5], std=[0.5]):
