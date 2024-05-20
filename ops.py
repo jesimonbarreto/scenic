@@ -298,8 +298,8 @@ def dino_transform(size=224, crop_size=224, mean=[0.5], std=[0.5]):
         image = to_tensor(image)  # Convert image to float32
         image = (image - mean) / std  # Normalize using provided mean and std dev
         return image
-    
-    image_ = transform_image(image)
+    if image:
+      image_ = transform_image(image)
     return image, image_
   return dino_transform
 
