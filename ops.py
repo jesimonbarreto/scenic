@@ -291,6 +291,9 @@ def dino_transform(size=224, crop_size=224, mean=[0.5], std=[0.5]):
     
     # Define image transformation pipeline using tf.image
     def transform_image(image):
+        print(tf.max(image))
+        print(tf.min(image))
+        print(image.dtype)
         image = tf.convert_to_tensor(image, dtype=tf.float32)
         image = resize(image, size)  # Resize image
         image = center_crop(image, crop_size=(crop_size, crop_size))  # Center crop image
