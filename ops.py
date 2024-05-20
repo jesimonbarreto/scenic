@@ -251,7 +251,7 @@ def dino_transform(size=224, crop_size=224, mean=[0.5], std=[0.5]):
   def dino_transform(image, image_):
 
     def to_tensor(image):
-      image = tf.convert_to_tensor(image, dtype=tf.float32) / 255.0
+      image = tf.image.convert_image_dtype(image, dtype=tf.float32) / 255.0
       # Transpose to (C x H x W) format
       image = tf.transpose(image, perm=[2, 0, 1])
       return image
@@ -291,10 +291,7 @@ def dino_transform(size=224, crop_size=224, mean=[0.5], std=[0.5]):
     
     # Define image transformation pipeline using tf.image
     def transform_image(image):
-        print(tf.max(image))
-        print(tf.min(image))
-        print(image.dtype)
-        image = tf.convert_to_tensor(image, dtype=tf.float32)
+        #image = tf.convert_to_tensor(image, dtype=tf.float32)
         image = resize(image, size)  # Resize image
         image = center_crop(image, crop_size=(crop_size, crop_size))  # Center crop image
         image = to_tensor(image)  # Convert image to float32
