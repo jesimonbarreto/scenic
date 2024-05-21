@@ -308,7 +308,7 @@ def dino_transform(size=224, crop_size=224, mean=[0.5], std=[0.5]):
     
     def resize(image, target_size):
       # Get the dimensions of the image
-      height, width = image.shape[0], image.shape[1]
+      height, width = tf.shape(image)[0], tf.shape(image)[1]
 
       # Determine the scaling factor to make the smaller dimension 224
       scale_factor = tf.cond(height < width,
@@ -325,12 +325,13 @@ def dino_transform(size=224, crop_size=224, mean=[0.5], std=[0.5]):
     # Define image transformation pipeline using tf.image
     def transform_image(image):
         image = tf.image.convert_image_dtype(image, dtype=tf.float32)
-        #image = resize(image, size)  # Resize image
+        image = resize(image, size)  # Resize image
         image = center_crop(image, crop_size=(crop_size, crop_size))  # Center crop image
         image = to_tensor(image)  # Convert image to float32
         image = (image - mean) / std  # Normalize using provided mean and std dev
         return image
-    image_ = transform_image(image)
+    image = transform_image(image)
+    image_ = transform_image(image_)
     return image, image_
   return dino_transform
 

@@ -39,8 +39,8 @@ def get_config():
       'decode' +
       '|copy("image", "image_resized")' +
       f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
-      f'|resize_small({reference_resolution}, method="area", antialias=True, inkey=("image"), outkey=("image"))' +
-      f'|resize_small({reference_resolution}, method="area", antialias=True, inkey=("image_resized"), outkey=("image_resized"))' +
+      #f'|resize_small({reference_resolution}, method="area", antialias=True, inkey=("image"), outkey=("image"))' +
+      #f'|resize_small({reference_resolution}, method="area", antialias=True, inkey=("image_resized"), outkey=("image_resized"))' +
       #f'|copy_resize_file({reference_resolution}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))' +
       f'|dino_transform(size={reference_resolution}, crop_size={crop_size}, mean={MEAN}, std={STD}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))'
       #'|value_range(0, 1, data_key="image_resized")' +
