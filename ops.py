@@ -326,7 +326,7 @@ def dino_transform(size=224, crop_size=224, mean=[0.5], std=[0.5]):
     def transform_image(image):
         image = tf.image.convert_image_dtype(image, dtype=tf.float32)
         #image = resize(image, size)  # Resize image
-        image = center_crop(image, crop_size=(crop_size, crop_size))  # Center crop image
+        #image = center_crop(image, crop_size=(crop_size, crop_size))  # Center crop image
         image = to_tensor(image)  # Convert image to float32
         image = (image - mean) / std  # Normalize using provided mean and std dev
         return image
