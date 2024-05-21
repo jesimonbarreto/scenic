@@ -278,10 +278,10 @@ def get_resize_small(smaller_size, method="area", antialias=True):
   return _resize_small
 '''
 @registry.Registry.register("preprocess_ops.dino_transform", "function")
-@TwoInKeysTwoOutKeys()
+@utils.InKeyOutKey()
 def dino_transform(size=224, crop_size=224, mean=[0.5], std=[0.5]):
   """Crop and flip an image and keep track of these operations with a mask."""
-  def dino_transform(image, image_):
+  def dino_transform(image):
 
     def to_tensor(image):
       image = tf.image.convert_image_dtype(image, dtype=tf.float32) / 255.0
@@ -324,15 +324,14 @@ def dino_transform(size=224, crop_size=224, mean=[0.5], std=[0.5]):
     
     # Define image transformation pipeline using tf.image
     def transform_image(image):
-        image = tf.image.convert_image_dtype(image, dtype=tf.float32)
-        image = resize(image, size)  # Resize image
+        #image = tf.image.convert_image_dtype(image, dtype=tf.float32)
+        #image = resize(image, size)  # Resize image
         image = center_crop(image, crop_size=(crop_size, crop_size))  # Center crop image
         image = to_tensor(image)  # Convert image to float32
         image = (image - mean) / std  # Normalize using provided mean and std dev
         return image
     image = transform_image(image)
-    image_ = transform_image(image_)
-    return image, image_
+    return image
   return dino_transform
 
 @registry.Registry.register("preprocess_ops.flip_with_mask", "function")
