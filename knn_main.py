@@ -103,6 +103,7 @@ def representation_fn_eval(
         backbone = True,
         train=False)
   
+  embedding = jnp.squeeze(embedding['x_norm_clstoken'])
   embedding = normalize(embedding)
 
   if gather_to_host:
