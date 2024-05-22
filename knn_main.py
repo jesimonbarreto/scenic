@@ -46,6 +46,9 @@ from jax.lax import map as map_
 from functools import partial
 from jax import jit
 
+import matplotlib.pyplot as plt
+
+
 FLAGS = flags.FLAGS
 
 
@@ -268,6 +271,20 @@ def train(
       #  continue
       batch_train = next(dataset.train_iter)
       #print(f' shape batch {batch_train.keys()}')
+      dir_plot='/home/jesimonbarreto/'
+      def normalize_vector(vector):
+        """Normalizes a JAX NumPy vector to values between 0 and 1."""
+        min_val = jnp.min(vector)
+        max_val = jnp.max(vector)
+        return (vector - min_val) / (max_val - min_val)
+      img = batch_train[0]
+      print(f'shape {img.shape}')
+      print(f'1 max {jnp.max(img)} min {jnp.min(img)}')
+      img = normalize_vector(img)
+      print(f'2 max {jnp.max(img)} min {jnp.min(img)}')
+      plt.imsave(os.path.join(dir_plot,f'exampleInput.jpg'), img)  # Using matplotlib
+      break
+
       emb_train = extract_features(batch_train)
       print(f'shape emb_train {emb_train.shape}')
       norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
@@ -280,6 +297,7 @@ def train(
       emb_train = emb_train.reshape((bl*bg, emb))
       label_train = label_train.reshape((bl*bg))
       jnp.savez(path_file, emb=emb_train, label=label_train)
+    break
     
 
     print('Finishing extract features train')
