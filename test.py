@@ -199,7 +199,7 @@ def train(
 
   ##########################################################################################
     # Load image
-  img = Image.open('/home/jesimon/Documentos/mestrado/goose.jpeg').convert('RGB')
+  img = Image.open('/home/jesimon/Documentos/mestrado/input_rede.jpg').convert('RGB')
 
   def to_tensor(image):
       image = tf.convert_to_tensor(image, dtype=tf.float32) / 255.0

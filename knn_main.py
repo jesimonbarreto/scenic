@@ -284,7 +284,6 @@ def train(
       print(f'2 max {jnp.max(img)} min {jnp.min(img)}')
       plt.imsave(os.path.join(dir_plot,f'exampleInput.jpg'), img)  # Using matplotlib
       break
-      #/home/jesimonbarreto/exampleInput.jpg
       emb_train = extract_features(batch_train)
       print(f'shape emb_train {emb_train.shape}')
       norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1

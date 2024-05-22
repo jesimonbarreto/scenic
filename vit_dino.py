@@ -157,7 +157,7 @@ class ViTDINO(nn.Module):
   attention_dropout_rate: float = 0.0
   stochastic_depth: float = 0.1
   posembs: Tuple[int, int] = (14, 14)
-  dtype: Any = jnp.float32
+  dtype: Any = jnp.floatToTokenSequence32
   loca: bool = False
 
   @nn.compact
@@ -168,8 +168,6 @@ class ViTDINO(nn.Module):
                backbone: bool = True,
                debug: bool = False):
     del debug
-    
-    
     # Input image -> sequence of patch tokens.
     to_token_fn = ToTokenSequence(
         patches=self.patches,
@@ -182,6 +180,9 @@ class ViTDINO(nn.Module):
         seqlen=seqlen if drop_moment == 'early' else -1,
         positional_embedding=self.positional_embedding if use_pe else 'pe_not_in_use',
         seqlen_selection=seqlen_selection)
+    
+    jax.debug.print("xshape: {center}", center=x.shape)
+    jax.debug.print("x[0,0]: {center}", center=x[0,0])
     
     # ViT Encoder.
     for lyr in range(self.num_layers):
