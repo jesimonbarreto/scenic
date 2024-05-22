@@ -277,7 +277,7 @@ def train(
         min_val = jnp.min(vector)
         max_val = jnp.max(vector)
         return (vector - min_val) / (max_val - min_val)
-      img = batch_train[0]
+      img = batch_train['image_resized'][0]
       print(f'shape {img.shape}')
       print(f'1 max {jnp.max(img)} min {jnp.min(img)}')
       img = normalize_vector(img)
