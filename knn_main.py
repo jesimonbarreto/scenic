@@ -277,14 +277,14 @@ def train(
         min_val = jnp.min(vector)
         max_val = jnp.max(vector)
         return (vector - min_val) / (max_val - min_val)
-      img = batch_train['image_resized'][0]
+      img = jnp.transpose(batch_train['image_resized'][0,0], (1,2,0))
       print(f'shape {img.shape}')
       print(f'1 max {jnp.max(img)} min {jnp.min(img)}')
       img = normalize_vector(img)
       print(f'2 max {jnp.max(img)} min {jnp.min(img)}')
       plt.imsave(os.path.join(dir_plot,f'exampleInput.jpg'), img)  # Using matplotlib
       break
-
+      #/home/jesimonbarreto/exampleInput.jpg
       emb_train = extract_features(batch_train)
       print(f'shape emb_train {emb_train.shape}')
       norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
