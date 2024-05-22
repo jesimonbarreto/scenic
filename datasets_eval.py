@@ -21,7 +21,6 @@ import json
 
 import numpy as np
 from collections import OrderedDict
-import matplotlib.pyplot as plt
 
 
 PRNGKey = jnp.ndarray
@@ -140,22 +139,7 @@ def get_dataset(*,
   logging.info(f' image {image_size}')
   logging.info(f' labels {labels_size}')
 
-  dir_plot='/home/jesimonbarreto/'
   
-  def normalize_vector(vector):
-    """Normalizes a JAX NumPy vector to values between 0 and 1."""
-    min_val = jnp.min(vector)
-    max_val = jnp.max(vector)
-    return (vector - min_val) / (max_val - min_val)
-  
-  
-  img = image_size[0,0]
-  print(f'shape {img.shape}')
-  print(f'1 max {jnp.max(img)} min {jnp.min(img)}')
-  img = normalize_vector(img)
-  print(f'2 max {jnp.max(img)} min {jnp.min(img)}')
-  plt.imsave(os.path.join(dir_plot,f'exampleInput.jpg'), img)  # Using matplotlib
-
   input_shape = (-1,) + tuple(train_ds.element_spec['image_resized'].shape[1:])
   labels_size = train_ds.element_spec['label_onehot'].shape
   logging.info(' input shape details %s', input_shape)
