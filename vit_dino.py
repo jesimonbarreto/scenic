@@ -179,7 +179,7 @@ class ViTDINO(nn.Module):
         seqlen=seqlen if drop_moment == 'early' else -1,
         positional_embedding=self.positional_embedding if use_pe else 'pe_not_in_use',
         seqlen_selection=seqlen_selection)
-    x_pre = x.copy()
+    #x_pre = x.copy()
     # ViT Encoder.
     for lyr in range(self.num_layers):
       x = vit.Encoder1DBlock(
@@ -206,7 +206,7 @@ class ViTDINO(nn.Module):
             "x_norm_patchtokens": x_norm[:, 1:],
             "x_prenorm": x,
             "masks": None,
-        }, x_pre, pos
+        }
 
 def norm_kernel_init_fn(rng, shape, dtype):
   """Initialize kernel with l2 normalized columns."""
