@@ -268,10 +268,9 @@ def train(
     for i in range(config.steps_per_epoch):
       path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
       if os.path.isfile(path_file+'.npz'):
-        print('Extracted before')
+        print('{path_file}.npz extracted before')
         continue
       batch_train = next(dataset.train_iter)
-      print(f' shape batch {batch_train.keys()}')
       emb_train = extract_features(batch_train)
       print(f'shape emb_train {emb_train.shape}')
       norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
