@@ -10,6 +10,7 @@ import ml_collections
 from scenic import app
 from scenic.train_lib import train_utils
 import ops  # pylint: disable=unused-import
+from jax.nn import softmax
 
 import os
 import sys
@@ -267,23 +268,11 @@ def train(
     print('Starting to extract features train')
     for i in range(config.steps_per_epoch):
       path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
-      #if os.path.isfile(path_file):
-      #  continue
+      if os.path.isfile(path_file):
+        print('Extracted before')
+        continue
       batch_train = next(dataset.train_iter)
-      #print(f' shape batch {batch_train.keys()}')
-      dir_plot='/home/jesimonbarreto/'
-      def normalize_vector(vector):
-        """Normalizes a JAX NumPy vector to values between 0 and 1."""
-        min_val = jnp.min(vector)
-        max_val = jnp.max(vector)
-        return (vector - min_val) / (max_val - min_val)
-      img = jnp.transpose(batch_train['image_resized'][0,0], (1,2,0))
-      print(f'shape {img.shape}')
-      print(f'1 max {jnp.max(img)} min {jnp.min(img)}')
-      img = normalize_vector(img)
-      print(f'2 max {jnp.max(img)} min {jnp.min(img)}')
-      plt.imsave(os.path.join(dir_plot,f'exampleInput.jpg'), img)  # Using matplotlib
-      break
+      print(f' shape batch {batch_train.keys()}')
       emb_train = extract_features(batch_train)
       print(f'shape emb_train {emb_train.shape}')
       norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
@@ -296,32 +285,9 @@ def train(
       emb_train = emb_train.reshape((bl*bg, emb))
       label_train = label_train.reshape((bl*bg))
       jnp.savez(path_file, emb=emb_train, label=label_train)
-    break
     
 
     print('Finishing extract features train')
-    #print(dataset.meta_data.keys)
-    '''for i in range(config.steps_per_epoch):
-      print(i)
-      batch = next(dataset.train_iter)
-      print(batch['image'].shape)
-      batch['emb'] = extract_features(batch)
-
-    for i in range(config.steps_per_epoch_eval):
-      print(i)
-      batch = next(dataset.valid_iter)
-
-      print(batch['image'].shape)
-      batch['emb'] = extract_features(batch)'''
-    
-    '''def my_transformation_function(batch):
-      # Existing logic for accessing desired key in batch
-      #transformed_data = ...  # Apply your transformation to the key value
-      batch["new_key"] = '1'
-      return batch
-
-    dataset.train_iter = map_(my_transformation_function, dataset.train_iter)
-    dataset.train_iter.keys()'''
 
     @jax.vmap
     def euclidean_distance(x1, x2):
@@ -338,12 +304,20 @@ def train(
 
     p_argsort = jax.pmap(jnp.argsort, in_axes=0)
 
+    def calculate_similarity(train_samples, test_samples):
+      return jnp.dot(test_samples, train_samples.T)
 
     def compute_distance(U, V):
       return compute_diff(U, V).mean(axis=-1)
     
     def compute_dist(u, v):
       return jnp.linalg.norm(u[:, None] - v[None, :], axis=-1)
+    
+    # Função para calcular a acurácia de um batch
+    def calculate_batch_correct_predictions(probas, labels):
+      predictions = jnp.argmax(probas, axis=1)
+      correct_predictions = jnp.sum(predictions == labels)
+      return correct_predictions
     
     devices = jax.device_count()
     n_test = config.dataset_configs.batch_size_test
@@ -356,136 +330,72 @@ def train(
       nearest = p_argsort(D)[..., 1:k+1]
       return nearest
     
-    for k in ks:
-      print(f'K: {k}')
-      len_test = 0
-      correct_pred = 0
-      predicts_acc = []
-      for i in range(config.steps_per_epoch_eval):
-        print(f'processing step eval {i}')
-        batch_eval = next(dataset.valid_iter)
-        emb_test = extract_features(batch_eval)[0]
-        bl, bg, emb = emb_test.shape
-        emb_test = emb_test.reshape((bl*bg, emb))
-        label_eval = batch_eval['label'].reshape((bl*bg))
-        norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2))==1
-        print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
-        if not norm_res:
-          emb_test = normalize(emb_test)
-      
-        #print(f'embeeding shape test {emb_test.shape}')
-        dist_all = []
-        labels = []
-        len_test += len(batch_eval)
-        for j in range(config.steps_per_epoch):
-          #batch_train = next(dataset.train_iter)
-          emb_file_save = os.path.join(dir_save_ckp,f'ckp_{step}_b{j}')
-          data_load = jnp.load(emb_file_save+'.npz')
-          emb_train = data_load['emb']#extract_features(batch_train)
-          label_train = data_load['label']#batch_train['label'][0]
-          #f = batch_train['image_resized']
-          #print(f'batch shape train {i}: {f.shape}')
-          #print(f'embeeding shape train {i}: {emb_train[0].shape}')
-          #print(f'embeeding shape test {i}: {emb_test[0].shape}')
-          #print(batch_train['label'].shape)
-          #dist_ = jax.vmap(euclidean_distance, in_axes=(0, 1))(emb_test, emb_train)
-          #####MUdar distancia
-          #####Montar a matriz certo, nao é so concatenar
-          #####Mudar a função de distancia para a padrão pq vmap ta com fulerage
-          dist_ = compute_dist(emb_test, emb_train)
-          if j == 0:
-            print(f' shape: emb train {emb_train.shape} emb test {emb_test.shape}')
-            print(f' shape: dist {dist_.shape} emb test {emb_test.shape}')
-          #print(f'dist shape train {i}: {dist_.shape} {dist_[0]}')
-          #print(f'labels shape train {i}: {label_train.shape} {label_train[0]}')
-
-          dist_all.append(dist_)
-          labels.append(label_train)
-        dist_all = jnp.concatenate(dist_all, axis=1)
-        labels = jnp.concatenate(labels)
-        if i ==0:
-          print(f' shape: dist_all {dist_all.shape} labels {labels.shape}')
-        #print(f'shape dist_all ------------ {dist_all.shape}')
-        #print(f'shape labels   ------------ {labels.shape}')
-          path_file_d = os.path.join(dir_save_y,f'dist_all{k}_b{i}')
-          jnp.savez(path_file_d, dist_all=dist_all)
-          path_file_d = os.path.join(dir_save_y,f'emb_test{k}_b{i}')
-          jnp.savez(path_file_d, emb_test=emb_test, label_eval=label_eval)
-
-        #dist_all = dist_all.reshape(devices, n_test // devices, -1)
-        #dist_all = jnp.repeat(jnp.expand_dims(dist_all,axis=0), devices, axis=0)
-        
-        path_file = os.path.join(dir_save_y,f'y_k{k}_b{i}')
-
-        k_nearest = jnp.argsort(dist_all)[:, :k]
-        print(f' shape kneares {k_nearest.shape}')
-        #k_nearest = k_nearest.reshape(-1, k)
-        k_nearest_labels = labels.squeeze()[k_nearest]  # Shape: (n, 5)
-        print(f' shape kneares labels{k_nearest_labels.shape}')
-        print(f' shape kneares labels{k_nearest_labels}')
-        print(f' labels {label_eval}')
-        #most_repetitive_labels = jnp.apply_along_axis(lambda row: jnp.bincount(jnp.asarray(row)).argmax(), axis=1, arr=jnp.asarray(k_nearest_labels))
-
-        #most_repetitive_labels = [(num_classes-1) - jnp.bincount(row, minlength=num_classes)[::-1].argmax() for row in k_nearest_labels]
-        most_repetitive_labels = jnp.array([jnp.bincount(row).argmax() for row in k_nearest_labels])
-        y_pred = most_repetitive_labels
-        path_file = os.path.join(dir_save_y,f'y_k{k}_b{i}')
-        jnp.savez(path_file, y_pred=y_pred, label=label_train)
-        jnp.savez(path_file_d, y_pred=y_pred, label=label_train)
-
-        comparison = jnp.array(y_pred).squeeze() == label_eval.squeeze()
-        corrects = comparison.sum()  # Proportion of correct matches
-        print(f"Step {step} -----> Corrects: {corrects:.1f} / total {len(comparison)}")
-        predicts_acc.append(corrects)
-        #class_rate = (labels[k_nearest, ...].mean(axis=1).round() == batch_eval['label'][0]).mean()
-        #print(f"{class_rate=}")
-        
-        '''@partial(jit, static_argnums=0)
-        def knn_vote(k, distances, train_labels):
-            # Get k nearest neighbors for each test sample
-            print(f'k {k}')
-            print(f'distances shape {distances}')
-            print(f'labels shape {train_labels}')
-            #k_mat = int(k[0])
-            #print(f'k {k_mat}')
-            nearest_indices = jnp.argpartition(distances, 5 - 1, axis=-1)[:5]
-            # Count occurrences of each class among neighbors
-            class_counts = jnp.bincount(train_labels[nearest_indices.flatten()])
-            # Predict class with the highest vote count
-            return jnp.argmax(class_counts, axis=-1)
-        
-        print(f'Dist all [0] : {dist_all[0]}')
-        k_ = [5]
-        
-        n = jax.device_count()
-        dist_all = jnp.repeat(jnp.array(dist_all).reshape(1,-1), n, axis=0) 
-        labels = jnp.repeat(jnp.array(labels).reshape(1,-1), n, axis=0)
-        k_ = jnp.repeat(jnp.array(k_).reshape(1,-1), n, axis=0)
-        print(f'shape dist_all ------------ {dist_all.shape}')
-        print(f'shape labels   ------------ {labels.shape}')
-
-        predictions = vmap(knn_vote)(k=jnp.array(k_), distances=dist_all, train_labels=labels)
-      
-        # Compare predictions with actual test labels
-        print('-----------------------------------')
-        print(f' pred  {predictions[0]}')
-        labels_eval = batch_eval['label'][0]
-        print(f' pred  {labels_eval}')
-        correct_predictions = jnp.equal(predictions[0], labels_eval)
-        correct_pred += jnp.sum(correct_predictions)'''
-      
-      predicts_acc = jnp.asarray(predicts_acc)
-      result = jnp.sum(predicts_acc)/len(predicts_acc)
-      
-      print(f"{k} Neighborhood: Accuracy total : {result:.4f} ---- executions {predicts_acc.shape} ----- step {step}")
-  
-    # Calculate accuracy as the ratio of correct predictions to total test samples
-    #accuracy = correct_pred / len_test
-
-    #print(f"Number of correct predictions: {correct_pred}")
-    #print(f"Number of total predictions: {len_test}")
-    #print(f"Accuracy: {accuracy:.4f}")
+    def one_hot(x, num_classes):
+      return jax.nn.one_hot(x, num_classes)
     
+    len_test = 0
+    T=config.get('T')
+    total_correct_predictions = {k: 0 for k in ks}
+    total_samples = 0
+    max_k = jnp.array(ks).max()
+    for i in range(config.steps_per_epoch_eval):
+      print(f'processing step eval {i}')
+      batch_eval = next(dataset.valid_iter)
+      emb_test = extract_features(batch_eval)[0]
+      bl, bg, emb = emb_test.shape
+      emb_test = emb_test.reshape((bl*bg, emb))
+      label_eval = batch_eval['label'].reshape((bl*bg))
+      norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2))==1
+      print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
+      if not norm_res:
+        emb_test = normalize(emb_test)
+    
+      print(f'embeeding shape test {emb_test.shape}')
+      sim_all = []
+      labels = []
+      len_test += len(batch_eval)
+      for j in range(config.steps_per_epoch):
+        emb_file_save = os.path.join(dir_save_ckp,f'ckp_{step}_b{j}')
+        data_load = jnp.load(emb_file_save+'.npz')
+        emb_train = data_load['emb']#extract_features(batch_train)
+        label_train = data_load['label']#batch_train['label'][0]
+
+        sim = calculate_similarity(emb_train, emb_test)
+        sim_all.append(sim)
+        labels.append(label_train)
+      
+      sim_all = jnp.concatenate(sim_all, axis=1)
+      labels = jnp.concatenate(labels)
+
+      # Usamos argsort para obter os índices que ordenariam a matriz
+      sorted_indices = jnp.argsort(sim_all, axis=-1)[:, ::-1]  # Ordena em ordem decrescente
+      topk_indices = sorted_indices[:, :max_k]
+
+      # Selecionamos os maiores valores de similaridade usando os índices ordenados
+      topk_sims = jnp.take_along_axis(sim_all, topk_indices, axis=-1)
+      labels = jnp.take_along_axis(labels, topk_indices, axis=-1)
+
+      batch_size = labels.shape[0]
+      topk_sims_transform = softmax(topk_sims / T, axis=1)
+      
+      matmul = one_hot(labels, num_classes=num_classes) * topk_sims_transform[:, :, None]
+      
+      probas_for_k = {k: jnp.sum(matmul[:, :k, :], axis=1) for k in ks}
+
+      for k in ks:
+        correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
+        total_correct_predictions[k] += correct_predictions
+        print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
+      total_samples += batch_size
+      
+
+    # Calcular a acurácia total para cada K
+    total_accuracies = {k: total_correct_predictions[k] / total_samples for k in ks}
+
+    # Resultado
+    print("Acurácia total para diferentes valores de K:")
+    for k, accuracy in total_accuracies.items():
+        print(f"K-{k} acurácia total: {accuracy:.4f}")
 
   train_utils.barrier_across_hosts()
 

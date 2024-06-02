@@ -26,10 +26,9 @@ class ToTokenSequence(nn.Module):
   posembs: Tuple[int, int] = (14, 14)
   positional_embedding: str = 'learned'
 
-  def add_positional_encodings(self, x: jnp.ndarray, w:int,h:int,
+  def add_positional_encodings(self, x: jnp.ndarray, w:int, h:int, c:int,
                                positional_embedding: str = '') -> jnp.ndarray:
     """Add positional encodings to the input patch sequence."""
-    c = x.shape[2]
 
     positional_embedding = positional_embedding or self.positional_embedding
     if positional_embedding == 'learned':
@@ -39,8 +38,7 @@ class ToTokenSequence(nn.Module):
           (1, self.posembs[0], self.posembs[1], c), x.dtype)
       # Optionally resize the positional encodings.
       if (h, w) != self.posembs:
-        posemb = jax.image.resize(posemb, (1, h, w, c), 'bicubic')
-        posemb = posemb.reshape((1, w*h, c))
+        posemb = jax.image.resize(posemb, (1, w, h, c), 'bicubic')
       x = x + posemb
     
     elif positional_embedding == 'learned_1d':
@@ -61,7 +59,7 @@ class ToTokenSequence(nn.Module):
     elif positional_embedding == 'sinusoidal_2d':
       x = attention_layers.AddFixedSinCosPositionEmbedding()(x)
     
-    return x
+    return x, posemb
 
   @nn.compact
   def __call__(self, x: jnp.ndarray, 
@@ -70,14 +68,12 @@ class ToTokenSequence(nn.Module):
                seqlen_selection: str = 'unstructured'):
     # Extracting patches and then embedding is in fact a single convolution.
     fh, fw = self.patches.size
-    n, c, h, w = x.shape
+    n, c, w, h = x.shape
     x = jnp.transpose(x, (0, 2, 3, 1))
     x = nn.Conv(self.hidden_size, (fh, fw), strides=(fh, fw), padding='VALID',
                 name='embedding')(x)
-    x = jnp.transpose(x, (0, 3, 1, 2))
-    n, c, h, w = x.shape
-    x = jnp.reshape(x, [n, c, h * w])
-    x = jnp.transpose(x, (0, 2, 1))
+    
+    n, w, h, c = x.shape
 
     is_initialized = self.has_variable('params','cls')
     if not is_initialized:
@@ -86,7 +82,10 @@ class ToTokenSequence(nn.Module):
       cls = self.get_variable('params','cls')
     
     # Adding positional encodings.
-    x = self.add_positional_encodings(x, w, h, positional_embedding)
+    x, posemb = self.add_positional_encodings(x, w, h, c, positional_embedding)
+    
+    x = jnp.reshape(x, (n, w*h, c))
+
     cls_exp = jnp.tile(cls, (x.shape[0], 1, 1))
     x = jnp.concatenate((cls_exp, x), axis=1)
 
@@ -100,7 +99,7 @@ class ToTokenSequence(nn.Module):
       if len(idx_kept_tokens) < n_tokens:
         x = jnp.take(x, idx_kept_tokens, axis=1)
 
-    return x, idx_kept_tokens
+    return x, posemb
 
 
 def token_indexes_not_to_drop(seqlen, n_tokens, seqlen_selection, rng):
@@ -157,7 +156,7 @@ class ViTDINO(nn.Module):
   attention_dropout_rate: float = 0.0
   stochastic_depth: float = 0.1
   posembs: Tuple[int, int] = (14, 14)
-  dtype: Any = jnp.floatToTokenSequence32
+  dtype: Any = jnp.float32
   loca: bool = False
 
   @nn.compact
@@ -174,16 +173,13 @@ class ViTDINO(nn.Module):
         hidden_size=self.hidden_size,
         posembs=self.posembs,
         positional_embedding=self.positional_embedding) 
-    x, idx_kept_tokens = to_token_fn(
+    x, pos = to_token_fn(
         x,
         #self.positional_embedding, 
         seqlen=seqlen if drop_moment == 'early' else -1,
         positional_embedding=self.positional_embedding if use_pe else 'pe_not_in_use',
         seqlen_selection=seqlen_selection)
-    
-    jax.debug.print("xshape: {center}", center=x.shape)
-    jax.debug.print("x[0,0]: {center}", center=x[0,0])
-    
+    x_pre = x.copy()
     # ViT Encoder.
     for lyr in range(self.num_layers):
       x = vit.Encoder1DBlock(
@@ -197,7 +193,7 @@ class ViTDINO(nn.Module):
           dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
               x, deterministic=not train)
     x_norm = nn.LayerNorm(name='encoder_norm')(x)
-    
+
     '''x = ProjectionHead(
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
@@ -210,7 +206,7 @@ class ViTDINO(nn.Module):
             "x_norm_patchtokens": x_norm[:, 1:],
             "x_prenorm": x,
             "masks": None,
-        }
+        }, x_pre, pos
 
 def norm_kernel_init_fn(rng, shape, dtype):
   """Initialize kernel with l2 normalized columns."""

@@ -259,14 +259,19 @@ def train(
   img_save = Image.fromarray((np.array((img*0.5)+0.5)*255).transpose(1, 2, 0).astype(np.uint8))
   img_save.save('/home/jesimon/Documentos/mestrado/meta_dog_features_jax_input.png')
 
+  np.save('/home/jesimon/Documentos/mestrado/py_image_proce_jax.npy',img)
+
   # Add batch dimension
+  #img = jnp.array(np.load('/home/jesimon/Documentos/mestrado/py_image_proce.npy'))
   img = tf.expand_dims(img, 0)
   img = tf.expand_dims(img, 0)
 
   ######################################################################################  
   batch_train = jnp.array(img)
-  result = extract_features(batch_train)
+  result, x_pre, pos = extract_features(batch_train)
   #result = jnp.squeeze(result)
+  np.save('/home/jesimon/Documentos/mestrado/jax_inp.npy',x_pre)
+  np.save('/home/jesimon/Documentos/mestrado/jax_pos.npy',pos)
   np.save('/home/jesimon/Documentos/mestrado/jax.npy',result)
   features = jnp.squeeze(result['x_norm_patchtokens'])
   print(features.shape)
