@@ -106,8 +106,6 @@ def representation_fn_eval(
         drop_moment='late',
         backbone = True,
         train=False)
-  print(embedding)
-  print(len(embedding))
   embedding = jnp.squeeze(embedding['x_norm_clstoken'])
   embedding = normalize(embedding)
 
@@ -269,7 +267,7 @@ def train(
     print('Starting to extract features train')
     for i in range(config.steps_per_epoch):
       path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
-      if os.path.isfile(path_file):
+      if os.path.isfile(path_file+'.npz'):
         print('Extracted before')
         continue
       batch_train = next(dataset.train_iter)
