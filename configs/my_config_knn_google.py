@@ -12,7 +12,7 @@ def get_config():
 
   """Returns the ViT experiment configuration."""
 
-
+  config.extract_train = False
   config = ml_collections.ConfigDict()
   config.experiment_name = '100ep_run'
   # Dataset.
