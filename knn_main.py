@@ -263,29 +263,29 @@ def train(
     
     if not os.path.exists(dir_save_y):
       os.makedirs(dir_save_y)
-
-    print('Starting to extract features train')
-    for i in range(config.steps_per_epoch):
-      path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
-      if os.path.isfile(path_file+'.npz'):
-        print('{path_file}.npz extracted before')
-        continue
-      batch_train = next(dataset.train_iter)
-      emb_train = extract_features(batch_train)
-      print(f'shape emb_train {emb_train.shape}')
-      norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
-      print(f'processing batch {i} shape {emb_train.shape}. Norma 1 {norm_res}')
-      if not norm_res:
-        emb_train = normalize(emb_train)
-      label_train = batch_train['label']
-      emb_train = emb_train[0]
-      bl, bg, emb = emb_train.shape
-      emb_train = emb_train.reshape((bl*bg, emb))
-      label_train = label_train.reshape((bl*bg))
-      jnp.savez(path_file, emb=emb_train, label=label_train)
-    
-
-    print('Finishing extract features train')
+    if config.get('extract_train'):
+      print('Starting to extract features train')
+      for i in range(config.steps_per_epoch):
+        path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
+        if os.path.isfile(path_file+'.npz'):
+          print('{path_file}.npz extracted before')
+          continue
+        batch_train = next(dataset.train_iter)
+        emb_train = extract_features(batch_train)
+        print(f'shape emb_train {emb_train.shape}')
+        norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
+        print(f'processing batch {i} shape {emb_train.shape}. Norma 1 {norm_res}')
+        if not norm_res:
+          emb_train = normalize(emb_train)
+        label_train = batch_train['label']
+        emb_train = emb_train[0]
+        bl, bg, emb = emb_train.shape
+        emb_train = emb_train.reshape((bl*bg, emb))
+        label_train = label_train.reshape((bl*bg))
+        jnp.savez(path_file, emb=emb_train, label=label_train)
+      print('Finishing extract features train')
+    else:
+      print('Not extract train')
 
     @jax.vmap
     def euclidean_distance(x1, x2):
@@ -371,7 +371,7 @@ def train(
 
       # Selecionamos os maiores valores de similaridade usando os índices ordenados
       topk_sims = jnp.take_along_axis(sim_all, topk_indices, axis=-1)
-      labels = jnp.take_along_axis(labels, topk_indices, axis=-1)
+      labels = labels[topk_indices]#jnp.take_along_axis(labels, topk_indices, axis=-1)
 
       batch_size = labels.shape[0]
       topk_sims_transform = softmax(topk_sims / T, axis=1)
