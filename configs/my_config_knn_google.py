@@ -38,6 +38,7 @@ def get_config():
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "image_resized")' +
+      f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
       '|resize_small(256, data_key="image")'+
       '|resize_small(256, data_key="image_resized")'+
       '|central_crop(224, data_key="image")'+
@@ -46,7 +47,7 @@ def get_config():
       '|value_range(0, 1, data_key="image_resized")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'+
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")'+
-      '|keep("image", "image_resized", "label")'
+      '|keep("image", "image_resized", "label", "label_onehot")'
   )
   ''' '|copy("image", "image_resized")' +
   f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
