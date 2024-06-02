@@ -106,7 +106,8 @@ def representation_fn_eval(
         drop_moment='late',
         backbone = True,
         train=False)
-  
+  print(embedding)
+  print(len(embedding))
   embedding = jnp.squeeze(embedding['x_norm_clstoken'])
   embedding = normalize(embedding)
 
