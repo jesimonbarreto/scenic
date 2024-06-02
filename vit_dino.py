@@ -68,8 +68,8 @@ class ToTokenSequence(nn.Module):
                seqlen_selection: str = 'unstructured'):
     # Extracting patches and then embedding is in fact a single convolution.
     fh, fw = self.patches.size
-    n, c, w, h = x.shape
-    x = jnp.transpose(x, (0, 2, 3, 1))
+    n, w, h, c = x.shape
+    #x = jnp.transpose(x, (0, 2, 3, 1))
     x = nn.Conv(self.hidden_size, (fh, fw), strides=(fh, fw), padding='VALID',
                 name='embedding')(x)
     
