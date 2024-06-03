@@ -11,9 +11,8 @@ STD = [0.5]
 def get_config():
 
   """Returns the ViT experiment configuration."""
-
-  config.extract_train = True
   config = ml_collections.ConfigDict()
+  config.extract_train = True
   config.experiment_name = '100ep_run'
   # Dataset.
   config.dataset_name = 'eval_dataset'
