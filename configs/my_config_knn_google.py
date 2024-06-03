@@ -1,6 +1,6 @@
 import ml_collections, os
 
-VARIANT = 'S/14'
+VARIANT = 'B/14'
 _IMAGENET_TRAIN_SIZE = 1281167 #9469 #1281167
 _IMAGENET_TEST_SIZE = 50000
 MEAN_RGB = [0.485, 0.456, 0.406]
@@ -12,7 +12,7 @@ def get_config():
 
   """Returns the ViT experiment configuration."""
 
-  config.extract_train = False
+  config.extract_train = True
   config = ml_collections.ConfigDict()
   config.experiment_name = '100ep_run'
   # Dataset.

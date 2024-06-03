@@ -267,9 +267,6 @@ def train(
       print('Starting to extract features train')
       for i in range(config.steps_per_epoch):
         path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
-        if os.path.isfile(path_file+'.npz'):
-          print('{path_file}.npz extracted before')
-          continue
         batch_train = next(dataset.train_iter)
         emb_train = extract_features(batch_train)
         print(f'shape emb_train {emb_train.shape}')
