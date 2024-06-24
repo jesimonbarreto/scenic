@@ -1,5 +1,5 @@
 import ml_collections, os
-
+import jax.numpy as jnp
 VARIANT = 'B/14'
 _IMAGENET_TRAIN_SIZE = 1281167 #9469 #1281167
 _IMAGENET_TEST_SIZE = 50000
@@ -36,7 +36,7 @@ def get_config():
 
   config.dataset_configs.filter_classes = True
   if config.dataset_configs.filter_classes:
-    config.dataset_configs.desired_classes = [0, 3, 9]
+    config.dataset_configs.desired_classes = jnp.array([0, 3, 9])
     config.class_mapping = {cls: i for i, cls in enumerate(config.dataset_configs.desired_classes)}
     config.class_mapping = [config.class_mapping.get(i, -1) for i in range(config.num_classes)]
     #update number classes variables
