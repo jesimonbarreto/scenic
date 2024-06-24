@@ -9,6 +9,9 @@ import jax.numpy as jnp
 from scenic.dataset_lib import dataset_utils
 from scenic.dataset_lib import datasets
 from scenic.dataset_lib.big_transfer import builder
+import data_utils
+import tensorflow as tf
+
 
 #tamanho das amostras estao indo é diferente para o batch
 
@@ -46,11 +49,20 @@ def get_dataset(*,
   n_train_ex = dataset_utils.get_num_examples(dataset_configs.dataset,
                                               dataset_configs.train_split,
                                               data_dir=dataset_configs.dataset_dir)
-  train_ds = dataset_utils.get_data(
+  
+  filter_cls = None 
+  if dataset_configs.get('filter_classes'):
+    desired_classes = tf.constant(dataset_configs.get('desired_classes'))
+    filter_cls=functools.partial(
+            data_utils.filter_classes_ts, allowed_labels=desired_classes
+    )
+  
+  train_ds = data_utils.get_data(
       dataset=dataset_configs.dataset,
       split=dataset_configs.train_split,
       data_dir=dataset_configs.get('dataset_dir'),
       batch_size=batch_size,
+      filter_fn=filter_cls,
       preprocess_fn=builder.get_preprocess_fn(dataset_configs.pp_train),
       shuffle_buffer_size=dataset_configs.shuffle_buffer_size,
       prefetch=dataset_configs.get('prefetch_to_host', 2),

@@ -16,6 +16,8 @@ from tensorflow.io import gfile
 from scenic.train_lib import train_utils
 import ops  # pylint: disable=unused-import
 import tensorflow_datasets as tfds
+import data_utils
+import tensorflow as tf
 
 import json
 
@@ -84,11 +86,19 @@ def get_dataset(*,
     download = True
   )
 
-  train_ds = dataset_utils.get_data(
+  filter_cls = None 
+  if dataset_configs.get('filter_classes'):
+    desired_classes = tf.constant(dataset_configs.get('desired_classes'))
+    filter_cls=functools.partial(
+            data_utils.filter_classes_ts, allowed_labels=desired_classes
+    )
+  
+  train_ds = data_utils.get_data(
       dataset=dataset_configs.dataset,
       split=dataset_configs.train_split,
       data_dir=dataset_configs.get('dataset_dir'),
       batch_size=dataset_configs.batch_size_train,
+      filter_fn=filter_cls,
       preprocess_fn=builder.get_preprocess_fn(dataset_configs.pp_train),
       shuffle_buffer_size=dataset_configs.shuffle_buffer_size,
       prefetch=dataset_configs.get('prefetch_to_host', 2),
@@ -96,11 +106,12 @@ def get_dataset(*,
       cache=False,
       ignore_errors=True)
   
-  eval_ds = dataset_utils.get_data(
+  eval_ds = data_utils.get_data(
       dataset=dataset_configs.dataset,
       split=dataset_configs.test_split,
       data_dir=dataset_configs.get('dataset_dir'),
       batch_size=dataset_configs.batch_size_test,
+      filter_fn=filter_cls,
       preprocess_fn=builder.get_preprocess_fn(dataset_configs.pp_train),
       shuffle_buffer_size=dataset_configs.shuffle_buffer_size,
       prefetch=dataset_configs.get('prefetch_to_host', 2),
@@ -132,7 +143,7 @@ def get_dataset(*,
   eval_iter = map(shard_batches, eval_iter)
   eval_iter = jax_utils.prefetch_to_device(eval_iter, prefetch_buffer_size)
 
-  image_size = eval_ds.element_spec['image_resized']
+  image_size = train_ds.element_spec['image_resized']
   labels_size = train_ds.element_spec['label_onehot']
   logging.info(f' train {train_ds.element_spec.keys()}')
   logging.info(f' test {eval_ds.element_spec.keys()}')

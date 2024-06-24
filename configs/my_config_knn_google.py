@@ -23,7 +23,7 @@ def get_config():
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
-  config.dataset_configs.dataset = 'imagenet2012'
+  config.dataset_configs.dataset = 'cifar10'#'imagenet2012'
   config.dataset_configs.dataset_dir = '/mnt/disks/persist/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
@@ -34,9 +34,21 @@ def get_config():
   crop_size = 224
   config.T = 0.07
 
+  config.dataset_configs.filter_classes = True
+  if config.dataset_configs.filter_classes:
+    config.dataset_configs.desired_classes = [0, 3, 9]
+    config.class_mapping = {cls: i for i, cls in enumerate(config.dataset_configs.desired_classes)}
+    config.class_mapping = [config.class_mapping.get(i, -1) for i in range(config.num_classes)]
+    #update number classes variables
+    config.num_classes = len(config.dataset_configs.desired_classe)
+    _IMAGENET_TRAIN_SIZE = 15000#update quantity samples train each class selected#1281167 #9469 #1281167
+    _IMAGENET_TEST_SIZE = 3000#update quantity samples train each class selected 50000
+
+
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "image_resized")' +
+      f'|adjust_labels({config.class_mapping}, , key="label", key_result="label_adj")' +
       f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
       '|resize_small(256, data_key="image")'+
       '|resize_small(256, data_key="image_resized")'+
@@ -48,18 +60,7 @@ def get_config():
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")'+
       '|keep("image", "image_resized", "label", "label_onehot")'
   )
-  ''' '|copy("image", "image_resized")' +
-  f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
-  f'|resize_small({reference_resolution}, method="area", antialias=True, inkey=("image"), outkey=("image"))' +
-  f'|resize_small({reference_resolution}, method="area", antialias=True, inkey=("image_resized"), outkey=("image_resized"))' +
-  #f'|copy_resize_file({reference_resolution}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))' +
-  f'|dino_transform(size={reference_resolution}, crop_size={crop_size}, mean={MEAN}, std={STD}, inkey=("image"), outkey=("image"))'
-  f'|dino_transform(size={reference_resolution}, crop_size={crop_size}, mean={MEAN}, std={STD}, inkey=("image_resized"), outkey=("image_resized"))'
-  #'|value_range(0, 1, data_key="image_resized")' +
-  #'|value_range(0, 1, data_key="image")' +
-  #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")' +
-  #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")' '''
-  #)
+
 
   ### kNN
 

@@ -5,6 +5,7 @@ from scenic.dataset_lib.big_transfer import registry
 from scenic.dataset_lib.big_transfer.preprocessing import utils
 import tensorflow as tf
 import tensorflow.compat.v2 as tf2
+import jax.numpy as jnp
 
 # The two following decorators mimic the support for single-input
 # single-output ops already in scenic.dataset_lib.big_transfer.preprocessing and
@@ -626,3 +627,18 @@ def concatenate(*keys):
     return {k: v for k, v in data.items() if k in keys}
 
   return _concatenate
+
+
+@registry.Registry.register("preprocess_ops.adjust_labels", "function")
+def adjust_labels(class_mapping,
+               key="labels",
+               key_result="labels_adj"):
+  
+  """One-hot encodes the input.
+  """
+  # Função para ajustar os rótulos para serem de 0 a len(desired_classes)-1
+  def _adjust_labels(data):
+    class_mapping = jnp.array(class_mapping)
+    data[key_result] = class_mapping[data[key]]
+    return data
+  return _adjust_labels
