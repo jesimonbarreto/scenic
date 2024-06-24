@@ -630,15 +630,20 @@ def concatenate(*keys):
 
 
 @registry.Registry.register("preprocess_ops.adjust_labels", "function")
-def adjust_labels(class_mapping,
-               key="labels",
-               key_result="labels_adj"):
+def adjust_labels(desired_classes,
+                  num_classes,
+                  filter_classes=True,
+                  key="labels",
+                  key_result="labels_adj"):
   
   """One-hot encodes the input.
   """
   # Função para ajustar os rótulos para serem de 0 a len(desired_classes)-1
   def _adjust_labels(data):
-    class_mapping = jnp.array(class_mapping)
-    data[key_result] = class_mapping[data[key]]
+    if filter_classes:
+      class_mapping = {cls: i for i, cls in enumerate(desired_classes)}
+      class_mapping = [class_mapping.get(i, -1) for i in range(num_classes)]
+      class_mapping = jnp.array(class_mapping)
+      data[key_result] = class_mapping[data[key]]
     return data
   return _adjust_labels
