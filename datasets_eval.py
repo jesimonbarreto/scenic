@@ -156,11 +156,11 @@ def get_dataset(*,
   logging.info(' input shape details %s', input_shape)
   logging.info(' samples details %s', labels_size)
   
-  for i in range(5): 
-    batch_ = next(train_iter)
-    logging.info(' label %s', batch_['label'])
-    logging.info(' label adj %s', batch_['label_adj'])
-    logging.info(' label adj %s', batch_['nothing'])
+
+  batch_ = next(train_iter)
+  logging.info(' label %s', batch_['label'])
+  logging.info(' label adj %s', batch_['label_adj'])
+  logging.info(' label adj %s', batch_['nothing'])
 
   meta_data = {
       'input_shape': input_shape,
