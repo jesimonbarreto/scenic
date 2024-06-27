@@ -34,7 +34,7 @@ def get_config():
   crop_size = 224
   config.T = 0.07
 
-  config.dataset_configs.filter_classes = False
+  config.dataset_configs.filter_classes = True
   if config.dataset_configs.filter_classes:
     config.dataset_configs.desired_classes = [1, 3, 9]
     #update number classes variables
