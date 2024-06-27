@@ -159,7 +159,7 @@ def get_dataset(*,
 
   batch_ = next(train_iter)
   print(batch_['label'])
-  #print(batch_['label_adj'][:100])
+  print(batch_['label_adj'])
   #logging.info(' label adj %s', batch_['label_adj'])
   batch_['nothing']
 
