@@ -1,8 +1,8 @@
 import ml_collections, os
 import jax.numpy as jnp
 VARIANT = 'B/14'
-_IMAGENET_TRAIN_SIZE = 1281167 #9469 #1281167
-_IMAGENET_TEST_SIZE = 50000
+_IMAGENET_TRAIN_SIZE = 50000#1281167 #9469 #1281167
+_IMAGENET_TEST_SIZE = 10000#50000
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 MEAN = [0.5]
@@ -29,7 +29,7 @@ def get_config():
   config.dataset_configs.test_split = 'test'#'validation'
   config.dataset_configs.batch_size_train = 1024
   config.dataset_configs.batch_size_test = 64
-  config.num_classes = 1000
+  config.num_classes = 10#1000
   reference_resolution = 224
   crop_size = 224
   config.T = 0.07
