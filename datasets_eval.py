@@ -156,6 +156,11 @@ def get_dataset(*,
   logging.info(' input shape details %s', input_shape)
   logging.info(' samples details %s', labels_size)
 
+  batch_ = next(train_iter)
+
+  logging.info(' label %s', batch_['label'])
+  logging.info(' label adj %s', batch_['label_adj'])
+
   meta_data = {
       'input_shape': input_shape,
       'num_train_examples': n_train_ex,
