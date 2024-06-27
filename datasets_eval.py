@@ -158,9 +158,9 @@ def get_dataset(*,
   
 
   batch_ = next(train_iter)
-  logging.info(' label %s', batch_['label'])
+  print(' label %s', batch_['label'])
   #logging.info(' label adj %s', batch_['label_adj'])
-  logging.info(' label adj %s', batch_['nothing'])
+  print(' label adj %s', batch_['nothing'])
 
   meta_data = {
       'input_shape': input_shape,
