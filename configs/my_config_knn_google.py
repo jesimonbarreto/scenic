@@ -27,14 +27,14 @@ def get_config():
   config.dataset_configs.dataset_dir = '/mnt/disks/persist/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'test'#'validation'
-  config.dataset_configs.batch_size_train = 64
+  config.dataset_configs.batch_size_train = #64
   config.dataset_configs.batch_size_test = 64
   config.num_classes = 1000
   reference_resolution = 224
   crop_size = 224
   config.T = 0.07
 
-  config.dataset_configs.filter_classes = True
+  config.dataset_configs.filter_classes = False
   if config.dataset_configs.filter_classes:
     config.dataset_configs.desired_classes = [0, 3, 9]
     #update number classes variables
