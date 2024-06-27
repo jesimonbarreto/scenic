@@ -26,7 +26,7 @@ def get_config():
   config.dataset_configs.dataset = 'cifar10'#'imagenet2012'
   config.dataset_configs.dataset_dir = '/mnt/disks/persist/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
-  config.dataset_configs.test_split = 'validation'
+  config.dataset_configs.test_split = 'test'#'validation'
   config.dataset_configs.batch_size_train = 64
   config.dataset_configs.batch_size_test = 64
   config.num_classes = 1000
@@ -56,7 +56,7 @@ def get_config():
       '|value_range(0, 1, data_key="image_resized")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'+
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")'+
-      '|keep("image", "image_resized", "label", "label_onehot")'
+      '|keep("image", "image_resized", "label", "label_adj", "label_onehot")'
   )
 
 
