@@ -36,17 +36,17 @@ def get_config():
 
   config.dataset_configs.filter_classes = False
   if config.dataset_configs.filter_classes:
-    config.dataset_configs.desired_classes = [0, 3, 9]
+    config.dataset_configs.desired_classes = [1, 3, 9]
     #update number classes variables
     config.num_classes = len(config.dataset_configs.desired_classes)
-    #_IMAGENET_TRAIN_SIZE = 15000#update quantity samples train each class selected#1281167 #9469 #1281167
-    #_IMAGENET_TEST_SIZE = 3000#update quantity samples train each class selected 50000
+    _IMAGENET_TRAIN_SIZE = 15000#update quantity samples train each class selected#1281167 #9469 #1281167
+    _IMAGENET_TEST_SIZE = 3000#update quantity samples train each class selected 50000
 
 
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "image_resized")' +
-      #f'|adjust_labels({config.dataset_configs.desired_classes}, {config.num_classes},{config.dataset_configs.filter_classes}, key="label", key_result="label_adj")' +
+      f'|adjust_labels({config.dataset_configs.desired_classes}, {config.num_classes},{config.dataset_configs.filter_classes}, key="label", key_result="label_adj")' +
       f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
       '|resize_small(256, data_key="image")'+
       '|resize_small(256, data_key="image_resized")'+
