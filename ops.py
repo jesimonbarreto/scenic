@@ -636,7 +636,7 @@ def adjust_labels(desired_classes,
                   key="labels",
                   key_result="labels_adj"):
   
-  """One-hot encodes the input.
+  """adjust encodes the input.
   """
   # Função para ajustar os rótulos para serem de 0 a len(desired_classes)-1
   def _adjust_labels(data):
