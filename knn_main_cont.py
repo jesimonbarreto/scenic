@@ -150,6 +150,7 @@ def train(
   total_counts_val = jnp.zeros(1000, dtype=int)
   
   for i in range(config.steps_per_epoch):
+    print(f'Processing {i}')
     batch_train = next(dataset.train_iter)
     shp = batch_train['label'].shape
     label_train = batch_train['label']
@@ -160,6 +161,7 @@ def train(
   combined_value_counts_train = {i: total_counts_train[i] for i in range(1000)}
 
   for i in range(config.steps_per_epoch_eval):
+    print(f'Processing {i}')
     batch_eval = next(dataset.valid_iter)
     shp = batch_eval['label'].shape
     label_eval = batch_eval['label'].reshape((shp[0]*shp[1]))
