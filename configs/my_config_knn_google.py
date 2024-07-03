@@ -60,7 +60,7 @@ def get_config():
       'decode' +
       '|copy("image", "image_resized")' +
       #f'|adjust_labels({config.dataset_configs.desired_classes}, {config.num_classes},{config.dataset_configs.filter_classes}, key="label", key_result="label_adj")' +
-      f'|onehot({config.num_classes_filter}, key="label_adj", key_result="label_onehot")' +
+      f'|onehot({config.num_classes_filter}, key="label", key_result="label_onehot")' +
       '|resize_small(256, data_key="image")'+
       '|resize_small(256, data_key="image_resized")'+
       '|central_crop(224, data_key="image")'+
