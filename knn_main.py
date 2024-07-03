@@ -380,7 +380,7 @@ def train(
       for k in ks:
         correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
         total_correct_predictions[k] += correct_predictions
-        print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
+        print(f'Using k = {k} -- batch {batch_size}/{correct_predictions} certos')
       total_samples += batch_size
       
 
@@ -388,9 +388,9 @@ def train(
     total_accuracies = {k: total_correct_predictions[k] / total_samples for k in ks}
 
     # Resultado
-    print("Acurácia total para diferentes valores de K:")
+    print("Total Accuracy:")
     for k, accuracy in total_accuracies.items():
-        print(f"K-{k} acurácia total: {accuracy:.4f}")
+        print(f"K:{k} Accuracy: {accuracy:.4f}")
 
   train_utils.barrier_across_hosts()
 

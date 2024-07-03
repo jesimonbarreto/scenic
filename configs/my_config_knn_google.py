@@ -1,8 +1,8 @@
 import ml_collections, os
 import jax.numpy as jnp
 VARIANT = 'B/14'
-_IMAGENET_TRAIN_SIZE = 50000#1281167 #9469 #1281167
-_IMAGENET_TEST_SIZE = 10000#50000
+_IMAGENET_TRAIN_SIZE = 1281167 #9469 #1281167
+_IMAGENET_TEST_SIZE = 50000
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 MEAN = [0.5]
@@ -23,25 +23,33 @@ def get_config():
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
-  config.dataset_configs.dataset = 'cifar10'#'imagenet2012'
+  config.dataset_configs.dataset = 'imagenet2012'
   config.dataset_configs.dataset_dir = '/mnt/disks/persist/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
-  config.dataset_configs.test_split = 'test'#'validation'
+  config.dataset_configs.test_split = 'validation'
   config.dataset_configs.batch_size_train = 1024
   config.dataset_configs.batch_size_test = 64
-  config.num_classes = 10#1000
+  config.num_classes = 1000
   reference_resolution = 224
   crop_size = 224
   config.T = 0.07
 
-  config.dataset_configs.filter_classes = True
+  config.dataset_configs.filter_classes = False
   if config.dataset_configs.filter_classes:
     global _IMAGENET_TRAIN_SIZE, _IMAGENET_TEST_SIZE
-    config.dataset_configs.desired_classes = [1, 3, 9]
+    config.dataset_configs.desired_classes = [
+                                              897, 827, 764, 761, 742, 721, 651,
+                                              650, 637, 632, 620, 738, 534, 508,
+                                              435, 412, 879, 859, 463, 470, 481,
+                                              473, 587, 313, 872, 629, 745, 760,
+                                              963, 938, 937, 987, 943, 955, 953,
+                                              957, 954, 752, 792, 626, 951, 112,
+                                              928
+                                              ]
     #update number classes variables
     config.num_classes_filter = len(config.dataset_configs.desired_classes)
-    _IMAGENET_TRAIN_SIZE = 15000#update quantity samples train each class selected#1281167 #9469 #1281167
-    _IMAGENET_TEST_SIZE = 3000#update quantity samples train each class selected 50000
+    _IMAGENET_TRAIN_SIZE = 15000#732-1300 per class in the ILSVRC2012 training set. #update quantity samples train each class selected
+    _IMAGENET_TEST_SIZE = 3000#update quantity samples train each class selected
   else:
     _IMAGENET_TRAIN_SIZE = _IMAGENET_TRAIN_SIZE
     _IMAGENET_TEST_SIZE = _IMAGENET_TRAIN_SIZE
@@ -51,7 +59,7 @@ def get_config():
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "image_resized")' +
-      f'|adjust_labels({config.dataset_configs.desired_classes}, {config.num_classes},{config.dataset_configs.filter_classes}, key="label", key_result="label_adj")' +
+      #f'|adjust_labels({config.dataset_configs.desired_classes}, {config.num_classes},{config.dataset_configs.filter_classes}, key="label", key_result="label_adj")' +
       f'|onehot({config.num_classes_filter}, key="label_adj", key_result="label_onehot")' +
       '|resize_small(256, data_key="image")'+
       '|resize_small(256, data_key="image_resized")'+
@@ -61,7 +69,8 @@ def get_config():
       '|value_range(0, 1, data_key="image_resized")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'+
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")'+
-      '|keep("image", "image_resized", "label_adj", "label", "label_onehot")'
+      '|keep("image", "image_resized", "label", "label_onehot")'
+      #'|keep("image", "image_resized", "label_adj", "label", "label_onehot")'
   )
 
 
