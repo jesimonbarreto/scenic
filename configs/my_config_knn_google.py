@@ -27,14 +27,14 @@ def get_config():
   config.dataset_configs.dataset_dir = '/mnt/disks/persist/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
-  config.dataset_configs.batch_size_train = 1024
-  config.dataset_configs.batch_size_test = 1024
+  config.dataset_configs.batch_size_train = 256
+  config.dataset_configs.batch_size_test = 64
   config.num_classes = 1000
   reference_resolution = 224
   crop_size = 224
   config.T = 0.07
 
-  config.dataset_configs.filter_classes = False
+  config.dataset_configs.filter_classes = True
   if config.dataset_configs.filter_classes:
     config.dataset_configs.desired_classes = [
                                               897, 827, 764, 761, 742, 721, 651,
@@ -46,9 +46,9 @@ def get_config():
                                               928
                                               ]
     #update number classes variables
-    config.num_classes_filter = len(config.dataset_configs.desired_classes)
+    config.num_classes_filter = config.num_classes#len(config.dataset_configs.desired_classes)
     _IMAGENET_TRAIN_SIZE = 1281167#732-1300 per class in the ILSVRC2012 training set. #update quantity samples train each class selected
-    _IMAGENET_TEST_SIZE = 3000#update quantity samples train each class selected
+    _IMAGENET_TEST_SIZE = 2134#update quantity samples train each class selected
   else:
     config.num_classes_filter = config.num_classes
 
