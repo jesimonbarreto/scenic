@@ -146,32 +146,24 @@ def train(
 ) -> Tuple[Any, Any]:
 
   # Inicializa um array para armazenar as contagens combinadas
-  total_counts_train = jnp.zeros(1000, dtype=int)
   total_counts_val = jnp.zeros(1000, dtype=int)
   
-  for i in range(config.steps_per_epoch):
-    print(f'Processing {i}')
-    batch_train = next(dataset.train_iter)
-    shp = batch_train['label'].shape
-    label_train = batch_train['label']
-    label_train = label_train.reshape((shp[0]*shp[1]))
-    counts = jnp.bincount(label_train, minlength=1000)
-    total_counts_train += counts
-
-  combined_value_counts_train = {i: total_counts_train[i] for i in range(1000)}
 
   for i in range(config.steps_per_epoch_eval):
     print(f'Processing {i}')
     batch_eval = next(dataset.valid_iter)
     shp = batch_eval['label'].shape
+    print(f'shape before {shp}')
     label_eval = batch_eval['label'].reshape((shp[0]*shp[1]))
     counts = jnp.bincount(label_eval, minlength=1000)
+    print(f'shape after {label_eval.shape}')
     total_counts_val += counts
+    print(f'counts {counts}')
 
   combined_value_counts_val = {i: total_counts_val[i] for i in range(1000)}
 
     
-  jnp.savez('/home/jesimonbarreto/count_samples_imgnet.npz', train=combined_value_counts_train, val=combined_value_counts_val)
+  jnp.savez('/home/jesimonbarreto/count_samples_imgnet.npz', val_arr=total_counts_val, val_dic=combined_value_counts_val)
 
   print('Finished')
 

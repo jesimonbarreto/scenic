@@ -28,7 +28,7 @@ def get_config():
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
   config.dataset_configs.batch_size_train = 1024
-  config.dataset_configs.batch_size_test = 64
+  config.dataset_configs.batch_size_test = 1024
   config.num_classes = 1000
   reference_resolution = 224
   crop_size = 224

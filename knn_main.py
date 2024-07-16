@@ -129,14 +129,15 @@ def knn_evaluate(
   dataset = train_utils.get_dataset(
       config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
   
-  train(
+  eval(
       rng=rng,
       config=config,
       dataset=dataset,
       workdir=workdir,
-      writer=writer)
+      writer=writer
+  )
   
-def train(
+def eval(
     *,
     rng: jnp.ndarray,
     config: ml_collections.ConfigDict,
