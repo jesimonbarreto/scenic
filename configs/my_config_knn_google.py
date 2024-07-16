@@ -9,7 +9,7 @@ MEAN = [0.5]
 STD = [0.5]
 
 def get_config():
-
+  global _IMAGENET_TRAIN_SIZE, _IMAGENET_TEST_SIZE
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   config.extract_train = True
@@ -36,7 +36,6 @@ def get_config():
 
   config.dataset_configs.filter_classes = False
   if config.dataset_configs.filter_classes:
-    global _IMAGENET_TRAIN_SIZE, _IMAGENET_TEST_SIZE
     config.dataset_configs.desired_classes = [
                                               897, 827, 764, 761, 742, 721, 651,
                                               650, 637, 632, 620, 738, 534, 508,
@@ -51,8 +50,6 @@ def get_config():
     _IMAGENET_TRAIN_SIZE = 15000#732-1300 per class in the ILSVRC2012 training set. #update quantity samples train each class selected
     _IMAGENET_TEST_SIZE = 3000#update quantity samples train each class selected
   else:
-    _IMAGENET_TRAIN_SIZE = _IMAGENET_TRAIN_SIZE
-    _IMAGENET_TEST_SIZE = _IMAGENET_TRAIN_SIZE
     config.num_classes_filter = config.num_classes
 
 
