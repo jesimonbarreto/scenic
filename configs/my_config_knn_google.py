@@ -28,7 +28,7 @@ def get_config():
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
   config.dataset_configs.batch_size_train = 1024
-  config.dataset_configs.batch_size_test = 1000
+  config.dataset_configs.batch_size_test = 1024
   config.num_classes = 1000
   reference_resolution = 224
   crop_size = 224
@@ -47,7 +47,7 @@ def get_config():
                                               ]
     #update number classes variables
     config.num_classes_filter = len(config.dataset_configs.desired_classes)
-    _IMAGENET_TRAIN_SIZE = 15000#732-1300 per class in the ILSVRC2012 training set. #update quantity samples train each class selected
+    _IMAGENET_TRAIN_SIZE = 1281167#732-1300 per class in the ILSVRC2012 training set. #update quantity samples train each class selected
     _IMAGENET_TEST_SIZE = 3000#update quantity samples train each class selected
   else:
     config.num_classes_filter = config.num_classes

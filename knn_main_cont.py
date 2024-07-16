@@ -149,7 +149,7 @@ def train(
   total_counts_val = jnp.zeros(1000, dtype=int)
   
 
-  for i in range(config.steps_per_epoch_eval):
+  for i in range(config.steps_per_epoch_eval + 1):
     print(f'Processing {i}')
     batch_eval = next(dataset.valid_iter)
     shp = batch_eval['label'].shape
