@@ -39,7 +39,7 @@ mvimgnet_classes = [
 ]
 
 class Builder(tfds.core.GeneratorBasedBuilder):
-  """DatasetBuilder for MVImgNet dataset."""
+  """DatasetBuilder for mvimgnet dataset."""
 
   VERSION = tfds.core.Version('1.0.0')
   RELEASE_NOTES = {
