@@ -1,12 +1,12 @@
 """MVImgNet dataset."""
 
-from . import MVImgNet_dataset_builder
+from . import mvimgnet_dataset_builder
 import tensorflow_datasets as tfds
 
 class MvimgnetTest(tfds.testing.DatasetBuilderTestCase):
   """Tests for MVImgNet dataset."""
   # TODO(MVImgNet):
-  DATASET_CLASS = MVImgNet_dataset_builder.Builder
+  DATASET_CLASS = mvimgnet_dataset_builder.Builder
   SPLITS = {
       'train': 3,  # Number of fake train example
       'test': 1,  # Number of fake test example
