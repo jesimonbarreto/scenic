@@ -114,6 +114,8 @@ def get_config():
   #config.dataset_configs.dataset = 'imagenet2012'
   config.dataset_configs.dataset = 'MVImagenet'
   config.dataset_configs.train_split = 'train'
+  config.dataset_configs.dataset_dir = '/mnt/disks/persist/dataset/imagenet/'
+
 
   # Model.
   version, patch = VARIANT.split('/')
