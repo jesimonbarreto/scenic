@@ -67,7 +67,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     # TODO(MVImgNet): Downloads the data and defines the splits
     #path = dl_manager.download_and_extract('https://todo-data-url')
 
-    path = os.path.join('/mnt/disks/persist/dataset/imagenet/','data_mv.zip')
+    path = os.path.join('/mnt/disks/persist/dataset/','mvimgnet')
     
 
     # TODO(MVImgNet): Returns the Dict[split names, Iterator[Key, Example]]
