@@ -284,7 +284,7 @@ def imagenet_load_split(batch_size,
   return ds
 
 
-@datasets.add_dataset('MVImagenet')
+@datasets.add_dataset('mvimgnet')
 def get_dataset(*,
                 batch_size,
                 eval_batch_size,
