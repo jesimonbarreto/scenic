@@ -28,9 +28,9 @@ def get_config():
   config.number_plot = 5
   config.dir_plot = '/home/jesimonbarreto/images/'
 
-  # Training.
+  # Training.'MVImagenet'
   config.max_grad_norm = 1
-  config.num_training_epochs = 100#400
+  config.num_training_epochs = 2#400
   config.batch_size = 512
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -40,7 +40,7 @@ def get_config():
   config.local_crops_scale = (0.05,0.4)
   config.student_temp = 0.1
   config.center_momentum = 0.9
-  config.ncrops = 8
+  config.ncrops = 0 #change other parameters
   config.warmup_teacher_temp = 0.04
   config.teacher_temp = 0.04
   config.warmup_teacher_temp_epochs = 0
@@ -112,7 +112,7 @@ def get_config():
   
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.dataset = 'imagenette'
+  config.dataset_configs.dataset = 'MVImagenet'
   config.dataset_configs.train_split = 'train'
 
   # Model.

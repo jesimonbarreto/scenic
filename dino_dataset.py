@@ -11,6 +11,7 @@ from scenic.dataset_lib import datasets
 from scenic.dataset_lib.big_transfer import builder
 import data_utils
 import tensorflow as tf
+import mvimagenet_dataset
 
 
 #tamanho das amostras estao indo é diferente para o batch
