@@ -114,8 +114,10 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         print(f" dir_frames {dir_search}")
         #base_names = [os.path.basename(fpath) for fpath in frames_video]
         print(f" base names {frames_video}")
+        
+        #for 
         record = {
-            "images": frames_video,
+            "image": frames_video,
             "label": int(label),
             #"label_name": mvimgnet_classes[label],
             "obj_var": obj_var
