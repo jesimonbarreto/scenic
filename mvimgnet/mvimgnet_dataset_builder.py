@@ -120,4 +120,4 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #"label_name": mvimgnet_classes[label],
             "obj_var": obj_var
         }
-        yield base_names, record
+        yield frames_video, record
