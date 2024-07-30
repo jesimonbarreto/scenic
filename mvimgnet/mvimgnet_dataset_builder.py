@@ -112,7 +112,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         record = {
             "images": base_names,
             "label": label,
-            "label_name": mvimgnet_classes[label],
+            #"label_name": mvimgnet_classes[label],
             "obj_var": obj_var
         }
         yield base_names, record
