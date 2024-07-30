@@ -67,7 +67,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     # TODO(MVImgNet): Downloads the data and defines the splits
     #path = dl_manager.download_and_extract('https://todo-data-url')
 
-    path = os.path.join('/mnt/disks/persist/dataset/','mvimgnet')
+    path = os.path.join('/mnt/disks/persist/dataset/mvimgnet','1.0.0')
     
 
     # TODO(MVImgNet): Returns the Dict[split names, Iterator[Key, Example]]
@@ -109,6 +109,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
         frames_video = tf.io.gfile.glob(os.path.join(datapath, label, obj_var, "*.jpg"))
         base_names = [os.path.basename(fpath) for fpath in frames_video]
+        print(base_names)
         record = {
             "images": base_names,
             "label": label,
