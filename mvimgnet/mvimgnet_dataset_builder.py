@@ -117,7 +117,9 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         id = label+'_'+obj_var
         print(f" id {id}")
         record = {
-            "image": frames_video[0],
-            "label": int(label)
+          #"shape": Sequence[Optional[int]],
+          #"encoding_format": str = 'png',
+          "video": frames_video,
+          "label": int(label)
         }
         yield id, record
