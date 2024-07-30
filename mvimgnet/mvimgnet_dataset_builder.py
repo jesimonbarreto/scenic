@@ -61,7 +61,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             # These are the features of your dataset like images, labels ...
             'video': tfds.features.Video(
               video_shape,
-              encoding_format= 'jpg'),
+              encoding_format= 'jpeg'),
             'label': tfds.features.ClassLabel(names=list(mvimgnet_classes)),
         }),
         # If there's a common (input, target) tuple from the
