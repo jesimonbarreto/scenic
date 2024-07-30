@@ -116,7 +116,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         print(f" base names {base_names}")
         record = {
             "images": base_names,
-            "label": label,
+            "label": mvimgnet_classes[label],
             #"label_name": mvimgnet_classes[label],
             "obj_var": obj_var
         }
