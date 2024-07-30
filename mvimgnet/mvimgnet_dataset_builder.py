@@ -106,10 +106,12 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   def _generate_examples(self, datapath):
     """Yields examples."""
     for label in tf.io.gfile.listdir(datapath):
+      print(f" label {label}")
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
+        print(f" obj_var {obj_var}")
         frames_video = tf.io.gfile.glob(os.path.join(datapath, label, obj_var, "*.jpg"))
         base_names = [os.path.basename(fpath) for fpath in frames_video]
-        print(base_names)
+        print(f" base names {base_names}")
         record = {
             "images": base_names,
             "label": label,
