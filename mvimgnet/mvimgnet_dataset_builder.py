@@ -46,19 +46,28 @@ class Builder(tfds.core.GeneratorBasedBuilder):
       '1.0.0': 'Initial release.',
   }
 
+
   def _info(self) -> tfds.core.DatasetInfo:
     """Returns the dataset metadata."""
     # TODO(MVImgNet): Specifies the tfds.core.DatasetInfo object
+    video_shape = (
+        None,
+        224,
+        224,
+        3,
+    )
     return self.dataset_info_from_configs(
         features=tfds.features.FeaturesDict({
             # These are the features of your dataset like images, labels ...
-            'image': tfds.features.Image(shape=(None, None, 3)),
+            'video': tfds.features.Video(
+              video_shape,
+              encoding_format= 'jpg'),
             'label': tfds.features.ClassLabel(names=list(mvimgnet_classes)),
         }),
         # If there's a common (input, target) tuple from the
         # features, specify them here. They'll be used if
         # `as_supervised=True` in `builder.as_dataset`.
-        supervised_keys=('images', 'label', 'label_number'),  # Set to `None` to disable
+        supervised_keys=('video', 'label'),  # Set to `None` to disable
         homepage='https://dataset-homepage/',
     )
 
@@ -117,8 +126,6 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         id = label+'_'+obj_var
         print(f" id {id}")
         record = {
-          #"shape": Sequence[Optional[int]],
-          #"encoding_format": str = 'png',
           "video": frames_video,
           "label": int(label)
         }
