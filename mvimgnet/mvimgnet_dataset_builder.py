@@ -112,10 +112,10 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         dir_search = os.path.join(datapath, label, obj_var,'images', "*.jpg")
         frames_video = tf.io.gfile.glob(dir_search)
         print(f" dir_frames {dir_search}")
-        base_names = [os.path.basename(fpath) for fpath in frames_video]
-        print(f" base names {base_names}")
+        #base_names = [os.path.basename(fpath) for fpath in frames_video]
+        print(f" base names {frames_video}")
         record = {
-            "images": base_names,
+            "images": frames_video,
             "label": mvimgnet_classes[label],
             #"label_name": mvimgnet_classes[label],
             "obj_var": obj_var
