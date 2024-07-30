@@ -111,8 +111,8 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         base_names = [os.path.basename(fpath) for fpath in frames_video]
         record = {
             "images": base_names,
-            "label": mvimgnet_classes[label],
-            "label_number": label,
+            "label": label,
+            "label_name": mvimgnet_classes[label],
             "obj_var": obj_var
         }
         yield base_names, record
