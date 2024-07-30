@@ -116,7 +116,9 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         print(f" base names {frames_video}")
         id = label+'_'+obj_var
         print(f" id {id}")
-        #for 
+        frames_video = tf.constant(frames_video)
+        # Serialize the tensor
+        frames_video = tf.io.serialize_tensor(frames_video)
         record = {
             "image": frames_video,
             "label": int(label)
