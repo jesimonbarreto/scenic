@@ -116,7 +116,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         print(f" base names {frames_video}")
         record = {
             "images": frames_video,
-            "label": mvimgnet_classes[label],
+            "label": int(label),
             #"label_name": mvimgnet_classes[label],
             "obj_var": obj_var
         }
