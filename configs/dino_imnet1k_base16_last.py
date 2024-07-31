@@ -48,8 +48,8 @@ def get_config():
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
   config.dataset_configs.pp_train = (
-      'decode(inkey="image1", outkey="image1")' +
-      'decode(inkey="image2", outkey="image2")' +
+      'decode(inkey=("image1"), outkey=("image1"))' +
+      'decode(inkey=("image2"), outkey=("image2"))' +
       f'|copy("image1", "x1")'+
       f'|copy("image2", "x2")'+
       '|value_range(0, 1, data_key="x1")' +
