@@ -681,13 +681,16 @@ def get_decode_video(channels=3):
     # tf.io.decode_image does not set the shape correctly, so we use
     # tf.io.deocde_jpeg, which also works for png, see
     # https://github.com/tensorflow/tensorflow/issues/8551
-    images=[]
-    print(image)
-    for i in image:
-      print(f'size tensor {i}')
-      img = tf.io.decode_jpeg(i, channels=channels)
-      images.append(img)
-    return images
+
+    @tf.function
+    def preprocess_fn(image):
+        # Ensure all operations are within this function
+        decoded_image = tf.io.decode_jpeg(image, channels=channels)
+        # Additional preprocessing steps
+        return decoded_image
+    image = image.map(lambda x: preprocess_fn(tf.io.read_file(x)))
+    
+    return image
     #return tf.io.decode_jpeg(image, channels=channels)
 
   return video_decode
