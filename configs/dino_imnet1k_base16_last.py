@@ -4,7 +4,7 @@
 import ml_collections
 
 VARIANT = 'B/14'
-_IMAGENET_TRAIN_SIZE = 9469 #1281167
+_IMAGENET_TRAIN_SIZE = 10 #1281167
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 
@@ -32,7 +32,7 @@ def get_config():
   # Training.'MVImagenet'
   config.max_grad_norm = 1
   config.num_training_epochs = 2#400
-  config.batch_size = 512
+  config.batch_size = 1
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
   total_steps = config.num_training_epochs * config.steps_per_epoch
