@@ -658,6 +658,8 @@ def get_copy_video(inkey, outkeys=['x1','x2','x3','x4'], mode='video'):
       data['x1'] = data[inkey][0]
       if len(data[inkey])>1:
         data['x2'] = data[inkey][1]
+      else:
+        data['x2'] = data[inkey][0]
     
     elif mode=='random':
       data['x1'] = data[inkey][0]
@@ -665,6 +667,9 @@ def get_copy_video(inkey, outkeys=['x1','x2','x3','x4'], mode='video'):
       if len(data[inkey])>1:
         data['x3'] = data[inkey][1]
         data['x4'] = data[inkey][1]
+      else:
+        data['x3'] = data[inkey][0]
+        data['x4'] = data[inkey][0]
 
     #data['image'] = data[inkey][0]
     return data
