@@ -51,22 +51,24 @@ def get_config():
       'decode_video' +
       f'|copy_video("image", "x2")'+
       f'|copy_video("image", "x3")'+
-      f'|copy_video("image", "x4")'+
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "_"))' +
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "_"))' +
-      '|value_range(0, 1, data_key="x1")' +
-      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
-      '|random_grayscale(0.2, data_key="x1")' +
-      '|random_blur(1.0, data_key="x1")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
+      '|keep("image, x1, x2, label")'
+  )
+  """f'|copy_video("image", "x4")'+
+  f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "_"))' +
+  f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "_"))' +
+  '|value_range(0, 1, data_key="x1")' +
+  '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
+  '|random_grayscale(0.2, data_key="x1")' +
+  '|random_blur(1.0, data_key="x1")' +
+  f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
-      '|value_range(0, 1, data_key="x2")' +
-      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
-      '|random_grayscale(0.2, data_key="x2")' +
-      '|random_blur(0.1, data_key="x2")' +
-      '|random_solarize(0.2, data_key="x2")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")')
-  
+  '|value_range(0, 1, data_key="x2")' +
+  '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
+  '|random_grayscale(0.2, data_key="x2")' +
+  '|random_blur(0.1, data_key="x2")' +
+  '|random_solarize(0.2, data_key="x2")' +
+  f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")')"""
+
   if config.mode == 'random':
     config.dataset_configs.pp_train += (
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x3", "x3"), outkey=("x3", "_"))' +
