@@ -48,7 +48,7 @@ def get_config():
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
   config.dataset_configs.pp_train = (
-      'decode' +
+      'decode_video' +
       f'|copy_video("video", mode="{config.mode}")' +
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "_"))' +
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "_"))' +

@@ -669,3 +669,22 @@ def get_copy_video(inkey, outkeys=['x1','x2','x3','x4'], mode='video'):
     return data
 
   return video_copy
+
+
+@registry.Registry.register("preprocess_ops.decode_video", "function")
+@utils.InKeyOutKey()
+def get_decode_video(channels=3):
+  """Decode an encoded image string, see tf.io.decode_image."""
+
+  def video_decode(image):  # pylint: disable=missing-docstring
+    # tf.io.decode_image does not set the shape correctly, so we use
+    # tf.io.deocde_jpeg, which also works for png, see
+    # https://github.com/tensorflow/tensorflow/issues/8551
+    images=[]
+    for i in image:
+      img = tf.io.decode_jpeg(image[i], channels=channels)
+      images.append(img)
+    return images
+    #return tf.io.decode_jpeg(image, channels=channels)
+
+  return video_decode
