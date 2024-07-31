@@ -5,7 +5,7 @@ from tensorflow_datasets.core.utils.lazy_imports_utils import tensorflow as tf
 #import tensorflow_datasets.public_api as tfds
 
 import os
-
+import numpy as np
 
 mvimgnet_classes = [
     "bag", "bottle", "washer", "vessel", "train", "telephone", "table", "stove", "sofa", "skateboard", 
@@ -124,14 +124,27 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         print(f" base names {frames_video[:2]+frames_video[:2]}")
         id = label+'_'+obj_var
         print(f" id {id}")
-        freq = frames_video[:2]
-        resul = []
-        for i in freq:
-          s = tf.io.read_file(i)
-          resul.append(s)
+        def process_image(image_path):
+          # Leia o arquivo da imagem
+          image = tf.io.read_file(image_path)
+          # Decodifique a imagem para um tensor
+          image = tf.image.decode_jpeg(image, channels=3)
+          # Redimensione a imagem
+          image = tf.image.resize(image, [256, 256])
+          # Normalize a imagem
+          image = tf.cast(image, tf.float32) / 255.0
+          # Converta o tensor para um numpy array
+          return image.numpy()
+        
+        video_ = []
+        for image_path in frames_video[:2]:
+          img = process_image(image_path)
+          video_.append(img)
+        
+        video_ = np.concatenate(video_)
 
         record = {
-          "image": s,
+          "image": video_,
           "label": int(label)
         }
         yield id, record
