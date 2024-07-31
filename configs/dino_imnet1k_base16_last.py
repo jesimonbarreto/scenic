@@ -64,6 +64,7 @@ def get_config():
       '|random_blur(0.1, data_key="x2")' +
       '|random_solarize(0.2, data_key="x2")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")')
+  
   if config.mode == 'random':
     config.dataset_configs.pp_train += (
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x3", "x3"), outkey=("x3", "image"))' +
