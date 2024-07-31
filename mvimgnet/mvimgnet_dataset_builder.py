@@ -126,7 +126,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         id = label+'_'+obj_var
         print(f" id {id}")
         record = {
-          "video": frames_video,
+          "video": frames_video[:2],
           "label": int(label)
         }
         yield id, record
