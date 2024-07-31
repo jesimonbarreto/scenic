@@ -246,7 +246,7 @@ def imagenet_load_split(batch_size,
 
   def decode_example(example):
     if train:
-      image = preprocess_for_train(example['image'], dtype, image_size,
+      image = preprocess_for_train(example['video'], dtype, image_size,
                                    data_augmentations)
     else:
       image = preprocess_for_eval(example['image'], dtype, image_size)
@@ -260,7 +260,7 @@ def imagenet_load_split(batch_size,
   dataset_builder.download_and_prepare()
   ds = dataset_builder.as_dataset(
       split=split, decoders={
-          'image': tfds.decode.SkipDecoding(),
+          'video': tfds.decode.SkipDecoding(),
       })
   options = tf.data.Options()
   options.threading.private_threadpool_size = 48
