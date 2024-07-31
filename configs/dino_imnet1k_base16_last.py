@@ -48,8 +48,8 @@ def get_config():
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
   config.dataset_configs.pp_train = (
-      #'decode_video' +
-      f'copy("image", "x1")'+
+      'decode_video' +
+      f'|copy("image", "x1")'+
       f'|copy("image", "x2")'+
       '|keep("image", "x1", "label")'
   )
