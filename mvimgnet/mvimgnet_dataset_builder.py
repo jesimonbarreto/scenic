@@ -67,7 +67,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         # If there's a common (input, target) tuple from the
         # features, specify them here. They'll be used if
         # `as_supervised=True` in `builder.as_dataset`.
-        supervised_keys=('video', 'label'),  # Set to `None` to disable
+        supervised_keys=('image', 'label'),  # Set to `None` to disable
         homepage='https://dataset-homepage/',
     )
 
