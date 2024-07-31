@@ -656,13 +656,13 @@ def get_copy_video(inkey, outkeys=['x1','x2','x3','x4'], mode='video'):
   def video_copy(data):
     if mode == 'video':
       data['x1'] = data[inkey][0]
-      if len(data[inkey][0]>1):
+      if len(data[inkey]>1):
         data['x2'] = data[inkey][1]
     
     elif mode=='random':
       data['x1'] = data[inkey][0]
       data['x2'] = data[inkey][0]
-      if len(data[inkey][0]>1):
+      if len(data[inkey]>1):
         data['x3'] = data[inkey][1]
         data['x4'] = data[inkey][1]
 
