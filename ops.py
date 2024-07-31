@@ -681,7 +681,7 @@ def get_decode_video(channels=3):
     # tf.io.deocde_jpeg, which also works for png, see
     # https://github.com/tensorflow/tensorflow/issues/8551
     images=[]
-    print(f'size tensor {image.size()}')
+    print(f'size tensor {image[0]}')
     for i in tf.range(image.size()):
       img = tf.io.decode_jpeg(image.read(i), channels=channels)
       images.append(img)
