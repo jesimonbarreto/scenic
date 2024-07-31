@@ -59,15 +59,17 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     return self.dataset_info_from_configs(
         features=tfds.features.FeaturesDict({
             # These are the features of your dataset like images, labels ...
-            'image': tfds.features.Video(
+            'video': tfds.features.Video(
               video_shape,
               encoding_format= 'jpeg'),
+            'image1': tfds.features.Image(encoding_format='jpeg'),
+            'image2': tfds.features.Image(encoding_format='jpeg'),
             'label': tfds.features.ClassLabel(names=list(mvimgnet_classes)),
         }),
         # If there's a common (input, target) tuple from the
         # features, specify them here. They'll be used if
         # `as_supervised=True` in `builder.as_dataset`.
-        supervised_keys=('image', 'label'),  # Set to `None` to disable
+        supervised_keys=('video','image1','image2', 'label'),  # Set to `None` to disable
         homepage='https://dataset-homepage/',
     )
 
@@ -145,8 +147,13 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         video_ = np.concatenate(video_)
         print(f' video {video_.shape} type {video_.dtype} max {np.max(video_)}')
 
+        print(f' image1 {video_[0].shape} type {video_[0].dtype} max {np.max(video_[0])}')
+        print(f' image2 {video_[1].shape} type {video_[1].dtype} max {np.max(video_[1])}')
+
         record = {
-          "image": video_,
+          "video": video_,
+          "image1": video_[0],
+          "image2": video_[1],
           "label": int(label)
         }
         yield id, record
