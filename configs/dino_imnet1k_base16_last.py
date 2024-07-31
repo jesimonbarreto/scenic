@@ -81,11 +81,11 @@ def get_config():
       '|random_blur(0.1, data_key="x4")' +
       '|random_solarize(0.2, data_key="x4")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x4")' +
-      '|keep("video, x1, x2, x3, x4, label")'
+      '|keep("image, x1, x2, x3, x4, label")'
       )
   else:
     config.dataset_configs.pp_train += (
-      '|keep("video, x1, x2, label")'
+      '|keep("image, x1, x2, label")'
     )
   
   # For IMAGENET-1K
