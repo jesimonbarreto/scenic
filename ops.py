@@ -671,8 +671,13 @@ def get_decode_video(channels=3):
     # https://github.com/tensorflow/tensorflow/issues/8551
     print(image)
     images = tf.map_fn(
+        functools.partial(tf.io.read_file, channels=channels),
+        image
+    )
+
+    images = tf.map_fn(
         functools.partial(tf.io.decode_jpeg, channels=channels),
-        image,
+        images,
         #back_prop=False,
         dtype=tf.uint8
     )
