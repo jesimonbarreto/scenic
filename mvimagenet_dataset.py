@@ -249,7 +249,7 @@ def imagenet_load_split(batch_size,
       image = preprocess_for_train(example['video'], dtype, image_size,
                                    data_augmentations)
     else:
-      image = preprocess_for_eval(example['image'], dtype, image_size)
+      image = preprocess_for_eval(example['video'], dtype, image_size)
 
     label = example['label']
     label = tf.one_hot(label, NUM_CLASSES) if onehot_labels else label
