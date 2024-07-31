@@ -682,10 +682,10 @@ def get_decode_video(channels=3):
     # https://github.com/tensorflow/tensorflow/issues/8551
     images=[]
     print(f'size tensor {image[0]}')
-    for i in tf.range(image.size()):
-      img = tf.io.decode_jpeg(image.read(i), channels=channels)
+    for i in image:
+      img = tf.io.decode_jpeg(i, channels=channels)
       images.append(img)
-    return tf.convert_to_tensor(images)
+    return images
     #return tf.io.decode_jpeg(image, channels=channels)
 
   return video_decode
