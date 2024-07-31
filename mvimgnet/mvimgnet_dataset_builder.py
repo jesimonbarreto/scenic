@@ -130,9 +130,9 @@ class Builder(tfds.core.GeneratorBasedBuilder):
           # Decodifique a imagem para um tensor
           image = tf.image.decode_jpeg(image, channels=3)
           # Redimensione a imagem
-          image = tf.image.resize(image, [256, 256])
+          image = tf.image.resize(image, [254, 254])
           # Normalize a imagem
-          image = tf.cast(image, tf.float32) / 255.0
+          #image = tf.cast(image, tf.float32) / 255.0
           # Converta o tensor para um numpy array
           return image.numpy()
         
@@ -142,6 +142,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
           video_.append(img)
         
         video_ = np.concatenate(video_)
+        print(f' video {video_.shape} type {video_.dtype}')
 
         record = {
           "image": video_,
