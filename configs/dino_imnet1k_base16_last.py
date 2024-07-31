@@ -49,7 +49,7 @@ def get_config():
 
   config.dataset_configs.pp_train = (
       #'decode_video' +
-      f'|copy_video("image", "x2")'+
+      f'copy_video("image", "x2")'+
       f'|copy_video("image", "x3")'+
       '|keep("image, x1, x2, label")'
   )
