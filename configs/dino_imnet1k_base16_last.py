@@ -22,6 +22,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
+  config.mode = 'video'
   
   #plot
   config.plot_ex = False
@@ -48,10 +49,11 @@ def get_config():
 
   config.dataset_configs.pp_train = (
       'decode' +
-      '|copy("image", "x1")' +
-      '|copy("image", "x2")' +
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x1"), outkey=("image", "x1"))' +
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("image", "x2"), outkey=("image", "x2"))' +
+      #'|copy("image", "x1")' +
+      #'|copy("image", "x2")' +
+      f'|copy_video("video", mode={config.mode})' +
+      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image"))' +
+      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image"))' +
       '|value_range(0, 1, data_key="x1")' +
       '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
       '|random_grayscale(0.2, data_key="x1")' +
@@ -63,52 +65,29 @@ def get_config():
       '|random_grayscale(0.2, data_key="x2")' +
       '|random_blur(0.1, data_key="x2")' +
       '|random_solarize(0.2, data_key="x2")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")')
+  if config.mode == 'random':
+    config.dataset_configs.pp_train += (
+      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x3", "x3"), outkey=("x3", "image"))' +
+      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x4", "x4"), outkey=("x4", "image"))' +
+      '|value_range(0, 1, data_key="x3")' +
+      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x3")' +
+      '|random_grayscale(0.2, data_key="x3")' +
+      '|random_blur(1.0, data_key="x3")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x3")'
 
-      ''.join([f'|copy("image", "crops{i}")' for i in range(config.ncrops)]) +
-      ''.join([f'|generate_crops((96, 96), {config.local_crops_scale}, inkey=("crops{i}"), outkey=("crops{i}"))' for i in range(config.ncrops)]) +
-      ''.join([f'|value_range(0, 1, data_key="crops{i}")' for i in range(config.ncrops)]) +
-      ''.join([f'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="crops{i}")' for i in range(config.ncrops)]) +
-      ''.join([f'|random_grayscale(0.2, data_key="crops{i}")' for i in range(config.ncrops)]) +
-      ''.join([f'|random_blur(0.5, data_key="crops{i}")' for i in range(config.ncrops)]) +
-      ''.join([f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="crops{i}")' for i in range(config.ncrops)]))
-      #'|keep("x1, x2"' + ''.join([f', "crops{i}"' for i in range(config.ncrops)]) + ')')
-
-  #'|copy_resize_file("image", "x1")' +
-  #'|copy_resize_file("image", "x2")' +
-  ''' '|init_patch_matching_tracker(14, "target_mask")' +
-  '|init_box_tracker("target_box")' +
-  f'|cropflip_generatemask({reference_resolution}, 32, flip=False, inkey=("reference", "target_mask", "target_box"), outkey=("reference", "target_mask", "target_box"))' +
-  '|value_range(0, 1, data_key="reference")' +
-  '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="reference")' +
-  '|random_grayscale(0.2, data_key="reference")' +
-  '|random_blur(1.0, data_key="reference")' +
-  f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="reference")' +
-  '|copy("image", "x1")' +
-  '|value_range(0, 1, data_key="x1")' +
-  '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
-  '|random_grayscale(0.2, data_key="x1")' +
-  '|random_blur(1.0, data_key="x1")' +
-  f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")' +
-  '|copy("image", "x2")' +
-  '|value_range(0, 1, data_key="x2")' +
-  '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
-  '|random_grayscale(0.2, data_key="x2")' +
-  '|random_blur(1.0, data_key="x2")' +
-  f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")' +
-
-  ''.join([f'|copy("image", "query{i}")' for i in range(n_queries)]) +
-  '|inception_crop_with_mask((224, 224), 32, 100, (14, 14), inkey=("query0", "target_mask", "target_box"), outkey=("query0", "query0_mask", "query0_box"))' +
-  ''.join([f'|inception_crop_with_mask((96, 96), 5, 32, (6, 6), inkey=("query{i}", "target_mask", "target_box"), outkey=("query{i}", "query{i}_mask", "query{i}_box"))' for i in range(1, n_queries)]) +
-  ''.join([f'|flip_with_mask(inkey=("query{i}", "query{i}_mask"), outkey=("query{i}", "query{i}_mask"))' for i in range(n_queries)]) +
-  ''.join([f'|value_range(0, 1, data_key="query{i}")' for i in range(n_queries)]) +
-  ''.join([f'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="query{i}")' for i in range(n_queries)]) +
-  ''.join([f'|random_grayscale(0.2, data_key="query{i}")' for i in range(n_queries)]) +
-  ''.join([f'|random_blur(0.5, data_key="query{i}")' for i in range(1, n_queries)]) +
-  '|random_blur(0.1, data_key="query0")|random_solarize(0.2, data_key="query0")' +
-  ''.join([f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="query{i}")' for i in range(n_queries)]) +
-  '|keep("reference"' + ''.join([f', "query{i}", "query{i}_box", "query{i}_mask"' for i in range(n_queries)]) + ')')
-  '''
+      '|value_range(0, 1, data_key="x4")' +
+      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x4")' +
+      '|random_grayscale(0.2, data_key="x4")' +
+      '|random_blur(0.1, data_key="x4")' +
+      '|random_solarize(0.2, data_key="x4")' +
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x4")' +
+      '|keep("video, x1, x2, x3, x4, label")'
+      )
+  else:
+    config.dataset_configs.pp_train += (
+      '|keep("video, x1, x2, label")'
+    )
   
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
