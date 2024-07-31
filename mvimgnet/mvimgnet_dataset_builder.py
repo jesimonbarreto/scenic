@@ -152,8 +152,8 @@ class Builder(tfds.core.GeneratorBasedBuilder):
 
         record = {
           #"video": video_,
-          "image1": video_[0],
-          "image2": video_[1],
+          "image1": frames_video[0],
+          "image2": frames_video[1],
           "label": int(label)
         }
         yield id, record
