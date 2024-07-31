@@ -669,15 +669,10 @@ def get_decode_video(channels=3):
     # tf.io.decode_image does not set the shape correctly, so we use
     # tf.io.deocde_jpeg, which also works for png, see
     # https://github.com/tensorflow/tensorflow/issues/8551
-    print(image)
-    images = tf.map_fn(
-        functools.partial(tf.io.read_file),
-        image
-    )
     print(images)
     images = tf.map_fn(
         functools.partial(tf.io.decode_jpeg, channels=channels),
-        images,
+        image,
         #back_prop=False
     )
     print(images)

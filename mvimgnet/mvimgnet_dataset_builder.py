@@ -124,9 +124,14 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         print(f" base names {frames_video[:2]+frames_video[:2]}")
         id = label+'_'+obj_var
         print(f" id {id}")
+        freq = frames_video[:2]
+        resul = []
+        for i in freq:
+          s = tf.io.read_file(i)
+          resul.append(s)
 
         record = {
-          "image": frames_video[:2]+frames_video[:2],
+          "image": s,
           "label": int(label)
         }
         yield id, record
