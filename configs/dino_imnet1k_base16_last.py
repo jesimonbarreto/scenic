@@ -50,8 +50,8 @@ def get_config():
   config.dataset_configs.pp_train = (
       'decode' +
       f'|copy_video("video", mode="{config.mode}")' +
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image"))' +
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image"))' +
+      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "_"))' +
+      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "_"))' +
       '|value_range(0, 1, data_key="x1")' +
       '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
       '|random_grayscale(0.2, data_key="x1")' +
@@ -67,8 +67,8 @@ def get_config():
   
   if config.mode == 'random':
     config.dataset_configs.pp_train += (
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x3", "x3"), outkey=("x3", "image"))' +
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x4", "x4"), outkey=("x4", "image"))' +
+      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x3", "x3"), outkey=("x3", "_"))' +
+      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x4", "x4"), outkey=("x4", "_"))' +
       '|value_range(0, 1, data_key="x3")' +
       '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x3")' +
       '|random_grayscale(0.2, data_key="x3")' +
