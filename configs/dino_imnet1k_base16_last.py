@@ -51,6 +51,7 @@ def get_config():
       'decode_video' +
       f'|copy("image", "x1")'+
       f'|copy("image", "x2")'+
+      '|value_range(0, 1, data_key="x1")' +
       '|keep("image", "x1", "label")'
   )
   """f'|copy_video("image", "x4")'+
