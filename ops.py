@@ -654,6 +654,7 @@ def get_copy_video(inkey, outkeys=['x1','x2','x3','x4'], mode='video'):
   """Copies value of `inkey` into `outkey`."""
 
   def video_copy(data):
+    print(f' data info {data}')
     if mode == 'video':
       data['x1'] = data[inkey][0]
       if len(data[inkey])>1:
