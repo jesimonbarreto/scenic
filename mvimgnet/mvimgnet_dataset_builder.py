@@ -59,7 +59,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     return self.dataset_info_from_configs(
         features=tfds.features.FeaturesDict({
             # These are the features of your dataset like images, labels ...
-            'video': tfds.features.Video(
+            'image': tfds.features.Video(
               video_shape,
               encoding_format= 'jpeg'),
             'label': tfds.features.ClassLabel(names=list(mvimgnet_classes)),
@@ -126,7 +126,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         id = label+'_'+obj_var
         print(f" id {id}")
         record = {
-          "video": frames_video[:2],
+          "image": frames_video[:2],
           "label": int(label)
         }
         yield id, record
