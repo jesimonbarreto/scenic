@@ -149,7 +149,7 @@ def get_config():
 
   # Logging.
   config.write_summary = True
-  config.save_state_0 = True
+  config.save_state_0 = False
   config.xprof = True  # Profile using xprof.
   config.checkpoint = True  # Do checkpointing.
   config.checkpoint_steps = 50
