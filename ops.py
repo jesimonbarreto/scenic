@@ -670,12 +670,14 @@ def get_decode_video(channels=3):
     # tf.io.deocde_jpeg, which also works for png, see
     # https://github.com/tensorflow/tensorflow/issues/8551
     print(image)
-    return tf.map_fn(
+    images = tf.map_fn(
         functools.partial(tf.io.decode_jpeg, channels=channels),
         image,
         #back_prop=False,
         #dtype=tf.uint8
         )
+    print(images)
+    return images 
     #return tf.io.decode_jpeg(image, channels=channels)
 
   return video_decode
