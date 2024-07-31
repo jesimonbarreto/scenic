@@ -665,7 +665,7 @@ def get_copy_video(inkey, outkeys=['x1','x2','x3','x4'], mode='video'):
       data['x3'] = data[inkey][1]
       data['x4'] = data[inkey][1]
 
-    data['image'] = data[inkey][0]
+    #data['image'] = data[inkey][0]
     return data
 
   return video_copy
