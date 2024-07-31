@@ -49,8 +49,8 @@ def get_config():
 
   config.dataset_configs.pp_train = (
       #'decode_video' +
-      f'copy_video("image", "x2")'+
-      f'|copy_video("image", "x3")'
+      #f'copy_video("image", "x2")'+
+      #f'|copy_video("image", "x3")'
       #'|keep("image", "label")'
   )
   """f'|copy_video("image", "x4")'+
@@ -69,28 +69,6 @@ def get_config():
   '|random_solarize(0.2, data_key="x2")' +
   f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")')"""
 
-  if config.mode == 'random':
-    config.dataset_configs.pp_train += (
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x3", "x3"), outkey=("x3", "_"))' +
-      f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x4", "x4"), outkey=("x4", "_"))' +
-      '|value_range(0, 1, data_key="x3")' +
-      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x3")' +
-      '|random_grayscale(0.2, data_key="x3")' +
-      '|random_blur(1.0, data_key="x3")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x3")'
-
-      '|value_range(0, 1, data_key="x4")' +
-      '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x4")' +
-      '|random_grayscale(0.2, data_key="x4")' +
-      '|random_blur(0.1, data_key="x4")' +
-      '|random_solarize(0.2, data_key="x4")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x4")' +
-      '|keep("image, x1, x2, x3, x4, label")'
-      )
-  else:
-    config.dataset_configs.pp_train += (
-      '|keep("image, x1, x2, label")'
-    )
   
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
