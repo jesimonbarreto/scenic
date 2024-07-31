@@ -49,7 +49,7 @@ def get_config():
 
   config.dataset_configs.pp_train = (
       'decode' +
-      f'|copy_video("video", mode={config.mode})' +
+      f'|copy_video("video", mode='{config.mode}')' +
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image"))' +
       f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image"))' +
       '|value_range(0, 1, data_key="x1")' +
