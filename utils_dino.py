@@ -144,10 +144,13 @@ def prepare_input(inputs: Dict[str, jnp.ndarray],
   sample_x = jnp.concatenate([inputs['x1'], inputs['x2']])
   # views.
   batch = dict()
-  crps = jnp.concatenate(
-      [inputs['crops' + str(i)] for i in range(n_crops)])
+  if n_crops > 0:
+    crps = jnp.concatenate(
+        [inputs['crops' + str(i)] for i in range(n_crops)])
 
-  batch['sample'] = [sample_x, crps]
+    batch['sample'] = [sample_x, crps]
+  else:
+    batch['sample'] = [sample_x]
 
   return batch
 
