@@ -169,7 +169,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         frames_video = sorted(frames_video, key=self.get_sequence_number)
         
         
-        for image_path in pairs:
+        for k ,image_path in enumerate(pairs):
           img1 = self.process_image(image_path[0])
           img1 = img1.astype(np.uint8)
           print(f' image1 {img1.shape} type {img1.dtype} max {np.max(img1)}')
@@ -182,4 +182,4 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             "image2": img2,
             "label": int(label)
           }
-          yield id, record
+          yield str(k)+'_'+id, record
