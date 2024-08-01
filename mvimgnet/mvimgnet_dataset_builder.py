@@ -6,6 +6,8 @@ from tensorflow_datasets.core.utils.lazy_imports_utils import tensorflow as tf
 
 import os
 import numpy as np
+import re
+import random
 
 mvimgnet_classes = [
     "bag", "bottle", "washer", "vessel", "train", "telephone", "table", "stove", "sofa", "skateboard", 
@@ -112,7 +114,39 @@ class Builder(tfds.core.GeneratorBasedBuilder):
           }
           yield fname, record
   '''
+  def process_image(self, image_path):
+      # Leia o arquivo da imagem
+      image = tf.io.read_file(image_path)
+      # Decodifique a imagem para um tensor
+      image = tf.image.decode_jpeg(image, channels=3)
+      # Redimensione a imagem
+      image = tf.image.resize(image, [224, 224])
+      # Normalize a imagem
+      #image = tf.cast(image, tf.float32) / 255.0
+      # Converta o tensor para um numpy array
+      return image.numpy()
 
+  # Função para extrair o número da sequência do nome do arquivo
+  def get_sequence_number(self, path):
+      # Usa regex para encontrar o número no nome do arquivo
+      match = re.search(r'(\d+)', path)
+      if match:
+          return int(match.group(1))
+      return None
+  
+  # Função para selecionar pares com distância x entre as posições
+  def select_pairs_with_distance(self, sorted_paths, x, n):
+      max_start_index = len(sorted_paths) - x - 1
+      if max_start_index < 0:
+          raise ValueError("Distância x é muito grande para a lista fornecida.")
+
+      pairs = []
+      for _ in range(n):
+          start_index = random.randint(0, max_start_index)
+          end_index = start_index + x
+          pairs.append((sorted_paths[start_index], sorted_paths[end_index]))
+      
+      return pairs
 
   def _generate_examples(self, datapath):
     """Yields examples."""
@@ -123,37 +157,29 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         dir_search = os.path.join(datapath, label, obj_var,'images', "*.jpg")
         frames_video = tf.io.gfile.glob(dir_search)
         #base_names = [os.path.basename(fpath) for fpath in frames_video]
-        print(f" base names {frames_video[:2]+frames_video[:2]}")
         id = label+'_'+obj_var
         print(f" id {id}")
-        def process_image(image_path):
-          # Leia o arquivo da imagem
-          image = tf.io.read_file(image_path)
-          # Decodifique a imagem para um tensor
-          image = tf.image.decode_jpeg(image, channels=3)
-          # Redimensione a imagem
-          image = tf.image.resize(image, [224, 224])
-          # Normalize a imagem
-          #image = tf.cast(image, tf.float32) / 255.0
-          # Converta o tensor para um numpy array
-          return image.numpy()
-        
-        video_ = []
-        for image_path in frames_video[:2]:
-          img = process_image(image_path)
-          img = img.astype(np.uint8)
-          video_.append(np.expand_dims(img, axis=0))
-        
-        video_ = np.concatenate(video_)
-        print(f' video {video_.shape} type {video_.dtype} max {np.max(video_)}')
+        dist = 5
+        n = 4
 
-        print(f' image1 {video_[0].shape} type {video_[0].dtype} max {np.max(video_[0])}')
-        print(f' image2 {video_[1].shape} type {video_[1].dtype} max {np.max(video_[1])}')
-
-        record = {
-          #"video": video_,
-          "image1": video_[0],
-          "image2": video_[1],
-          "label": int(label)
-        }
-        yield id, record
+        # Seleciona os pares
+        pairs = self.select_pairs_with_distance(frames_video, dist, n)
+        print(f" base names {pairs}")
+        # Ordena a lista de paths usando o número da sequência como chave
+        frames_video = sorted(frames_video, key=self.get_sequence_number)
+        
+        
+        for image_path in pairs:
+          img1 = self.process_image(image_path[0])
+          img1 = img1.astype(np.uint8)
+          print(f' image1 {img1.shape} type {img1.dtype} max {np.max(img1)}')
+          img2 = self.process_image(image_path[1])
+          img2 = img2.astype(np.uint8)
+          print(f' image2 {img2.shape} type {img2.dtype} max {np.max(img2)}')
+          record = {
+            #"video": video_,
+            "image1": img1,
+            "image2": img2,
+            "label": int(label)
+          }
+          yield id, record
