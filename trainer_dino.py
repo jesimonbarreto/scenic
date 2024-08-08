@@ -117,7 +117,7 @@ def dino_train_step(
         drop_moment=drop_moment,
         backbone = True,
         train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_prenorm"]
     
     st = flax_model.apply(
         {'params': params},
@@ -127,7 +127,7 @@ def dino_train_step(
         drop_moment=drop_moment,
         backbone = True,
         train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_prenorm"]
     
     '''cc = flax_model.apply(
         {'params': params},
