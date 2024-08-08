@@ -194,7 +194,7 @@ class ViTDINO(nn.Module):
               x, deterministic=not train)
     x_norm = nn.LayerNorm(name='encoder_norm')(x)
 
-    '''x = ProjectionHead(
+    x_train = ProjectionHead(
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
           output_dim=self.head_output_dim,
@@ -206,6 +206,7 @@ class ViTDINO(nn.Module):
             "x_norm_patchtokens": x_norm[:, 1:],
             "x_prenorm": x,
             "masks": None,
+            "x_train": x_train
         }
 
 def norm_kernel_init_fn(rng, shape, dtype):
