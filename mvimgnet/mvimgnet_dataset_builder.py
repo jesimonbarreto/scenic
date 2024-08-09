@@ -40,6 +40,11 @@ mvimgnet_classes = [
     "inflator", "ironmongery", "bulb"
 ]
 
+filter_imagnet = [2, 7, 10, 12, 13, 15, 19, 20, 21, 22, 23, 26, 33, 34, 47,
+                  49, 51, 76, 81, 83, 84, 94, 96, 113, 120, 123, 133, 136,
+                  149, 151, 152, 158, 166, 168, 173, 175, 179, 187, 197,
+                  200, 214, 221, 224]
+
 class Builder(tfds.core.GeneratorBasedBuilder):
   """DatasetBuilder for mvimgnet dataset."""
 
@@ -151,20 +156,18 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   def _generate_examples(self, datapath):
     """Yields examples."""
     for label in tf.io.gfile.listdir(datapath):
-      print(f" label {label}")
+      if int(label) not in filter_imagnet:
+         continue
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
-        print(f" obj_var {obj_var}")
         dir_search = os.path.join(datapath, label, obj_var,'images', "*.jpg")
         frames_video = tf.io.gfile.glob(dir_search)
         #base_names = [os.path.basename(fpath) for fpath in frames_video]
         id = label+'_'+obj_var
-        print(f" id {id}")
         dist = 5
         n = 4
 
         # Seleciona os pares
         pairs = self.select_pairs_with_distance(frames_video, dist, n)
-        print(f" base names {pairs}")
         # Ordena a lista de paths usando o número da sequência como chave
         frames_video = sorted(frames_video, key=self.get_sequence_number)
         
@@ -172,10 +175,8 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         for k ,image_path in enumerate(pairs):
           img1 = self.process_image(image_path[0])
           img1 = img1.astype(np.uint8)
-          print(f' image1 {img1.shape} type {img1.dtype} max {np.max(img1)}')
           img2 = self.process_image(image_path[1])
           img2 = img2.astype(np.uint8)
-          print(f' image2 {img2.shape} type {img2.dtype} max {np.max(img2)}')
           record = {
             #"video": video_,
             "image1": img1,
