@@ -143,8 +143,8 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   def select_pairs_with_distance(self, sorted_paths, x, n):
       max_start_index = len(sorted_paths) - x - 1
       if max_start_index < 0:
-          raise ValueError("Distância x é muito grande para a lista fornecida.")
-
+          #raise ValueError("Distância x é muito grande para a lista fornecida.")
+         return []
       pairs = []
       for _ in range(n):
           start_index = random.randint(0, max_start_index)
@@ -166,11 +166,14 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         dist = 5
         n = 4
 
-        # Seleciona os pares
-        pairs = self.select_pairs_with_distance(frames_video, dist, n)
         # Ordena a lista de paths usando o número da sequência como chave
         frames_video = sorted(frames_video, key=self.get_sequence_number)
+
+        # Seleciona os pares
+        pairs = self.select_pairs_with_distance(frames_video, dist, n)
         
+        if len(pairs) == 0:
+           continue
         
         for k ,image_path in enumerate(pairs):
           img1 = self.process_image(image_path[0])
