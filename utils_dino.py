@@ -141,6 +141,8 @@ def prepare_input(inputs: Dict[str, jnp.ndarray],
   """Prepare the different views for LOCA training."""
   
   n_crops = config.ncrops
+  mode = config.mode
+
   sample_x = jnp.concatenate([inputs['x1'], inputs['x2']])
   # views.
   batch = dict()
@@ -151,6 +153,10 @@ def prepare_input(inputs: Dict[str, jnp.ndarray],
     batch['sample'] = [sample_x, crps]
   else:
     batch['sample'] = [sample_x]
+
+  if mode == 'random':
+    sample_x_add = jnp.concatenate([inputs['x3'], inputs['x4']])
+    batch['sample'] = batch['sample'].append(sample_x_add)
 
   return batch
 
