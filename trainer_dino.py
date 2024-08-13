@@ -166,6 +166,7 @@ def dino_train_step(
       student_out = st
       loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
       total_loss += loss_dino
+      total_loss /=2
     return total_loss, (loss_dino, center)
   
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
