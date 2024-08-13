@@ -156,7 +156,7 @@ def prepare_input(inputs: Dict[str, jnp.ndarray],
 
   if mode == 'random':
     sample_x_add = jnp.concatenate([inputs['x3'], inputs['x4']])
-    batch['sample'] = batch['sample'].append(sample_x_add)
+    batch['sample'] = [sample_x, sample_x_add]
 
   return batch
 
