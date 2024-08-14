@@ -74,13 +74,13 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/home/jesimonbarreto/exp_test_now/'
+  config.train_dir = '/home/jesimonbarreto/logs_experiments/random/weights/'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = False
   #config.preextracted = True
   config.write_summary = True
-  config.steps_checkpoints = [0]
+  config.steps_checkpoints = [19020]
   config.ks = [5,10,20]
-  config.dir_files = '/mnt/disks/persist/eval_files/'
+  config.dir_files = '/mnt/disks/dataset/eval_files/'
 
   config.data_dtype_str = 'float32'
   #config.data_dtype_str = 'bfloat16'
