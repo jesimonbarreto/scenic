@@ -126,6 +126,7 @@ def get_config():
                               'H': 1280}[version]
   config.model.patches = ml_collections.ConfigDict()
   config.model.patches.size = [patch, patch]
+  config.model.posembs = (518 // patch, 518 // patch)
   config.model.num_heads = {'Ti': 3, 'S': 6, 'B': 12, 'L': 16, 'H': 16}[version]
   config.model.mlp_dim = {'Ti': 768,
                           'S': 1536,
