@@ -74,7 +74,7 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/home/jesimonbarreto/logs_experiments/random/weights/'#'/home/jesimonbarreto/exp_test_now/'
+  config.train_dir = '/home/jesimonbarreto/random/'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = True
   #config.preextracted = True
   config.write_summary = True
