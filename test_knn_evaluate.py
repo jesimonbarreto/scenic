@@ -299,9 +299,9 @@ def train(
     img = jnp.array(img)
     img = jnp.tile(img, (8, 8, 1, 1, 1))
 
-    result = extract_features(img)[0, 0]
+    result = extract_features(img)
     #result = jnp.squeeze(result)
-    img = jnp.squeeze(result['x_norm_patchtokens'])
+    img = jnp.squeeze(result['x_norm_patchtokens'][0, 0])
     print(img.shape)
     
     img = np.array(img)
