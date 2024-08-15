@@ -164,7 +164,7 @@ def train(
   train_state = utils.TrainState(
       global_step=0, opt_state=opt_state, tx=tx, params=params,
       ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
-  train_dir= '/home/jesimonbarreto/video/'
+  train_dir= '/home/jesimonbarreto/random/'
   step = 19020
   print(f"step: {step}")
     
@@ -313,7 +313,7 @@ def train(
     pca_features = (pca_features - pca_features.min()) / (pca_features.max() - pca_features.min())
     pca_features = pca_features * 255
     plt.imshow(pca_features.reshape(16, 16, 3).astype(np.uint8))
-    plt.savefig('/home/jesimonbarreto/gen_video/'+resul_name+'.png')
+    plt.savefig('/home/jesimonbarreto/gen_random/'+resul_name+'.png')
 
 if __name__ == '__main__':
   app.run(main=knn_evaluate)
