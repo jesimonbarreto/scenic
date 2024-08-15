@@ -297,6 +297,8 @@ def train(
 
     ######################################################################################  
     img = jnp.array(img)
+    img = jnp.tile(img, (8, 8, 1, 1, 1))
+
     result = extract_features(img)
     #result = jnp.squeeze(result)
     img = jnp.squeeze(result['x_norm_patchtokens'])
@@ -311,7 +313,7 @@ def train(
     pca_features = (pca_features - pca_features.min()) / (pca_features.max() - pca_features.min())
     pca_features = pca_features * 255
     plt.imshow(pca_features.reshape(16, 16, 3).astype(np.uint8))
-    plt.savefig('/home/jesimonbarreto/video/'+resul_name+'.png')
+    plt.savefig('/home/jesimonbarreto/gen_video/'+resul_name+'.png')
 
 if __name__ == '__main__':
   app.run(main=knn_evaluate)
