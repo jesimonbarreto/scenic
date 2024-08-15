@@ -1,7 +1,7 @@
 import ml_collections, os
 import jax.numpy as jnp
 
-VARIANT = 'S/14'
+VARIANT = 'B/14'
 _IMAGENET_TRAIN_SIZE = 15000 #1281167 #9469 #1281167
 _IMAGENET_TEST_SIZE = 3000 #50000
 MEAN_RGB = [0.485, 0.456, 0.406]
@@ -11,9 +11,10 @@ def get_config():
 
   """Returns the ViT experiment configuration."""
 
-  config.extract_train = False
+  
 
   config = ml_collections.ConfigDict()
+  config.extract_train = False
   config.experiment_name = '100ep_run'
   # Dataset.
   config.dataset_name = 'eval_dataset'
@@ -34,20 +35,20 @@ def get_config():
   reference_resolution = 224
   crop_size = 224
 
-  config.dataset_configs.filter_classes = True
+  config.dataset_configs.filter_classes = False
   if config.dataset_configs.filter_classes:
     config.dataset_configs.desired_classes = [0, 3, 9]
     config.class_mapping = {cls: i for i, cls in enumerate(config.dataset_configs.desired_classes)}
     config.class_mapping = jnp.array([config.class_mapping.get(i, -1) for i in range(config.num_classes)])
     #update number classes variables
     config.num_classes = len(config.dataset_configs.desired_classe)
-    _IMAGENET_TRAIN_SIZE = 33#update quantity samples train each class selected#1281167 #9469 #1281167
-    _IMAGENET_TEST_SIZE = 33#update quantity samples train each class selected 50000
+    #_IMAGENET_TRAIN_SIZE = 33#update quantity samples train each class selected#1281167 #9469 #1281167
+    #_IMAGENET_TEST_SIZE = 33#update quantity samples train each class selected 50000
 
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "image_resized")' +
-      f'|adjust_labels({config.class_mapping})' +
+  #    f'|adjust_labels({config.class_mapping})' +
       f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
       f'|resize_small({reference_resolution}, method="area", antialias=True, inkey=("image"), outkey=("image"))' +
       f'|resize_small({reference_resolution}, method="area", antialias=True, inkey=("image_resized"), outkey=("image_resized"))' +
@@ -59,7 +60,7 @@ def get_config():
 
   #dir of checkpoints
   config.train_dir = '/home/jesimonbarreto/exp_test_now/'
-  config.preextracted = True
+  config.preextracted = False
   #config.preextracted = True
   config.write_summary = True
   config.steps_checkpoints = [0]

@@ -49,6 +49,10 @@ from jax.lax import map as map_
 
 from functools import partial
 from jax import jit
+import glob
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.decomposition import PCA
 
 FLAGS = flags.FLAGS
 
@@ -120,7 +124,7 @@ def train(
     writer: metric_writers.MetricWriter,
 ) -> Tuple[Any, Any]:
   meta_data = {
-      'input_shape': (1, 3, 224, 224),
+      'input_shape': (1, 224, 224, 3),
       'num_train_examples': 1,
       'input_dtype': getattr(jnp, 'float32'),
       'label_data' : 1,
@@ -160,25 +164,54 @@ def train(
   train_state = utils.TrainState(
       global_step=0, opt_state=opt_state, tx=tx, params=params,
       ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
-  
-  '''=============================================='''
-  print('Here... trying load')
-  from load_params import load_params
-  print(f' {config.dir_weight} {config.weight_load}')
-  params = load_params(config.weight_load,config.dir_weight, params,
-                params_key='teacher_weights',
-                force_random_init= None)
-
-  print('Here... finished load')
-  '''=============================================='''
-  # Only one model function but two sets of parameters.
-  ema_params = copy.deepcopy(params)
-  # Create the TrainState to track training state (i.e. params and optimizer).
-  train_state = utils.TrainState(
-          global_step=0, opt_state=opt_state, tx=tx, params=params,
-          ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
-  train_state = jax_utils.replicate(train_state)
+  train_dir= '/home/jesimonbarreto/video/'
+  step = 19020
+  print(f"step: {step}")
     
+
+  if not config.preextracted:
+    ckpt_file = os.path.join(train_dir,'checkpoint_'+str(step))  
+    ckpt_info = ckpt_file.split('/')
+    ckpt_dir = '/'.join(ckpt_info[:-1])
+    ckpt_num = ckpt_info[-1].split('_')[-1]
+    print(f"file: {ckpt_file}")
+    print(f"ckpt_num: {ckpt_num}")
+
+    #try:
+
+    train_state, _ = train_utils.restore_checkpoint(
+        ckpt_dir, 
+        train_state, 
+        assert_exist=True, 
+        step=int(ckpt_num),
+      )
+      
+    #except:
+
+    #  sys.exit("no checkpoint found")
+    #  continue
+
+    train_state = jax_utils.replicate(train_state)
+
+  else:
+    '''=============================================='''
+    print('Here... trying load')
+    from load_params import load_params
+    print(f' {config.dir_weight} {config.weight_load}')
+    params = load_params(config.weight_load,config.dir_weight, params,
+                  params_key='teacher_weights',
+                  force_random_init= None)
+
+    print('Here... finished load')
+    '''=============================================='''
+    # Only one model function but two sets of parameters.
+    ema_params = copy.deepcopy(params)
+    # Create the TrainState to track training state (i.e. params and optimizer).
+    train_state = utils.TrainState(
+        global_step=0, opt_state=opt_state, tx=tx, params=params,
+        ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
+    train_state = jax_utils.replicate(train_state)
+      
   #project feats or not
   representation_fn_knn = functools.partial(
       representation_fn_eval,
@@ -196,16 +229,11 @@ def train(
     features = repr_fn(train_state, batch)
     return features  # Return extracted features for the batch
   
-
-  ##########################################################################################
-    # Load image
-  img = Image.open('/home/jesimon/Documentos/mestrado/input_rede.jpg').convert('RGB')
-
   def to_tensor(image):
-      image = tf.convert_to_tensor(image, dtype=tf.float32) / 255.0
-      # Transpose to (C x H x W) format
-      image = tf.transpose(image, perm=[2, 0, 1])
-      return image
+    image = tf.convert_to_tensor(image, dtype=tf.float32) / 255.0
+    # Transpose to (C x H x W) format
+    #image = tf.transpose(image, perm=[0, 1, 2])
+    return image
   
   def center_crop(image, crop_size):
     pad_width = 2
@@ -230,8 +258,8 @@ def train(
 
     # Determine the scaling factor to make the smaller dimension 224
     scale_factor = tf.cond(height < width,
-                           lambda: target_size / height,
-                           lambda: target_size / width)
+                          lambda: target_size / height,
+                          lambda: target_size / width)
 
     # Resize the image while preserving the aspect ratio
     new_height = int(height * scale_factor)
@@ -249,43 +277,41 @@ def train(
       image = (image - [0.5]) / [0.5]  # Normalize using provided mean and std dev
       return image
 
-  # Apply transformation to the image
-  img = transform_image(img)
+  ##########################################################################################
+    # Load image
+  for name_img in glob.glob('/mnt/disks/dataset/mvimgnet/copy/*.*'):
+    img = Image.open(name_img).convert('RGB')
+    resul_name = name_img.split('/')[-1].split('.')[0]
 
-  import matplotlib.pyplot as plt
-  import numpy as np
-  from sklearn.decomposition import PCA
+    # Apply transformation to the image
+    img = transform_image(img)
+    #img_save = Image.fromarray((np.array((img*0.5)+0.5)*255).transpose(1, 2, 0).astype(np.uint8))
+    #img_save.save('/home/jesimon/Documentos/mestrado/meta_dog_features_jax_input.png')
 
-  img_save = Image.fromarray((np.array((img*0.5)+0.5)*255).transpose(1, 2, 0).astype(np.uint8))
-  img_save.save('/home/jesimon/Documentos/mestrado/meta_dog_features_jax_input.png')
+    #np.save('/home/jesimon/Documentos/mestrado/py_image_proce_jax.npy',img)
 
-  np.save('/home/jesimon/Documentos/mestrado/py_image_proce_jax.npy',img)
+    # Add batch dimension
+    #img = jnp.array(np.load('/home/jesimon/Documentos/mestrado/py_image_proce.npy'))
+    img = tf.expand_dims(img, 0)
+    img = tf.expand_dims(img, 0)
 
-  # Add batch dimension
-  #img = jnp.array(np.load('/home/jesimon/Documentos/mestrado/py_image_proce.npy'))
-  img = tf.expand_dims(img, 0)
-  img = tf.expand_dims(img, 0)
+    ######################################################################################  
+    img = jnp.array(img)
+    result = extract_features(img)
+    #result = jnp.squeeze(result)
+    img = jnp.squeeze(result['x_norm_patchtokens'])
+    print(img.shape)
+    
+    img = np.array(img)
 
-  ######################################################################################  
-  batch_train = jnp.array(img)
-  result, x_pre, pos = extract_features(batch_train)
-  #result = jnp.squeeze(result)
-  np.save('/home/jesimon/Documentos/mestrado/jax_inp.npy',x_pre)
-  np.save('/home/jesimon/Documentos/mestrado/jax_pos.npy',pos)
-  np.save('/home/jesimon/Documentos/mestrado/jax.npy',result)
-  features = jnp.squeeze(result['x_norm_patchtokens'])
-  print(features.shape)
-  
-  features = np.array(features)
+    pca = PCA(n_components=3)
+    pca.fit(img)
 
-  pca = PCA(n_components=3)
-  pca.fit(features)
-
-  pca_features = pca.transform(features)
-  pca_features = (pca_features - pca_features.min()) / (pca_features.max() - pca_features.min())
-  pca_features = pca_features * 255
-  plt.imshow(pca_features.reshape(16, 16, 3).astype(np.uint8))
-  plt.savefig('/home/jesimon/Documentos/mestrado/meta_dog_features_jax.png')
+    pca_features = pca.transform(img)
+    pca_features = (pca_features - pca_features.min()) / (pca_features.max() - pca_features.min())
+    pca_features = pca_features * 255
+    plt.imshow(pca_features.reshape(16, 16, 3).astype(np.uint8))
+    plt.savefig('/home/jesimonbarreto/video/'+resul_name+'.png')
 
 if __name__ == '__main__':
   app.run(main=knn_evaluate)
