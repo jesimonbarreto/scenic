@@ -26,7 +26,7 @@ import math, sys, os
 import imageio
 from PIL import Image
 import matplotlib.pyplot as plt
-
+import wandb
 
 
 # Aliases for custom types:
@@ -223,12 +223,24 @@ def train(
   Returns:
     train_state that has the state of training.
   """
+
+
   lead_host = jax.process_index() == 0
   #plot flag
   fstexe = True
 
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
+
+  # Start a run, tracking hyperparameters
+  wandb.init(
+      # set the wandb project where this run will be logged
+      project="master",
+
+      # track hyperparameters and run metadata with wandb.config
+      config=dict(config)
+  )
+
 
   num_local_devices = jax.local_device_count()
 
@@ -367,6 +379,7 @@ def train(
                                                train_metrics),
           extra_training_logs= ext_log,
           writer=writer)
+      wandb.log(train_summary)
       chrono.resume()
       train_metrics = []
     ##################### CHECKPOINTING ###################
