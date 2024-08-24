@@ -946,7 +946,7 @@ def log_train_summary(
 
   if flush_writer:
     writer.flush()
-  return train_metrics_summary
+  return train_metrics_summary.update(train_logs)
 
 
 def accumulate_gradients(
