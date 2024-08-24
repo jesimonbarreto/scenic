@@ -33,7 +33,7 @@ def get_config():
 
   # Training.'MVImagenet'
   config.max_grad_norm = 1
-  config.num_training_epochs = 25#400
+  config.num_training_epochs = 30#400
   config.batch_size = 64
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -190,8 +190,8 @@ def get_config():
   config.save_state_0 = False
   config.xprof = True  # Profile using xprof.
   config.checkpoint = True  # Do checkpointing.
-  config.checkpoint_steps = 50
-  config.log_summary_steps = 5
+  config.checkpoint_steps = 1000
+  config.log_summary_steps = 10
 
   return config
 

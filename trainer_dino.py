@@ -379,7 +379,7 @@ def train(
                                                train_metrics),
           extra_training_logs= ext_log,
           writer=writer)
-      wandb.log(train_summary)
+      wandb.log(train_summary|ext_log)
       chrono.resume()
       train_metrics = []
     ##################### CHECKPOINTING ###################
@@ -393,7 +393,7 @@ def train(
           metadata = unrep_train_state.metadata
           metadata['chrono'] = chrono.save()
           unrep_train_state.replace(metadata=metadata)  # pytype: disable=attribute-error
-          utils.save_checkpoint(workdir, unrep_train_state)
+          utils.save_checkpoint(workdir, unrep_train_state, max_to_keep=10)
           del unrep_train_state
       chrono.resume()  # Un-pause now.
   # Wait until computations are done before exiting.
