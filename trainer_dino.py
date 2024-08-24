@@ -260,7 +260,7 @@ def train(
   print(f'Here... trying load {params.keys()}')
   from load_params import load_params
 
-  params = load_params('dinov2_vitb14','/home/jesimonbarreto/', params,
+  params = load_params(config.load_weights,'/home/jesimonbarreto/', params,
                 params_key='teacher_weights',
                 force_random_init= None)
 
@@ -354,7 +354,7 @@ def train(
         print(f' config {config.ncrops}')
         plot_example(train_batch, 
                      number_plot=config.number_plot,
-                     dir_plot='/home/jesimonbarreto/images/',
+                     dir_plot=config.dir_plot,
                      number_crops=config.ncrops)
         fstexe = False
 

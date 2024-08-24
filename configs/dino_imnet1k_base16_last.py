@@ -3,7 +3,7 @@
 
 import ml_collections
 
-VARIANT = 'B/14'
+VARIANT = 'S/14'
 _IMAGENET_TRAIN_SIZE = 40608 #10152 (number of video filtered) * n pairs of each video #1281167
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
@@ -29,9 +29,11 @@ def get_config():
   config.number_plot = 2
   config.dir_plot = '/home/jesimonbarreto/images/'
 
+  config.load_weights = 'dinov2_vits14'
+
   # Training.'MVImagenet'
   config.max_grad_norm = 1
-  config.num_training_epochs = 4#400
+  config.num_training_epochs = 25#400
   config.batch_size = 64
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
