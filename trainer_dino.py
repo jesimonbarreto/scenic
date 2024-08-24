@@ -379,14 +379,13 @@ def train(
                                                train_metrics),
           extra_training_logs= ext_log,
           writer=writer)
-      print(ext_log)
-      wb = train_utils.stack_forest(ext_log)
-      for key, val in wb.items():
-        train_summary[key]=float(val.mean())
-      print(train_summary)
+      ext_log = train_utils.stack_forest(ext_log)
+      for key, val in ext_log.items():
+        train_summary[key]=jnp.array(float(val.mean()))
       wandb.log(train_summary, step=step)
       chrono.resume()
       train_metrics = []
+      ext_log = []
     ##################### CHECKPOINTING ###################
     if ((step % config.get('checkpoint_steps') == 1 and step > 1) or
         (step == total_steps)) and config.checkpoint:
