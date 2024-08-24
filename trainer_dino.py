@@ -380,11 +380,11 @@ def train(
           extra_training_logs= ext_log,
           writer=writer)
       wandb.log(train_summary, step=step)
-      print(v)
-      v = train_utils.stack_forest(v)
-      v = {key: val.mean() for key, val in v.items()}
-      print(v)
-      wandb.log(v, step=step)
+      print(ext_log)
+      ext_log = train_utils.stack_forest(ext_log)
+      ext_log = {key: val.mean() for key, val in ext_log.items()}
+      print(ext_log)
+      wandb.log(ext_log, step=step)
       chrono.resume()
       train_metrics = []
     ##################### CHECKPOINTING ###################
