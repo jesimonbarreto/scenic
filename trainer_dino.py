@@ -381,7 +381,8 @@ def train(
           writer=writer)
       wandb.log(train_summary, step=step)
       print(v)
-      #wandb.log(v, step=step)
+      v = train_utils.stack_forest(v)
+      wandb.log({key: val.mean() for key, val in v.items()}, step=step)
       chrono.resume()
       train_metrics = []
     ##################### CHECKPOINTING ###################
