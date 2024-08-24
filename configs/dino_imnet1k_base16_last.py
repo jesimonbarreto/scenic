@@ -191,7 +191,7 @@ def get_config():
   config.xprof = True  # Profile using xprof.
   config.checkpoint = True  # Do checkpointing.
   config.checkpoint_steps = 1000
-  config.log_summary_steps = 10
+  config.log_summary_steps = 5
 
   return config
 

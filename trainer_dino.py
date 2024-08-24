@@ -379,8 +379,8 @@ def train(
                                                train_metrics),
           extra_training_logs= ext_log,
           writer=writer)
-      wbs = train_summary.update(v)
-      wandb.log(wbs, step=step)
+      wandb.log(train_summary, step=step)
+      wandb.log(v, step=step)
       chrono.resume()
       train_metrics = []
     ##################### CHECKPOINTING ###################
