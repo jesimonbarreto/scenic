@@ -235,8 +235,8 @@ def train(
   # Start a run, tracking hyperparameters
   wandb.init(
       # set the wandb project where this run will be logged
-      project="master",
-
+      project=config.project,
+      name=config.experiment_name
       # track hyperparameters and run metadata with wandb.config
       config=dict(config)
   )

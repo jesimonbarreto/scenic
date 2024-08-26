@@ -13,7 +13,8 @@ def get_config():
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
 
   config = ml_collections.ConfigDict()
-  config.experiment_name = '100ep_run'
+  config.project = 'master'
+  config.experiment_name = 'Dino_30ep_8khead_run'
   # Dataset.
   config.dataset_name = 'dino_dataset'
   config.data_dtype_str = 'float32'
@@ -33,7 +34,7 @@ def get_config():
 
   # Training.'MVImagenet'
   config.max_grad_norm = 1
-  config.num_training_epochs = 4#400
+  config.num_training_epochs = 25#400
   config.batch_size = 64
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -140,7 +141,7 @@ def get_config():
                              'B': 12,
                              'L': 24,
                              'H': 32}[version]
-  config.model.head_output_dim = 65536 #4096
+  config.model.head_output_dim = 8192 #4096
   config.model.attention_dropout_rate = 0.0
   config.model.dropout_rate = 0.0
   config.model.stochastic_depth = 0.1
