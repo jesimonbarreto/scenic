@@ -193,6 +193,7 @@ def get_config():
   config.checkpoint = True  # Do checkpointing.
   config.checkpoint_steps = 1000
   config.log_summary_steps = 5
+  config.max_keep_checkpoint = 15
 
   return config
 
