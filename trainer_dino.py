@@ -399,7 +399,7 @@ def train(
           metadata = unrep_train_state.metadata
           metadata['chrono'] = chrono.save()
           unrep_train_state.replace(metadata=metadata)  # pytype: disable=attribute-error
-          utils.save_checkpoint(workdir, unrep_train_state, max_keep_checkpoint=config.max_keep_checkpoint)
+          utils.save_checkpoint(workdir, unrep_train_state, max_to_keep=config.max_keep_checkpoint)
           del unrep_train_state
       chrono.resume()  # Un-pause now.
   # Wait until computations are done before exiting.
