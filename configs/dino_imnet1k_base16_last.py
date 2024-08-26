@@ -14,7 +14,7 @@ def get_config():
 
   config = ml_collections.ConfigDict()
   config.project = 'master'
-  config.experiment_name = 'Dino_25ep_8khead_run'
+  config.experiment_name = 'Dino_17ep_8khead_run'
   # Dataset.
   config.dataset_name = 'dino_dataset'
   config.data_dtype_str = 'float32'
