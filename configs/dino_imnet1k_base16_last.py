@@ -30,7 +30,7 @@ def get_config():
   config.number_plot = 2
   config.dir_plot = '/home/jesimonbarreto/images/'
 
-  config.load_weights = 'dinov2_vits14'
+  config.load_weights = 'dinov2_vit'+version.lower()+'14'
 
   # Training.'MVImagenet'
   config.max_grad_norm = 1
