@@ -74,11 +74,11 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/home/jesimonbarreto/random/'#'/home/jesimonbarreto/exp_test_now/'
+  config.train_dir = '/home/jesimonbarreto/check_val/'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = False
   #config.preextracted = True
   config.write_summary = True
-  config.steps_checkpoints = [19020]
+  config.steps_checkpoints = [3501]
   config.ks = [5,10,20]
   config.dir_files = '/mnt/disks/dataset/eval_files/'
 
