@@ -37,6 +37,17 @@ def get_config():
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
   total_steps = config.num_training_epochs * config.steps_per_epoch
+
+  #DINO
+  config.global_crops_scale = (0.14, 1.0) 
+  config.local_crops_number = 0 #if 0, global scale = 0.14,1.0
+  config.local_crops_scale = (0.05,0.25)
+  config.student_temp = 0.1
+  config.center_momentum = 0.9
+  config.ncrops = 0 #change other parameters
+  config.warmup_teacher_temp = 0.04
+  config.teacher_temp = 0.07
+  config.warmup_teacher_temp_epochs = 30
   
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
@@ -165,16 +176,7 @@ def get_config():
 
   # Weight decay.
   config.weight_decay = 0.04
-  #DINO
-  config.global_crops_scale = (0.14, 1.0) 
-  config.local_crops_number = 0 #if 0, global scale = 0.14,1.0
-  config.local_crops_scale = (0.05,0.25)
-  config.student_temp = 0.1
-  config.center_momentum = 0.9
-  config.ncrops = 0 #change other parameters
-  config.warmup_teacher_temp = 0.04
-  config.teacher_temp = 0.07
-  config.warmup_teacher_temp_epochs = 30
+
   
   #Verificar
   config.weight_decay_end = 0.4
