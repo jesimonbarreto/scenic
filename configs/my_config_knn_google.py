@@ -166,7 +166,7 @@ def get_config():
   config.weight_decay = 0.04
   #verificar
   config.weight_decay_end = 0.4
-  config.lr=0.0005
+  config.lr=0.000005
   config.warmup_epochs=10
   config.optimizer = 'adamw'
   config.drop_path_rate= 0.1

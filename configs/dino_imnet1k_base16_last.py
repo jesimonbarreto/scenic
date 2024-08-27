@@ -14,7 +14,7 @@ def get_config():
 
   config = ml_collections.ConfigDict()
   config.project = 'master'
-  config.experiment_name = 'Dino_17ep_8khead_run'
+  config.experiment_name = 'Dino_newargs_17ep_8khead_run'
   # Dataset.
   config.dataset_name = 'dino_dataset'
   config.data_dtype_str = 'float32'
@@ -39,16 +39,9 @@ def get_config():
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
   total_steps = config.num_training_epochs * config.steps_per_epoch
-  config.global_crops_scale = (0.14, 1.0) 
-  config.local_crops_number = 0 #if 0, global scale = 0.14,1.0
-  config.local_crops_scale = (0.05,0.25)
-  config.student_temp = 0.1
-  config.center_momentum = 0.9
-  config.ncrops = 0 #change other parameters
-  config.warmup_teacher_temp = 0.03
-  config.teacher_temp = 0.07
-  config.warmup_teacher_temp_epochs = 0
+  
   config.dataset_configs.number_of_focal_queries = n_queries - 1
+
   if config.mode == 'video':
     config.dataset_configs.pp_train = (
         #'decode(inkey=("image1"), outkey=("image1"))' +
@@ -172,9 +165,20 @@ def get_config():
 
   # Weight decay.
   config.weight_decay = 0.04
-  #verificar
+  #DINO
+  config.global_crops_scale = (0.14, 1.0) 
+  config.local_crops_number = 0 #if 0, global scale = 0.14,1.0
+  config.local_crops_scale = (0.05,0.25)
+  config.student_temp = 0.1
+  config.center_momentum = 0.9
+  config.ncrops = 0 #change other parameters
+  config.warmup_teacher_temp = 0.04
+  config.teacher_temp = 0.04
+  config.warmup_teacher_temp_epochs = 30
+  
+  #Verificar
   config.weight_decay_end = 0.4
-  config.lr=0.000005
+  config.lr=0.0000005
   config.warmup_epochs=10
   config.optimizer = 'adamw'
   config.drop_path_rate= 0.1
