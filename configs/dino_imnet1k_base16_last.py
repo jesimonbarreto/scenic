@@ -173,7 +173,7 @@ def get_config():
   config.center_momentum = 0.9
   config.ncrops = 0 #change other parameters
   config.warmup_teacher_temp = 0.04
-  config.teacher_temp = 0.04
+  config.teacher_temp = 0.07
   config.warmup_teacher_temp_epochs = 30
   
   #Verificar
