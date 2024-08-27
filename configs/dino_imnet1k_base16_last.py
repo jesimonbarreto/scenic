@@ -30,8 +30,6 @@ def get_config():
   config.number_plot = 2
   config.dir_plot = '/home/jesimonbarreto/images/'
 
-  config.load_weights = 'dinov2_vit'+version.lower()+'14'
-
   # Training.'MVImagenet'
   config.max_grad_norm = 1
   config.num_training_epochs = 17#400
@@ -145,6 +143,8 @@ def get_config():
   config.norm_last_layer = True
   config.momentum_teacher = 0.996
   config.use_bn_in_head = False
+  config.load_weights = 'dinov2_vit'+version.lower()+'14'
+
 
   # LOCA specific parameters.
   config.n_ref_positions = int((reference_resolution // patch)**2)
