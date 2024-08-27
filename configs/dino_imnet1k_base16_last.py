@@ -47,7 +47,7 @@ def get_config():
   config.ncrops = 0 #change other parameters
   config.warmup_teacher_temp = 0.04
   config.teacher_temp = 0.07
-  config.warmup_teacher_temp_epochs = 30
+  config.warmup_teacher_temp_epochs = 0
   
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
