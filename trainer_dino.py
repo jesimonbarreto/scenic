@@ -306,7 +306,7 @@ def train(
     def print_and_categorize(path, v):
         # Converte o caminho (path) de tupla para string
         full_path = '/'.join(path)
-        print(f"Path: {full_path}")
+        print(f"Path: {full_path}/{v}")
         # Categoriza como 'trainable' se 'projection' estiver no caminho, senão 'frozen'
         return 'trainable' if 'projection' in full_path else 'frozen'
     
