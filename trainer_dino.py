@@ -311,6 +311,7 @@ def train(
         return 'trainable' if 'projection' in full_path else 'frozen'
     
     param_partitions = traverse_util.path_aware_map(print_and_categorize, params)
+    print(param_partitions)
     #param_partitions = traverse_util.path_aware_map(
     #  lambda path, v: 'trainable' if 'projection' in path else 'frozen', train_state.params)
     
