@@ -13,8 +13,11 @@ def get_config():
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
 
   config = ml_collections.ConfigDict()
+  #WANDB
   config.project = 'master'
   config.experiment_name = 'Dino_newargs_17ep_8khead_run'
+  #config
+  config.transfer_learning = True
   # Dataset.
   config.dataset_name = 'dino_dataset'
   config.data_dtype_str = 'float32'

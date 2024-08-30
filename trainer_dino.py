@@ -10,6 +10,7 @@ from clu import periodic_actions
 from clu import platform
 from flax import jax_utils
 import flax.linen as nn
+from flax import traverse_util
 import jax
 from jax import nn as opr
 from jax.example_libraries import optimizers
@@ -110,7 +111,7 @@ def dino_train_step(
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
 
     teacher_out = flax_model.apply(
-        {'params': train_state.ema_params},
+        {'params': train_state.ema_params if use_ema else params},
         batch['sample'][0],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
@@ -145,7 +146,7 @@ def dino_train_step(
     total_loss = loss_dino
     if config.mode == 'random':
       teacher_out = flax_model.apply(
-        {'params': train_state.ema_params},
+        {'params': train_state.ema_params if use_ema else params},
         batch['sample'][1],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
@@ -256,6 +257,25 @@ def train(
                     dataset.meta_data.get('input_dtype', jnp.float32))],
        config=config, rngs=init_rng)
   
+    # Função para listar todas as camadas
+  def list_layers(params, parent_name=""):
+      layer_names = []
+      for layer_name, layer_params in params.items():
+          full_name = f"{parent_name}/{layer_name}" if parent_name else layer_name
+          if isinstance(layer_params, dict):
+              # Recursivamente lista subcamadas
+              layer_names.extend(list_layers(layer_params, full_name))
+          else:
+              # Adiciona o nome da camada atual
+              layer_names.append(full_name)
+      return layer_names
+
+  # Lista os nomes de todas as camadas
+  layer_names = list_layers(params)
+  for name in layer_names:
+      print(name)
+
+  print(casa)
   '''=============================================='''
   print(f'Here... trying load {params.keys()}')
   from load_params import load_params
@@ -277,10 +297,21 @@ def train(
       config.momentum_rate)
 
   # Create optimizer.
-  weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
-  tx = optax.inject_hyperparams(optax.adamw)(
-      learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
-      mask=weight_decay_mask,)
+  if config.transfer_learning:
+    partition_optimizers = {'trainable': optax.inject_hyperparams(optax.adamw)(
+        learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
+        mask=weight_decay_mask,), 
+        'frozen': optax.set_to_zero()}
+    
+    param_partitions = traverse_util.path_aware_map(
+      lambda path, v: 'frozen' if 'backbone' in path else 'trainable', train_state.params)
+    
+    tx = optax.multi_transform(partition_optimizers, param_partitions)
+  else:
+    weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
+    tx = optax.inject_hyperparams(optax.adamw)(
+        learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
+        mask=weight_decay_mask,)
   opt_state = jax.jit(tx.init, backend='cpu')(params)
 
   # Create chrono class to track and store training statistics and metadata.
