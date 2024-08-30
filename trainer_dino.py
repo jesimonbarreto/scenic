@@ -302,11 +302,20 @@ def train(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
         mask=weight_decay_mask,), 
         'frozen': optax.set_to_zero()}
+    # Função para categorizar parâmetros e printar os caminhos
+    def print_and_categorize(path, v):
+        # Converte o caminho (path) de tupla para string
+        full_path = '/'.join(path)
+        print(f"Path: {full_path}")
+        # Categoriza como 'trainable' se 'projection' estiver no caminho, senão 'frozen'
+        return 'trainable' if 'projection' in full_path else 'frozen'
     
-    param_partitions = traverse_util.path_aware_map(
-      lambda path, v: 'frozen' if 'backbone' in path else 'trainable', train_state.params)
+    param_partitions = traverse_util.path_aware_map(print_and_categorize, params)
+    #param_partitions = traverse_util.path_aware_map(
+    #  lambda path, v: 'trainable' if 'projection' in path else 'frozen', train_state.params)
     
     tx = optax.multi_transform(partition_optimizers, param_partitions)
+    print(casa)
   else:
     weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
     tx = optax.inject_hyperparams(optax.adamw)(

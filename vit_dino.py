@@ -194,12 +194,19 @@ class ViTDINO(nn.Module):
               x, deterministic=not train)
     x_norm = nn.LayerNorm(name='encoder_norm')(x)
 
+    x_out = ProjectionModule(
+          hidden_dim=self.head_hidden_dim,
+          bottleneck_dim=self.head_bottleneck_dim,
+          output_dim=self.head_output_dim,
+          name='projection_module')(
+              x, train)#.reshape((-1, self.head_output_dim))'''
+
     x_train = ProjectionHead(
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
           output_dim=self.head_output_dim,
           name='projection_head')(
-              x, train)#.reshape((-1, self.head_output_dim))'''
+              x_out, train)#.reshape((-1, self.head_output_dim))'''
 
     return {
             "x_norm_clstoken": x_norm[:, 0],
@@ -215,7 +222,35 @@ def norm_kernel_init_fn(rng, shape, dtype):
   param /= (jnp.linalg.norm(param, axis=0, keepdims=True) + 1e-10)
   return param
 
+class ProjectionModule(nn.Module):
+  """Projection head.
 
+  Attributes:
+    hidden_dim: Dimension of the hidden layer in the projection mlp.
+    bottleneck_dim: Dimension of the bottleneck.
+    output_dim: Dimension of the output ("number of prototypes").
+    normalize_last_layer: Normalize the last layer of prototypes.
+    use_bn: Use batch normalizations.
+    n_layers: Depth of the projection head.
+  """
+  hidden_dim: int = 2048
+  bottleneck_dim: int = 256
+  output_dim: int = 4096
+  n_layers: int = 2
+
+  @nn.compact
+  def __call__(self, x: jnp.ndarray, train: bool) -> jnp.ndarray:
+    for i in range(self.n_layers):
+      x = nn.Dense(self.hidden_dim)(x)
+      x = nn.gelu(x)
+      x = nn_layers.IdentityLayer(name=f'mlp_{i}')(x)
+    x = nn.Dense(self.bottleneck_dim)(x)
+    # Normalize.
+    x /= jnp.linalg.norm(x, axis=-1, keepdims=True)
+    x = WeightNormDense(self.output_dim, use_bias=False, name='prototypes',
+                        kernel_init=norm_kernel_init_fn)(x)
+    return x
+  
 class ProjectionHead(nn.Module):
   """Projection head.
 
