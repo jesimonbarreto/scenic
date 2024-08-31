@@ -320,7 +320,7 @@ def train(
     tx = optax.inject_hyperparams(optax.adamw)(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
         mask=weight_decay_mask,)
-  opt_state = jax.jit(tx.init, backend='cpu')(params[0])
+  opt_state = jax.jit(tx.init, backend='cpu')(params)
 
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
