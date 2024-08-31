@@ -317,7 +317,7 @@ def train(
       lambda path, v: 'trainable' if 'projection' in '/'.join(path) else 'frozen', params)
     
     param_partitions = unfreeze(param_partitions)
-    params = unfreeze(params)
+    #params = unfreeze(params)
     tx = optax.multi_transform(partition_optimizers, param_partitions)
   else:
     tx = optax.inject_hyperparams(optax.adamw)(
