@@ -275,9 +275,8 @@ def train(
   for name in layer_names:
       print(name)
 
-  print(casa)
   '''=============================================='''
-  print(f'Here... trying load {params.keys()}')
+  '''print(f'Here... trying load {params.keys()}')
   from load_params import load_params
 
   params = load_params(config.load_weights,'/home/jesimonbarreto/', params,
@@ -285,7 +284,7 @@ def train(
                 force_random_init= None)
 
 
-  print(f'Here... finished load {params.keys()}')
+  print(f'Here... finished load {params.keys()}')'''
   '''=============================================='''
 
   # Only one model function but two sets of parameters.
