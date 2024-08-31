@@ -295,6 +295,7 @@ def train(
   momentum_parameter_scheduler = lr_schedules.compound_lr_scheduler(
       config.momentum_rate)
 
+  weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
   # Create optimizer.
   if config.transfer_learning:
     partition_optimizers = {'trainable': optax.inject_hyperparams(optax.adamw)(
@@ -317,7 +318,6 @@ def train(
     tx = optax.multi_transform(partition_optimizers, param_partitions)
     print(casa)
   else:
-    weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
     tx = optax.inject_hyperparams(optax.adamw)(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
         mask=weight_decay_mask,)
