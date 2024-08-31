@@ -257,7 +257,7 @@ def train(
                     dataset.meta_data.get('input_dtype', jnp.float32))],
        config=config, rngs=init_rng)
   
-    # Função para listar todas as camadas
+  '''  # Função para listar todas as camadas
   def list_layers(params, parent_name=""):
       layer_names = []
       for layer_name, layer_params in params.items():
@@ -273,7 +273,7 @@ def train(
   # Lista os nomes de todas as camadas
   layer_names = list_layers(params)
   for name in layer_names:
-      print(name)
+      print(name)'''
 
   '''=============================================='''
   '''print(f'Here... trying load {params.keys()}')
@@ -306,7 +306,7 @@ def train(
     def print_and_categorize(path, v):
         # Converte o caminho (path) de tupla para string
         full_path = '/'.join(path)
-        print(f"Path: {full_path}/{v}")
+        #print(f"Path: {full_path}/{v}")
         # Categoriza como 'trainable' se 'projection' estiver no caminho, senão 'frozen'
         return 'trainable' if 'projection' in full_path else 'frozen'
     
@@ -316,7 +316,6 @@ def train(
     #  lambda path, v: 'trainable' if 'projection' in path else 'frozen', train_state.params)
     
     tx = optax.multi_transform(partition_optimizers, param_partitions)
-    print(casa)
   else:
     tx = optax.inject_hyperparams(optax.adamw)(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
