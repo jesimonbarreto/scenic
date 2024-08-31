@@ -276,7 +276,7 @@ def train(
       print(name)'''
 
   '''=============================================='''
-  print(f'Here... trying load {params.keys()}')
+  #print(f'Here... trying load {params.keys()}')
   from load_params import load_params
 
   params = load_params(config.load_weights,'/home/jesimonbarreto/', params,
@@ -284,7 +284,7 @@ def train(
                 force_random_init= None)
 
 
-  print(f'Here... finished load {params.keys()}')
+  #print(f'Here... finished load {params.keys()}')
   '''=============================================='''
 
   # Only one model function but two sets of parameters.
@@ -295,11 +295,12 @@ def train(
   momentum_parameter_scheduler = lr_schedules.compound_lr_scheduler(
       config.momentum_rate)
 
-  
+  weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
   # Create optimizer.
   if config.transfer_learning:
     partition_optimizers = {'trainable': optax.inject_hyperparams(optax.adamw)(
-        learning_rate=learning_rate_fn, weight_decay=config.weight_decay), 
+        learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
+        mask=weight_decay_mask,), 
         'frozen': optax.set_to_zero()}
     # Função para categorizar parâmetros e printar os caminhos
     def print_and_categorize(path, v):
@@ -316,11 +317,10 @@ def train(
     
     tx = optax.multi_transform(partition_optimizers, param_partitions)
   else:
-    weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
     tx = optax.inject_hyperparams(optax.adamw)(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
         mask=weight_decay_mask,)
-  opt_state = jax.jit(tx.init, backend='cpu')(params)
+  opt_state = jax.jit(tx.init, backend='cpu')(dict(params))
 
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
