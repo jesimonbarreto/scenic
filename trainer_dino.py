@@ -11,6 +11,7 @@ from clu import platform
 from flax import jax_utils
 import flax.linen as nn
 from flax import traverse_util
+from flax.core import freeze, unfreeze
 import jax
 from jax import nn as opr
 from jax.example_libraries import optimizers
@@ -315,12 +316,14 @@ def train(
     param_partitions = traverse_util.path_aware_map(
       lambda path, v: 'trainable' if 'projection' in '/'.join(path) else 'frozen', params)
     
+    param_partitions = unfreeze(param_partitions)
+    params = unfreeze(params)
     tx = optax.multi_transform(partition_optimizers, param_partitions)
   else:
     tx = optax.inject_hyperparams(optax.adamw)(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
         mask=weight_decay_mask,)
-  opt_state = jax.jit(tx.init, backend='cpu')(dict(params))
+  opt_state = jax.jit(tx.init, backend='cpu')(params)
 
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
