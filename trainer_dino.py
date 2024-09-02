@@ -324,11 +324,19 @@ def train(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
         mask=weight_decay_mask,)
   
-  #opt_state = jax.jit(tx.init, backend='cpu')(params)
-  opt_state = tx.init(params)
+    opt_state = jax.jit(tx.init, backend='cpu')(params)
+    #opt_state = tx.init(params)
 
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
+  from flax.training.train_state import TrainState
+
+  state = TrainState.create(
+  apply_fn=model.apply,
+  params=params,
+  tx=tx)
+  opt_state = state.opt_state
+
 
   # Create the TrainState to track training state (i.e. params and optimizer).
   train_state = utils.TrainState(
