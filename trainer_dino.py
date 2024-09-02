@@ -318,7 +318,8 @@ def train(
     
     # Identifique as camadas a serem congeladas (exemplo)
     frozen_layers = ['projection_head']
-
+    for i in traverse_util.flatten_dict(params):
+      print(i)
     # Crie a máscara
     mask = {
         name: name in frozen_layers
