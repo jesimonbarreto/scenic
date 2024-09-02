@@ -332,7 +332,7 @@ def train(
   from flax.training.train_state import TrainState
 
   state = TrainState.create(
-  #apply_fn=model.apply,
+  apply_fn=model.flax_model.apply,
   params=params,
   tx=tx)
   opt_state = state.opt_state
