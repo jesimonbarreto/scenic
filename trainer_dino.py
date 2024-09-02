@@ -299,10 +299,10 @@ def train(
   #weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
   # Create optimizer.
   if config.transfer_learning:
-    partition_optimizers = {'trainable': optax.inject_hyperparams(optax.adamw)(
-        learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
+    #partition_optimizers = {'trainable': optax.inject_hyperparams(optax.adamw)(
+    #    learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
         #mask=weight_decay_mask,), 
-        'frozen': optax.set_to_zero()}
+    #    'frozen': optax.set_to_zero()}
     # Função para categorizar parâmetros e printar os caminhos
     def print_and_categorize(path, v):
         # Converte o caminho (path) de tupla para string
@@ -313,16 +313,27 @@ def train(
     
     #param_partitions = traverse_util.path_aware_map(print_and_categorize, params)
     #print(param_partitions)
-    param_partitions = traverse_util.path_aware_map(
-      lambda path, v: 'trainable' if 'projection' in '/'.join(path) else 'frozen', params)
+    #param_partitions = traverse_util.path_aware_map(
+    #  lambda path, v: 'trainable' if 'projection' in '/'.join(path) else 'frozen', params)
     
+    # Identifique as camadas a serem congeladas (exemplo)
+    frozen_layers = ['projection_head']
+
+    # Crie a máscara
+    mask = {
+        name: name in frozen_layers
+        for name, _ in traverse_util.traverse_util.flatten_dict(params)
+    }
+    masked_params = optax.mask(params, mask)
+
+
     #param_partitions = unfreeze(param_partitions)
     #params = unfreeze(params)
-    tx = optax.multi_transform(partition_optimizers, param_partitions)
-  else:
-    tx = optax.inject_hyperparams(optax.adamw)(
-        learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
-        mask=weight_decay_mask,)
+    #tx = optax.multi_transform(partition_optimizers, param_partitions)
+
+  tx = optax.inject_hyperparams(optax.adamw)(
+      learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
+      )#mask=weight_decay_mask,)
   
   opt_state = jax.jit(tx.init, backend='cpu')(params)
 
@@ -332,7 +343,7 @@ def train(
 
   # Create the TrainState to track training state (i.e. params and optimizer).
   train_state = utils.TrainState(
-    global_step=0, opt_state=opt_state, tx=tx, params=param_partitions,
+    global_step=0, opt_state=opt_state, tx=tx, params=params,
       ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
   
   if config.save_state_0:
