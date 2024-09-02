@@ -316,7 +316,7 @@ def train(
     param_partitions = traverse_util.path_aware_map(
       lambda path, v: 'trainable' if 'projection' in '/'.join(path) else 'frozen', params)
     
-    param_partitions = unfreeze(param_partitions)
+    #param_partitions = unfreeze(param_partitions)
     #params = unfreeze(params)
     tx = optax.multi_transform(partition_optimizers, param_partitions)
   else:
