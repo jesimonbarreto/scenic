@@ -296,12 +296,12 @@ def train(
   momentum_parameter_scheduler = lr_schedules.compound_lr_scheduler(
       config.momentum_rate)
 
-  weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
+  #weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
   # Create optimizer.
   if config.transfer_learning:
     partition_optimizers = {'trainable': optax.inject_hyperparams(optax.adamw)(
-        learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
-        mask=weight_decay_mask,), 
+        learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
+        #mask=weight_decay_mask,), 
         'frozen': optax.set_to_zero()}
     # Função para categorizar parâmetros e printar os caminhos
     def print_and_categorize(path, v):
@@ -324,7 +324,7 @@ def train(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
         mask=weight_decay_mask,)
   
-  opt_state = jax.jit(tx.init, backend='cpu')(param_partitions)
+  opt_state = jax.jit(tx.init, backend='cpu')(params)
 
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
