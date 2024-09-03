@@ -322,8 +322,8 @@ def train(
       print(i)
     # Crie a máscara
     mask = {
-        name: name in frozen_layers
-        for name, _ in traverse_util.flatten_dict(params)
+        name[0]: name[0] in frozen_layers
+        for name in traverse_util.flatten_dict(params)
     }
     masked_params = optax.mask(params, mask)
 
