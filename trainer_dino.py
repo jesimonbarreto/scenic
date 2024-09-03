@@ -12,7 +12,7 @@ from flax import jax_utils
 import flax.linen as nn
 from flax import traverse_util
 from flax.core import freeze, unfreeze
-from flax.training import train_state
+from flax.training import train_state as ts
 import jax
 from jax import nn as opr
 from jax.example_libraries import optimizers
@@ -321,7 +321,7 @@ def train(
     #param_partitions = unfreeze(param_partitions)
     #params = unfreeze(params)
     tx = optax.multi_transform(partition_optimizers, param_partitions)
-    opt_state = train_state.TrainState.create(apply_fn=model.flax_model.apply,
+    opt_state = ts.TrainState.create(apply_fn=model.flax_model.apply,
                                       params=params,
                                       tx=tx)
   else:
