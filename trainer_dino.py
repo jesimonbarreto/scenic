@@ -326,12 +326,13 @@ def train(
         def update_fn(updates, state, params=None):
             return jax.tree_map(jnp.zeros_like, updates), ()
         return optax.GradientTransformation(init_fn, update_fn)
-    
-    #param_partitions = unfreeze(param_partitions)
-    #params = unfreeze(params)
-    tx = optax.multi_transform({'adam': optax.adam(0.1), 'zero': zero_grads()},
-                               create_mask(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s)
-                               )
+
+    tx = optax.multi_transform(
+        {'adam': optax.inject_hyperparams(optax.adamw)(
+        learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
+        'zero': zero_grads()},
+         create_mask(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s)
+        )
     
     print(create_mask(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s))
     
