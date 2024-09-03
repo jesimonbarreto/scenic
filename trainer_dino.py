@@ -307,7 +307,7 @@ def train(
     def create_mask(params, label_fn):
       def _map(params, mask, label_fn):
           for k in params:
-              if not label_fn(k):
+              if label_fn(k):
                   mask[k] = 'zero'
               else:
                   if isinstance(params[k], FrozenDict):
@@ -330,10 +330,10 @@ def train(
     #param_partitions = unfreeze(param_partitions)
     #params = unfreeze(params)
     tx = optax.multi_transform({'adam': optax.adam(0.1), 'zero': zero_grads()},
-                               create_mask(params, lambda s: 'projection' in s)
+                               create_mask(params, lambda s: 'ToTokenSequence' or 'encoder' in s)
                                )
     
-    print(create_mask(params, lambda s:'projection' in s))
+    print(create_mask(params, lambda s: 'ToTokenSequence' or 'encoder' in s))
     
   else:
     tx = optax.inject_hyperparams(optax.adamw)(
