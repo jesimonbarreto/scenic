@@ -329,20 +329,17 @@ def train(
     #param_partitions = unfreeze(param_partitions)
     #params = unfreeze(params)
     tx = optax.multi_transform({'adam': optax.adam(0.1), 'zero': zero_grads()},
-                               create_mask(params, lambda s:'projection' in s)
+                               create_mask(params, lambda s: 'projection' or 'Dense' or 'prototypes' in s)
                                )
     
     print(create_mask(params, lambda s:'projection' in s))
     
-    opt_state = ts.TrainState.create(apply_fn=model.flax_model.apply,
-                                      params=params,
-                                      tx=tx)
   else:
     tx = optax.inject_hyperparams(optax.adamw)(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
         )#mask=weight_decay_mask,)
     
-    opt_state = jax.jit(tx.init, backend='cpu')(params)
+  opt_state = jax.jit(tx.init, backend='cpu')(params)
 
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
