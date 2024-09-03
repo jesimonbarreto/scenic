@@ -271,7 +271,7 @@ class ProjectionHead(nn.Module):
   def __call__(self, x: jnp.ndarray, train: bool) -> jnp.ndarray:
     for i in range(self.n_layers):
       x = nn.Dense(self.hidden_dim, name=f'projection_densei_{i}')(x)
-      x = nn.gelu(x, name=f'projection_gelu_{i}')
+      x = nn.gelu(x)
       x = nn_layers.IdentityLayer(name=f'projection_mlp_{i}')(x)
     x = nn.Dense(self.bottleneck_dim,name=f'projection_densee_{i}')(x)
     # Normalize.
