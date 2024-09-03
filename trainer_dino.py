@@ -318,14 +318,18 @@ def train(
     
     # Identifique as camadas a serem congeladas (exemplo)
     frozen_layers = ['projection_head']
-    for i in traverse_util.flatten_dict(params):
-      print(i)
+    
     # Crie a máscara
     mask = {
         name[0]: name[0] in frozen_layers
         for name in traverse_util.flatten_dict(params)
     }
-    masked_params = optax.mask(params, mask)
+
+    print(mask)
+    #masked_params = optax.mask(params, mask)
+
+    masked_params = optax.masked(tx, mask)(params)  # Use optax.masked
+
 
 
     #param_partitions = unfreeze(param_partitions)
