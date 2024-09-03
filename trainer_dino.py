@@ -432,8 +432,9 @@ def train(
           inner_inner_state = inner_state.inner_state
           v = inner_inner_state.hyperparams['learning_rate']
         else:
-          v = inner_state.hyperparams['learning_rate']
-          print(v)
+          break
+      print('learning rate ##################')
+      print(v)
       print('learning rate ##################')
       ext_log.append(v)
       train_metrics.append(tm)
