@@ -427,7 +427,7 @@ def train(
       #v['learning_rate'] = train_state.opt_state.hyperparams['learning_rate']
       print('learning rate ##################')
       for inner_state in train_state.opt_state.inner_states.values():
-        print(inner_state.hyperparams)
+        print(inner_state.inner_state)
         if isinstance(inner_state, optax.MaskedState):
           inner_inner_state = inner_state.inner_state
           v = inner_inner_state.hyperparams['learning_rate']
