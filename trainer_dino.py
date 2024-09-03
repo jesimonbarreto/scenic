@@ -12,6 +12,7 @@ from flax import jax_utils
 import flax.linen as nn
 from flax import traverse_util
 from flax.core import freeze, unfreeze
+from flax.training import train_state
 import jax
 from jax import nn as opr
 from jax.example_libraries import optimizers
@@ -299,10 +300,10 @@ def train(
   #weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
   # Create optimizer.
   if config.transfer_learning:
-    #partition_optimizers = {'trainable': optax.inject_hyperparams(optax.adamw)(
-    #    learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
+    partition_optimizers = {'trainable': optax.inject_hyperparams(optax.adamw)(
+       learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
         #mask=weight_decay_mask,), 
-    #    'frozen': optax.set_to_zero()}
+        'frozen': optax.set_to_zero()}
     # Função para categorizar parâmetros e printar os caminhos
     def print_and_categorize(path, v):
         # Converte o caminho (path) de tupla para string
@@ -313,39 +314,27 @@ def train(
     
     #param_partitions = traverse_util.path_aware_map(print_and_categorize, params)
     #print(param_partitions)
-    #param_partitions = traverse_util.path_aware_map(
-    #  lambda path, v: 'trainable' if 'projection' in '/'.join(path) else 'frozen', params)
+    param_partitions = traverse_util.path_aware_map(
+      lambda path, v: 'trainable' if 'projection' in '/'.join(path) else 'frozen', params)
     
-    # Identifique as camadas a serem congeladas (exemplo)
-    frozen_layers = ['projection_head']
-    
-    # Crie a máscara
-    mask = {
-        name[0]: name[0] in frozen_layers
-        for name in traverse_util.flatten_dict(params)
-    }
-
-    print(mask)
-    #masked_params = optax.mask(params, mask)
-
-    masked_params = optax.masked(tx, mask)(params)  # Use optax.masked
-
-
 
     #param_partitions = unfreeze(param_partitions)
     #params = unfreeze(params)
-    #tx = optax.multi_transform(partition_optimizers, param_partitions)
-
-  tx = optax.inject_hyperparams(optax.adamw)(
-      learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
-      )#mask=weight_decay_mask,)
-  
-  opt_state = jax.jit(tx.init, backend='cpu')(masked_params)
+    tx = optax.multi_transform(partition_optimizers, param_partitions)
+    opt_state = train_state.TrainState.create(apply_fn=model.flax_model.apply,
+                                      params=params,
+                                      tx=tx)
+  else:
+    tx = optax.inject_hyperparams(optax.adamw)(
+        learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
+        )#mask=weight_decay_mask,)
+    
+    opt_state = jax.jit(tx.init, backend='cpu')(params)
 
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
 
-
+  
   # Create the TrainState to track training state (i.e. params and optimizer).
   train_state = utils.TrainState(
     global_step=0, opt_state=opt_state, tx=tx, params=params,
