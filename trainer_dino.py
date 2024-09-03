@@ -332,7 +332,7 @@ def train(
                                create_mask(params, lambda s: 'projection' or 'Dense' or 'prototypes' in s)
                                )
     
-    print(create_mask(params, lambda s:'projection' in s))
+    print(create_mask(params, lambda s:'projection' or 'Dense' or 'prototypes' in s))
     
   else:
     tx = optax.inject_hyperparams(optax.adamw)(
