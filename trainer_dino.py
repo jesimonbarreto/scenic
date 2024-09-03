@@ -12,6 +12,8 @@ from flax import jax_utils
 import flax.linen as nn
 from flax import traverse_util
 from flax.core import freeze, unfreeze
+from flax.core import frozen_dict
+from flax.core.frozen_dict import FrozenDict
 from flax.training import train_state as ts
 import jax
 from jax import nn as opr
@@ -300,27 +302,38 @@ def train(
   #weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
   # Create optimizer.
   if config.transfer_learning:
-    partition_optimizers = {'trainable': optax.inject_hyperparams(optax.adamw)(
-       learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
-        #mask=weight_decay_mask,), 
-        'frozen': optax.set_to_zero()}
-    # Função para categorizar parâmetros e printar os caminhos
-    def print_and_categorize(path, v):
-        # Converte o caminho (path) de tupla para string
-        full_path = '/'.join(path)
-        #print(f"Path: {full_path}/{v}")
-        # Categoriza como 'trainable' se 'projection' estiver no caminho, senão 'frozen'
-        return 'trainable' if 'projection' in full_path else 'frozen'
-    
-    #param_partitions = traverse_util.path_aware_map(print_and_categorize, params)
-    #print(param_partitions)
-    param_partitions = traverse_util.path_aware_map(
-      lambda path, v: 'trainable' if 'projection' in '/'.join(path) else 'frozen', params)
-    
+    params = freeze(params)
+    def create_mask(params, label_fn):
+      def _map(params, mask, label_fn):
+          for k in params:
+              if not label_fn(k):
+                  mask[k] = 'zero'
+              else:
+                  if isinstance(params[k], FrozenDict):
+                      mask[k] = {}
+                      _map(params[k], mask[k], label_fn)
+                  else:
+                      mask[k] = 'adam'
+      mask = {}
+      _map(params, mask, label_fn)
+      return frozen_dict.freeze(mask)
 
+    def zero_grads():
+        # from https://github.com/deepmind/optax/issues/159#issuecomment-896459491
+        def init_fn(_):
+            return ()
+        def update_fn(updates, state, params=None):
+            return jax.tree_map(jnp.zeros_like, updates), ()
+        return optax.GradientTransformation(init_fn, update_fn)
+    
     #param_partitions = unfreeze(param_partitions)
     #params = unfreeze(params)
-    tx = optax.multi_transform(partition_optimizers, param_partitions)
+    tx = optax.multi_transform({'adam': optax.adam(0.1), 'zero': zero_grads()},
+                               create_mask(params, lambda s:'projection' in s)
+                               )
+    
+    print(create_mask(params, lambda s:'projection' in s))
+    
     opt_state = ts.TrainState.create(apply_fn=model.flax_model.apply,
                                       params=params,
                                       tx=tx)
