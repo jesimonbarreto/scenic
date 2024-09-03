@@ -329,10 +329,10 @@ def train(
     #param_partitions = unfreeze(param_partitions)
     #params = unfreeze(params)
     tx = optax.multi_transform({'adam': optax.adam(0.1), 'zero': zero_grads()},
-                               create_mask(params, lambda s: 'projection' or 'Dense' or 'prototypes' in s)
+                               create_mask(params, lambda s: 'projection' in s)
                                )
     
-    print(create_mask(params, lambda s:'projection' or 'Dense' or 'prototypes' in s))
+    print(create_mask(params, lambda s:'projection' in s))
     
   else:
     tx = optax.inject_hyperparams(optax.adamw)(

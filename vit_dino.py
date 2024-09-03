@@ -270,13 +270,13 @@ class ProjectionHead(nn.Module):
   @nn.compact
   def __call__(self, x: jnp.ndarray, train: bool) -> jnp.ndarray:
     for i in range(self.n_layers):
-      x = nn.Dense(self.hidden_dim)(x)
-      x = nn.gelu(x)
-      x = nn_layers.IdentityLayer(name=f'mlp_{i}')(x)
-    x = nn.Dense(self.bottleneck_dim)(x)
+      x = nn.Dense(self.hidden_dim, name=f'projection_densei_{i}')(x)
+      x = nn.gelu(x, name=f'projection_gelu_{i}')
+      x = nn_layers.IdentityLayer(name=f'projection_mlp_{i}')(x)
+    x = nn.Dense(self.bottleneck_dim,name=f'projection_densee_{i}')(x)
     # Normalize.
     x /= jnp.linalg.norm(x, axis=-1, keepdims=True)
-    x = WeightNormDense(self.output_dim, use_bias=False, name='prototypes',
+    x = WeightNormDense(self.output_dim, use_bias=False, name='projection_prototypes',
                         kernel_init=norm_kernel_init_fn)(x)
     return x
 
