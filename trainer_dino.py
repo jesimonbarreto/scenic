@@ -424,7 +424,12 @@ def train(
                                   train_batch,
                                   center,
                                   epoch)
-      v['learning_rate'] = train_state.opt_state.hyperparams['learning_rate']
+      #v['learning_rate'] = train_state.opt_state.hyperparams['learning_rate']
+      print('learning rate ##################')
+      for inner_state in train_state.opt_state.inner_states.values():
+          v = inner_state.hyperparams['learning_rate']
+          print(v)
+      print('learning rate ##################')
       ext_log.append(v)
       train_metrics.append(tm)
     for h in hooks:
