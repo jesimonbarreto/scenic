@@ -303,6 +303,7 @@ def train(
   # Create optimizer.
   if config.transfer_learning:
     params = freeze(params)
+    
     def create_mask(params, label_fn):
       def _map(params, mask, label_fn):
           for k in params:
