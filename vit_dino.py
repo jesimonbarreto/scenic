@@ -194,19 +194,19 @@ class ViTDINO(nn.Module):
               x, deterministic=not train)
     x_norm = nn.LayerNorm(name='encoder_norm')(x)
 
-    '''x_out = ProjectionModule(
+    x_out = ProjectionModule(
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
           output_dim=self.head_output_dim,
           name='projection_module')(
-              x, train)#.reshape((-1, self.head_output_dim))'''
+              x_norm, train)#.reshape((-1, self.head_output_dim))'''
 
     x_train = ProjectionHead(
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
           output_dim=self.head_output_dim,
           name='projection_head')(
-              x_norm, train)#.reshape((-1, self.head_output_dim))'''
+              x_out, train)#.reshape((-1, self.head_output_dim))'''
 
     return {
             "x_norm_clstoken": x_norm[:, 0],
