@@ -21,7 +21,12 @@ import random
 import datetime
 import subprocess
 from collections import defaultdict, deque
-
+import jax
+import jax.numpy as jnp
+import flax.linen as nn
+from flax.training import train_state
+from flax.core import frozen_dict
+from flax.core.frozen_dict import FrozenDict
 
 #from PIL import ImageFilter, ImageOps
 
@@ -176,6 +181,27 @@ def sinkhorn(x, num_itr=3, distributed=True):
     # x sums to 1 for each sample (it is an assignment).
     x /= weight_per_sample
   return x
+
+
+def print_tree(d, depth=0, print_value=False):
+    for k in d.keys():
+        if isinstance(d[k], FrozenDict):
+            print('  ' * depth, k)
+            print_tree(d[k], depth + 1, print_value)
+        else:
+            if print_value:
+                print('  ' * depth, k, d[k])
+            else:
+                print('  ' * depth, k)
+
+
+def compare_params(lhs, rhs, depth):
+    for k in lhs.keys():
+        if isinstance(lhs[k], FrozenDict):
+            print('  ' * depth, k)
+            compare_params(lhs[k], rhs[k], depth + 1)
+        else:
+            print('  ' * depth, k, jnp.mean(jnp.abs(lhs[k] - rhs[k])))
 
 ########################## IN GITHUB DINO ######################
 '''

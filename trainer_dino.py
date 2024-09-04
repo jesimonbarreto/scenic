@@ -315,7 +315,7 @@ def train(
   momentum_parameter_scheduler = lr_schedules.compound_lr_scheduler(
       config.momentum_rate)
 
-  #weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
+  weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
   # Create optimizer.
   if config.transfer_learning:
     params = freeze(params)
@@ -348,20 +348,16 @@ def train(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
         'zero': zero_grads()},
          create_mask(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s)
-        )
-    
-    print(create_mask(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s))
-    
+        )    
   else:
     tx = optax.inject_hyperparams(optax.adamw)(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
-        )#mask=weight_decay_mask,)
+        mask=weight_decay_mask,)
     
   opt_state = jax.jit(tx.init, backend='cpu')(params)
 
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
-
   
   # Create the TrainState to track training state (i.e. params and optimizer).
   train_state = utils.TrainState(
@@ -440,17 +436,16 @@ def train(
                                   train_batch,
                                   center,
                                   epoch)
-      #v['learning_rate'] = train_state.opt_state.hyperparams['learning_rate']
-      print('learning rate ##################')
-      for inner_state in train_state.opt_state.inner_states.values():
-        print(inner_state.inner_state.hyperparams)
-        v = inner_state.inner_state.hyperparams
-        break
+      
+      if config.transfer_learning:
+        for inner_state in train_state.opt_state.inner_states.values():
+          #print(inner_state.inner_state.hyperparams)
+          v = inner_state.inner_state.hyperparams
+          break
+      else:
+        v = train_state.opt_state.hyperparams
       
       v = calculate_means(v)
-      print('learning rate ##################')
-      print(v)
-      print('learning rate ##################')
       ext_log.append(v)
       train_metrics.append(tm)
     for h in hooks:
