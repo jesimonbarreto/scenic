@@ -34,6 +34,22 @@ import matplotlib.pyplot as plt
 import wandb
 
 
+def calculate_means(dictionary):
+  """Calculates the mean of values in each NumPy array within a dictionary.
+
+  Args:
+    dictionary: A dictionary where each value is a NumPy array.
+
+  Returns:
+    A new dictionary with the same keys, but the values are the means.
+  """
+
+  new_dict = {}
+  for key, array in dictionary.items():
+    mean_value = jnp.mean(array)
+    new_dict[key] = mean_value
+  return new_dict
+
 # Aliases for custom types:
 Batch = Dict[str, jnp.ndarray]
 
@@ -428,10 +444,10 @@ def train(
       print('learning rate ##################')
       for inner_state in train_state.opt_state.inner_states.values():
         print(inner_state.inner_state.hyperparams)
-        if isinstance(inner_state, optax.MaskedState):
-          inner_inner_state = inner_state.inner_state
-          v = inner_inner_state.hyperparams['learning_rate']
-          break
+        v = inner_state.inner_state.hyperparams
+        break
+      
+      v = calculate_means(v)
       print('learning rate ##################')
       print(v)
       print('learning rate ##################')
