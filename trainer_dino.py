@@ -391,7 +391,7 @@ def train(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
         mask=weight_decay_mask,)
     
-  opt_state = jax.jit(tx.init, backend='cpu')(params)
+  opt_state = jax.jit(tx.init, backend='cpu')(params.unfreeze())
 
   if config.print_lr_infos:
     # Get the inner states of the optimizer
