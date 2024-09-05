@@ -9,6 +9,7 @@ from clu import metric_writers
 from clu import periodic_actions
 from clu import platform
 from flax import jax_utils
+import flax
 import flax.linen as nn
 from flax import traverse_util
 from flax.core import freeze, unfreeze
@@ -353,8 +354,8 @@ def train(
     def flattened_traversal(fn):
       """Returns function that is called with `(path, param)` instead of pytree."""
       def mask(tree):
-        flat = flax.traverse_util.flatten_dict(tree)
-        return flax.traverse_util.unflatten_dict(
+        flat = traverse_util.flatten_dict(tree)
+        return traverse_util.unflatten_dict(
             {k: fn(k, v) for k, v in flat.items()})
       return mask
 
