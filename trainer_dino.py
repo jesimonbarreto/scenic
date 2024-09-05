@@ -351,6 +351,7 @@ def train(
          create_mask(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s)
         )
   elif config.layer_wise:
+    params = freeze(params)
     def flattened_traversal(fn):
       """Returns function that is called with `(path, param)` instead of pytree."""
       def mask(tree):
