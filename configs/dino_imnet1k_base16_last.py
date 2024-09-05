@@ -17,7 +17,9 @@ def get_config():
   config.project = 'report'
   config.experiment_name = 'Dino_newargs_17ep_8k2Mhead_run'
   #config
-  config.transfer_learning = True
+  config.transfer_learning = False
+  config.layer_wise = True
+  config.print_infos = True
   # Dataset.
   config.dataset_name = 'dino_dataset'
   config.data_dtype_str = 'float32'

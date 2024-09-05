@@ -348,7 +348,42 @@ def train(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
         'zero': zero_grads()},
          create_mask(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s)
-        )    
+        )
+  elif config.layer_wise:
+    def flattened_traversal(fn):
+      """Returns function that is called with `(path, param)` instead of pytree."""
+      def mask(tree):
+        flat = flax.traverse_util.flatten_dict(tree)
+        return flax.traverse_util.unflatten_dict(
+            {k: fn(k, v) for k, v in flat.items()})
+      return mask
+
+    # Specify layer-wise learning rate.
+    lrs = {'ToTokenSequence_0': 0.01,
+           'encoder_norm': 0.02,
+           'encoderblock_0': 0.03,
+           'encoderblock_1': 0.04,
+           'encoderblock_2': 0.05,
+           'encoderblock_3': 0.06,
+           'encoderblock_4': 0.07,
+           'encoderblock_5': 0.08,
+           'encoderblock_6': 0.09,
+           'encoderblock_7': 0.1,
+           'encoderblock_8': 0.11,
+           'encoderblock_9': 0.12,
+           'encoderblock_10': 0.13,
+           'encoderblock_11': 0.14,
+           'projection_module':0.15,
+           'projection_head':0.16
+           }
+    label_fn = flattened_traversal(lambda path, _: path[0])
+
+    tx = optax.multi_transform(
+        {name: optax.sgd(lr) for name, lr in lrs.items()}, label_fn)
+
+    #fake_grads = jax.tree_map(jnp.ones_like, params.unfreeze())
+    #opt_state = tx.init(params.unfreeze())
+
   else:
     tx = optax.inject_hyperparams(optax.adamw)(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
@@ -356,6 +391,16 @@ def train(
     
   opt_state = jax.jit(tx.init, backend='cpu')(params)
 
+  if config.print_lr_infos:
+    # Get the inner states of the optimizer
+    inner_states = tx.inner_states
+
+    # Iterate over inner states and print optimizer and learning rate
+    for layer_name, inner_state in inner_states.items():
+        optimizer_name = type(inner_state).__name__
+        learning_rate = inner_state.hyperparams['learning_rate']
+        print(f"Layer: {layer_name}, Optimizer: {optimizer_name}, Learning Rate: {learning_rate}")
+  
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
   
