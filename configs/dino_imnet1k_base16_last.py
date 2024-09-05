@@ -19,7 +19,7 @@ def get_config():
   #config
   config.transfer_learning = False
   config.layer_wise = True
-  config.print_lr_infos = True
+  config.print_lr_infos = False
   # Dataset.
   config.dataset_name = 'dino_dataset'
   config.data_dtype_str = 'float32'
