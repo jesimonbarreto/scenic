@@ -406,8 +406,6 @@ def train(
     
   opt_state = jax.jit(tx.init, backend='cpu')(params)
 
-  print(casa)
-
   if config.print_lr_infos:
     # Get the inner states of the optimizer
     inner_states = tx.inner_states
