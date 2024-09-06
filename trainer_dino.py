@@ -390,7 +390,8 @@ def train(
       return frozen_dict.freeze(mask)
 
     tx = optax.multi_transform(
-        {name: optax.sgd(lr) for name, lr in dist_lrs.items()},
+        {name: optax.inject_hyperparams(optax.adamw)(
+        learning_rate=lr, weight_decay=config.weight_decay,) for name, lr in dist_lrs.items()},
         create_maskLW(params)
         )
     if config.print_lr_infos:
@@ -486,15 +487,12 @@ def train(
                                   center,
                                   epoch)
       
-      if config.transfer_learning:
+      if config.transfer_learning or config.layer_wise:
         print(train_state.opt_state)
         for inner_state in train_state.opt_state.inner_states.values():
           print(inner_state)
           v = inner_state.inner_state.hyperparams
           break
-      if config.layer_wise:
-        print(train_state.opt_state)
-        v = train_state.opt_state.inner_state['adam16']
       else:
         v = train_state.opt_state.hyperparams
       
