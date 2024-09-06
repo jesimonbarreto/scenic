@@ -370,12 +370,10 @@ def train(
           current_rate *= mult
       return learning_rates
 
-    # Example usage:
-    str_used = "adam"
     layers = 16
     initial_rate = 0.00000000000000001
     mult = 10
-    dist_lrs = distribute_learning_rates(model, layers, initial_rate, mult)
+    dist_lrs = distribute_learning_rates("adam", layers, initial_rate, mult)
 
     def create_maskLW(params):
       def _map(params, mask, level=1, cont=1):
