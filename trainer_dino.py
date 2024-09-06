@@ -367,59 +367,37 @@ def train(
       current_rate = initial_rate
       for i in range(1, num_layers + 1):
           learning_rates[f"{model_name}{i}"] = current_rate
-          current_rate /= mult
+          current_rate *= mult
       return learning_rates
 
     # Example usage:
     model = "adam"
-    layers = 3
-    initial_rate = 0.0000001
+    layers = 16
+    initial_rate = 0.00000000000000001
     mult = 10
     dist_lrs = distribute_learning_rates(model, layers, initial_rate, mult)
 
-    def create_maskLW(params, label_fn):
-      def _map(params, mask, label_fn, level=1, cont=1):
+    def create_maskLW(params):
+      def _map(params, mask, level=1, cont=1):
           for k in params:
             if isinstance(params[k], FrozenDict):
               mask[k] = {}
-              _map(params[k], mask[k], label_fn, level=level+1, cont=cont)
+              _map(params[k], mask[k], level=level+1, cont=cont)
             else:
               mask[k] = f'adam{cont}'
             if level==1:
               cont+=1       
       mask = {}
-      _map(params, mask, label_fn, level=1, cont=1)
+      _map(params, mask, level=1, cont=1)
       return frozen_dict.freeze(mask)
 
-    # Specify layer-wise learning rate.
-    lrs = {'ToTokenSequence_0': 0.01,
-           'encoder_norm': 0.02,
-           'encoderblock_0': 0.03,
-           'encoderblock_1': 0.04,
-           'encoderblock_2': 0.05,
-           'encoderblock_3': 0.06,
-           'encoderblock_4': 0.07,
-           'encoderblock_5': 0.08,
-           'encoderblock_6': 0.09,
-           'encoderblock_7': 0.1,
-           'encoderblock_8': 0.11,
-           'encoderblock_9': 0.12,
-           'encoderblock_10': 0.13,
-           'encoderblock_11': 0.14,
-           'projection_module':0.15,
-           'projection_head':0.16
-           }
-    
     tx = optax.multi_transform(
         {name: optax.sgd(lr) for name, lr in dist_lrs.items()},
-        create_maskLW(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s)
+        create_maskLW(params)
         )
     
-    print(create_maskLW(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s))
-
-    print(casa)
-    #fake_grads = jax.tree_map(jnp.ones_like, params.unfreeze())
-    #opt_state = tx.init(params.unfreeze())
+    print(create_maskLW(params))
+    print(dist_lrs)
 
   else:
     tx = optax.inject_hyperparams(optax.adamw)(
@@ -427,6 +405,8 @@ def train(
         mask=weight_decay_mask,)
     
   opt_state = jax.jit(tx.init, backend='cpu')(params)
+
+  print(casa)
 
   if config.print_lr_infos:
     # Get the inner states of the optimizer
