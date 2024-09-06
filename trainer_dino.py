@@ -486,16 +486,18 @@ def train(
                                   center,
                                   epoch)
       
-      if config.transfer_learning or config.layer_wise:
+      if config.transfer_learning:
         print(train_state.opt_state)
         for inner_state in train_state.opt_state.inner_states.values():
           print(inner_state)
           v = inner_state.inner_state.hyperparams
           break
+      if config.layer_wise:
+        v = train_state.opt_state['adam16']
       else:
         v = train_state.opt_state.hyperparams
       
-      v = calculate_means(v)
+      #v = calculate_means(v)
       ext_log.append(v)
       train_metrics.append(tm)
     for h in hooks:
