@@ -382,7 +382,7 @@ def train(
           for k in params:
             if isinstance(params[k], FrozenDict):
               mask[k] = {}
-              map(params[k], mask[k], label_fn, level=level+1, cont=cont)
+              _map(params[k], mask[k], label_fn, level=level+1, cont=cont)
             else:
               mask[k] = f'adam{cont}'
             if level==1:
