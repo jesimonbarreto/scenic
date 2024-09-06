@@ -351,14 +351,45 @@ def train(
          create_mask(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s)
         )
   elif config.layer_wise:
-    #params = freeze(params)
-    def flattened_traversal(fn):
-      """Returns function that is called with `(path, param)` instead of pytree."""
-      def mask(tree):
-        flat = traverse_util.flatten_dict(tree)
-        return traverse_util.unflatten_dict(
-            {k: fn(k, v) for k, v in flat.items()})
-      return mask
+    params = freeze(params)
+    
+    def distribute_learning_rates(model_name, num_layers, initial_rate, mult=10):
+      """Distributes learning rates exponentially from an initial rate.
+      Args:
+        model_name: The name of the model (string).
+        num_layers: The number of layers in the model (int).
+        initial_rate: The initial learning rate (float).
+        divisor: The factor by which to divide subsequent rates (int, default=10).
+      Returns:
+        A dictionary where keys are layer names and values are learning rates.
+      """
+      learning_rates = {}
+      current_rate = initial_rate
+      for i in range(1, num_layers + 1):
+          learning_rates[f"{model_name}{i}"] = current_rate
+          current_rate /= mult
+      return learning_rates
+
+    # Example usage:
+    model = "adam"
+    layers = 3
+    initial_rate = 0.0000001
+    mult = 10
+    dist_lrs = distribute_learning_rates(model, layers, initial_rate, mult)
+
+    def create_maskLW(params, label_fn):
+      def _map(params, mask, label_fn, level=1, cont=1):
+          for k in params:
+            if isinstance(params[k], FrozenDict):
+              mask[k] = {}
+              map(params[k], mask[k], label_fn, level=level+1, cont=cont)
+            else:
+              mask[k] = f'adam{cont}'
+            if level==1:
+              cont+=1       
+      mask = {}
+      _map(params, mask, label_fn, level=1, cont=1)
+      return frozen_dict.freeze(mask)
 
     # Specify layer-wise learning rate.
     lrs = {'ToTokenSequence_0': 0.01,
@@ -378,10 +409,13 @@ def train(
            'projection_module':0.15,
            'projection_head':0.16
            }
-    label_fn = flattened_traversal(lambda path, _: path[0])
-
+    
     tx = optax.multi_transform(
-        {name: optax.sgd(lr) for name, lr in lrs.items()}, label_fn)
+        {name: optax.sgd(lr) for name, lr in dist_lrs.items()},
+        create_maskLW(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s, level=1)
+        )
+    
+    print(create_maskLW(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s, level=1))
 
     #fake_grads = jax.tree_map(jnp.ones_like, params.unfreeze())
     #opt_state = tx.init(params.unfreeze())
