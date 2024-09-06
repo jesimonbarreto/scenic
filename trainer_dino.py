@@ -487,6 +487,7 @@ def train(
                                   epoch)
       
       if config.transfer_learning or config.layer_wise:
+        print(train_state.opt_state)
         for inner_state in train_state.opt_state.inner_states.values():
           print(inner_state)
           v = inner_state.inner_state.hyperparams
