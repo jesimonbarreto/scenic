@@ -412,10 +412,10 @@ def train(
     
     tx = optax.multi_transform(
         {name: optax.sgd(lr) for name, lr in dist_lrs.items()},
-        create_maskLW(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s, level=1)
+        create_maskLW(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s)
         )
     
-    print(create_maskLW(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s, level=1))
+    print(create_maskLW(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s))
 
     print(casa)
     #fake_grads = jax.tree_map(jnp.ones_like, params.unfreeze())
