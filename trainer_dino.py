@@ -351,7 +351,7 @@ def train(
          create_mask(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s)
         )
   elif config.layer_wise:
-    params = freeze(params)
+    #params = freeze(params)
     def flattened_traversal(fn):
       """Returns function that is called with `(path, param)` instead of pytree."""
       def mask(tree):
@@ -391,7 +391,7 @@ def train(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
         mask=weight_decay_mask,)
     
-  opt_state = jax.jit(tx.init, backend='cpu')(params.unfreeze())
+  opt_state = jax.jit(tx.init, backend='cpu')(params)
 
   if config.print_lr_infos:
     # Get the inner states of the optimizer
