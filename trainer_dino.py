@@ -371,7 +371,7 @@ def train(
       return learning_rates
 
     # Example usage:
-    model = "adam"
+    str_used = "adam"
     layers = 16
     initial_rate = 0.00000000000000001
     mult = 10
