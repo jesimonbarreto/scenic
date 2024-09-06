@@ -488,7 +488,7 @@ def train(
       
       if config.transfer_learning or config.layer_wise:
         for inner_state in train_state.opt_state.inner_states.values():
-          print(inner_state.inner_state.hyperparams)
+          print(inner_state)
           v = inner_state.inner_state.hyperparams
           break
       else:
