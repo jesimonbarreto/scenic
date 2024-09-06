@@ -417,6 +417,7 @@ def train(
     
     print(create_maskLW(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s, level=1))
 
+    print(casa)
     #fake_grads = jax.tree_map(jnp.ones_like, params.unfreeze())
     #opt_state = tx.init(params.unfreeze())
 
