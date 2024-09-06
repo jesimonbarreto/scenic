@@ -393,9 +393,9 @@ def train(
         {name: optax.sgd(lr) for name, lr in dist_lrs.items()},
         create_maskLW(params)
         )
-    
-    print(create_maskLW(params))
-    print(dist_lrs)
+    if config.print_lr_infos:
+      print(create_maskLW(params))
+      print(dist_lrs)
 
   else:
     tx = optax.inject_hyperparams(optax.adamw)(
@@ -404,15 +404,6 @@ def train(
     
   opt_state = jax.jit(tx.init, backend='cpu')(params)
 
-  if config.print_lr_infos:
-    # Get the inner states of the optimizer
-    inner_states = tx.inner_states
-
-    # Iterate over inner states and print optimizer and learning rate
-    for layer_name, inner_state in inner_states.items():
-        optimizer_name = type(inner_state).__name__
-        learning_rate = inner_state.hyperparams['learning_rate']
-        print(f"Layer: {layer_name}, Optimizer: {optimizer_name}, Learning Rate: {learning_rate}")
   
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
