@@ -493,7 +493,8 @@ def train(
           v = inner_state.inner_state.hyperparams
           break
       if config.layer_wise:
-        v = train_state.opt_state['adam16']
+        print(train_state.opt_state)
+        v = train_state.opt_state.inner_state['adam16']
       else:
         v = train_state.opt_state.hyperparams
       
