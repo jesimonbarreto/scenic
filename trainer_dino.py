@@ -260,7 +260,7 @@ def train(
       project=config.project,
       name=config.experiment_name,
       # track hyperparameters and run metadata with wandb.config
-      config=dict(config)
+      config=config.to_dict()
   )
 
 
@@ -353,7 +353,7 @@ def train(
   elif config.layer_wise:
     params = freeze(params)
     
-    def distribute_learning_rates(model_name, num_layers, initial_rate, mult=10):
+    def distribute_learning_rates(model_name, num_layers, initial_rate, mult=10, min_v = 0.01):
       """Distributes learning rates exponentially from an initial rate.
       Args:
         model_name: The name of the model (string).
@@ -367,13 +367,15 @@ def train(
       current_rate = initial_rate
       for i in range(1, num_layers + 1):
           learning_rates[f"{model_name}{i}"] = current_rate
-          current_rate *= mult
+          if current_rate < min_v:
+            current_rate *= mult
       return learning_rates
 
     layers = 16
-    initial_rate = 0.00000000000000001
+    initial_rate = 0.0000000000000001
     mult = 10
-    dist_lrs = distribute_learning_rates("adam", layers, initial_rate, mult)
+    min_v = 0.01
+    dist_lrs = distribute_learning_rates("adam", layers, initial_rate, mult, min_v)
 
     def create_maskLW(params):
       def _map(params, mask, level=1, cont=1):
@@ -388,10 +390,20 @@ def train(
       mask = {}
       _map(params, mask, level=1, cont=1)
       return frozen_dict.freeze(mask)
+    
+    def create_lr_rules(config, dist_lrs):
+      optimizer_dict = {}
+      for name, lr in dist_lrs.items():
+        config.lr_configs.base_learning_rate = lr * config.batch_size / 1024
+        learning_rate_fn = lr_schedules.get_learning_rate_fn(config)
+        optimizer = optax.inject_hyperparams(optax.adamw)(
+            learning_rate=learning_rate_fn, weight_decay=config.weight_decay
+        )
+        optimizer_dict[name] = optimizer
+      return optimizer_dict
 
     tx = optax.multi_transform(
-        {name: optax.inject_hyperparams(optax.adamw)(
-        learning_rate=lr, weight_decay=config.weight_decay,) for name, lr in dist_lrs.items()},
+        create_lr_rules(config, dist_lrs),
         create_maskLW(params)
         )
     if config.print_lr_infos:
