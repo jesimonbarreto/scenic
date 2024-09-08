@@ -15,7 +15,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Report'
-  config.experiment_name = 'Dino_8k2Mhead_lr00000001'
+  config.experiment_name = 'Dino_8k2Mhead_lr000001'
   #config
   config.transfer_learning = False
   config.layer_wise = False
@@ -170,7 +170,7 @@ def get_config():
   config.query_max_seqlen = 70
 
   # Learning rate.
-  config.lr=0.0000001
+  config.lr=0.00001
   #cosine schedule lr
   config.lr_configs = ml_collections.ConfigDict()
   config.lr_configs.learning_rate_schedule = 'compound'
