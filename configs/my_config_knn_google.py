@@ -12,8 +12,10 @@ def get_config():
   global _IMAGENET_TRAIN_SIZE, _IMAGENET_TEST_SIZE
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
+  #WANDB
+  config.project = 'Eval_report'
+  config.experiment_name = 'Eval_Dino_8k2Mhead_lr0001'
   config.extract_train = True
-  config.experiment_name = '100ep_run'
   # Dataset.
   config.dataset_name = 'eval_dataset'
   config.data_dtype_str = 'float32'

@@ -48,6 +48,7 @@ from functools import partial
 from jax import jit
 
 import matplotlib.pyplot as plt
+import wandb
 
 
 FLAGS = flags.FLAGS
@@ -149,6 +150,15 @@ def eval(
   
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
+
+  # Start a run, tracking hyperparameters
+  wandb.init(
+      # set the wandb project where this run will be logged
+      project=config.project,
+      name=config.experiment_name,
+      # track hyperparameters and run metadata with wandb.config
+      config=config.to_dict()
+  )
 
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
@@ -266,13 +276,16 @@ def eval(
       os.makedirs(dir_save_y)
     if config.get('extract_train'):
       print('Starting to extract features train')
+      print_result = True
       for i in range(config.steps_per_epoch):
         path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
         batch_train = next(dataset.train_iter)
         emb_train = extract_features(batch_train)
-        print(f'shape emb_train {emb_train.shape}')
         norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
-        print(f'processing batch {i} shape {emb_train.shape}. Norma 1 {norm_res}')
+        if print_result:
+          print(f'shape emb_train {emb_train.shape}')
+          print(f'processing batch {i} shape {emb_train.shape}. Norma 1 {norm_res}')
+          print_result=False
         if not norm_res:
           emb_train = normalize(emb_train)
         label_train = batch_train['label']
@@ -335,14 +348,14 @@ def eval(
     total_samples = 0
     max_k = jnp.array(ks).max()
     for i in range(config.steps_per_epoch_eval):
-      print(f'processing step eval {i}')
+      #print(f'processing step eval {i}')
       batch_eval = next(dataset.valid_iter)
       emb_test = extract_features(batch_eval)[0]
       bl, bg, emb = emb_test.shape
       emb_test = emb_test.reshape((bl*bg, emb))
       label_eval = batch_eval['label'].reshape((bl*bg))
       norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2))==1
-      print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
+      #print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
       if not norm_res:
         emb_test = normalize(emb_test)
     
@@ -377,11 +390,14 @@ def eval(
       matmul = one_hot(labels, num_classes=num_classes) * topk_sims_transform[:, :, None]
       
       probas_for_k = {k: jnp.sum(matmul[:, :k, :], axis=1) for k in ks}
+      print_result = True
 
       for k in ks:
         correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
         total_correct_predictions[k] += correct_predictions
-        print(f'Using k = {k} -- batch {batch_size}/{correct_predictions} certos')
+        if print_result:
+          print(f'Using k = {k} -- batch {batch_size}/{correct_predictions} certos')
+          print_result = False
       total_samples += batch_size
       
 
@@ -392,6 +408,10 @@ def eval(
     print("Total Accuracy:")
     for k, accuracy in total_accuracies.items():
         print(f"K:{k} Accuracy: {accuracy:.4f}")
+        wandb.log({
+          "K": k,
+          "Accuracy": round(accuracy,4)
+        })
 
   train_utils.barrier_across_hosts()
 
