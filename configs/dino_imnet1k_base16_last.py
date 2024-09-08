@@ -18,7 +18,7 @@ def get_config():
   config.experiment_name = 'Dino_newargs_17ep_8k2Mhead_run'
   #config
   config.transfer_learning = False
-  config.layer_wise = True
+  config.layer_wise = False
   config.print_lr_infos = False
   # Dataset.
   config.dataset_name = 'dino_dataset'
@@ -170,22 +170,21 @@ def get_config():
   config.query_max_seqlen = 70
 
   # Learning rate.
+  config.lr=0.001
   #cosine schedule lr
   config.lr_configs = ml_collections.ConfigDict()
   config.lr_configs.learning_rate_schedule = 'compound'
   config.lr_configs.factors = 'constant * cosine_decay * linear_warmup'
   config.lr_configs.warmup_steps = config.steps_per_epoch * 15
   config.lr_configs.steps_per_cycle = total_steps
-  config.lr_configs.base_learning_rate = 0.001 * config.batch_size / 1024
+  config.lr_configs.base_learning_rate = config.lr * config.batch_size / 1024.
   config.lr_configs.alpha = 0.01
 
   # Weight decay.
   config.weight_decay = 0.04
-
   
   #Verificar
   config.weight_decay_end = 0.4
-  config.lr=0.0000005
   config.warmup_epochs=10
   config.optimizer = 'adamw'
   config.drop_path_rate= 0.1
