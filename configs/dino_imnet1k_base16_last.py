@@ -14,8 +14,8 @@ def get_config():
 
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'report'
-  config.experiment_name = 'Dino_newargs_17ep_8k2Mhead_run'
+  config.project = 'Report'
+  config.experiment_name = 'Dino_8k2Mhead_lr0001'
   #config
   config.transfer_learning = False
   config.layer_wise = False
