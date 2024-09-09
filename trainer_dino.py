@@ -555,8 +555,6 @@ def train(
           del unrep_train_state
       chrono.resume()  # Un-pause now.
 
-  # Wait until computations are done before exiting.
-  train_utils.barrier_across_hosts()
   ##################### VALIDATION ###################
   print('Starting Validation...')
   result_val = module_knn.knn_evaluate(
@@ -567,6 +565,8 @@ def train(
   )
   wandb.log(result_val, step)
   print('Finishing Validation')
+  # Wait until computations are done before exiting.
   train_utils.barrier_across_hosts()
+  
   # Return the train summary after last step.
   return train_state, train_summary
