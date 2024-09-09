@@ -14,7 +14,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Eval_report'
-  config.experiment_name = 'Eval_Dino_8k2Mhead_lr0001'
+  config.experiment_name = 'Eval_Dino_8k2Mhead_all'
   config.extract_train = True
   # Dataset.
   config.dataset_name = 'eval_dataset'
@@ -76,10 +76,11 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/home/jesimonbarreto/check_val/'#'/home/jesimonbarreto/exp_test_now/'
-  config.preextracted = True
+  config.train_dir = '/home/jesimonbarreto/weights/'#'/home/jesimonbarreto/exp_test_now/'
+  config.preextracted = False
   config.write_summary = True
-  config.steps_checkpoints = [3501]
+  #finetun_ckp_10778  layerwise_ckp_10778  lr00001better_ckp_10778  lr0001_ckp_10778
+  config.steps_checkpoints = ['finetun_ckp_10778','layerwise_ckp_10778','lr00001better_ckp_10778','lr0001_ckp_10778']
   config.ks = [5,10,20]
   config.dir_files = '/mnt/disks/dataset/eval_files/'
 
