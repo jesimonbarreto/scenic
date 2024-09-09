@@ -522,6 +522,7 @@ def train(
 
     ##################### VALIDATION ###################
     if step in config.run_validation:
+        print('Starting Validation...')
         result_val = module_knn.knn_evaluate(
           rng=rng,
           config=config.val,
@@ -530,6 +531,7 @@ def train(
           train_state=train_state,
           model=model
         )
+        print('Finishing Validation')
     ###################### LOG TRAIN SUMMARY ########################
     if (step % config.get('log_summary_steps') == 1) or (step == total_steps):
       chrono.pause()
