@@ -520,18 +520,6 @@ def train(
     for h in hooks:
       h(step)
 
-    ##################### VALIDATION ###################
-    if step in config.run_validation:
-        print('Starting Validation...')
-        result_val = module_knn.knn_evaluate(
-          rng=rng,
-          config=config.val,
-          workdir=workdir,
-          writer=writer,
-          train_state=train_state,
-          model=model
-        )
-        print('Finishing Validation')
     ###################### LOG TRAIN SUMMARY ########################
     if (step % config.get('log_summary_steps') == 1) or (step == total_steps):
       chrono.pause()
@@ -551,6 +539,7 @@ def train(
       chrono.resume()
       train_metrics = []
       ext_log = []
+    
     ##################### CHECKPOINTING ###################
     if ((step % config.get('checkpoint_steps') == 1 and step > 1) or
         (step == total_steps)) and config.checkpoint:
@@ -565,8 +554,21 @@ def train(
           utils.save_checkpoint(workdir, unrep_train_state, max_to_keep=config.max_keep_checkpoint)
           del unrep_train_state
       chrono.resume()  # Un-pause now.
-    
+
   # Wait until computations are done before exiting.
+  train_utils.barrier_across_hosts()
+  ##################### VALIDATION ###################
+  print('Starting Validation...')
+  result_val = module_knn.knn_evaluate(
+    rng=rng,
+    config=config.val,
+    workdir=workdir,
+    writer=writer,
+    train_state=train_state,
+    model=model
+  )
+  wandb.log(result_val, step)
+  print('Finishing Validation')
   train_utils.barrier_across_hosts()
   # Return the train summary after last step.
   return train_state, train_summary
