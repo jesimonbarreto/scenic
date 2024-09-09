@@ -22,10 +22,14 @@ def main(rng: jnp.ndarray, config: ml_collections.ConfigDict, workdir: str,
   dataset = train_utils.get_dataset(
       config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
   
+  dataset_val = train_utils.get_dataset(
+      config.val, data_rng, dataset_service_address=FLAGS.dataset_service_address)
+  
   trainer.train(
       rng=rng,
       config=config,
       dataset=dataset,
+      dataset_val=dataset_val,
       workdir=workdir,
       writer=writer)
 

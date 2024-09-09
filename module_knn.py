@@ -117,16 +117,12 @@ def representation_fn_eval(
   return embedding
 
 def knn_evaluate(
-  rng: jnp.ndarray,
+  dataset: dataset_utils.Dataset,
   config: ml_collections.ConfigDict,
   train_state: utils.TrainState,
   model: nn.Module
 ):
 
-  data_rng, rng = jax.random.split(rng)
-  dataset = train_utils.get_dataset(
-      config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
-  
   result = eval(
       config=config,
       dataset=dataset,

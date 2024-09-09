@@ -228,6 +228,7 @@ def train(
     rng: jnp.ndarray,
     config: ml_collections.ConfigDict,
     dataset: dataset_utils.Dataset,
+    dataset_val: dataset_utils.Dataset,
     workdir: str,
     writer: metric_writers.MetricWriter,
 ) -> Tuple[Any, Any]:
@@ -558,7 +559,7 @@ def train(
   ##################### VALIDATION ###################
   print('Starting Validation...')
   result_val = module_knn.knn_evaluate(
-    rng=rng,
+    dataset=dataset_val,
     config=config.val,
     train_state=train_state,
     model=model
