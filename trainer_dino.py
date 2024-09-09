@@ -33,6 +33,7 @@ import imageio
 from PIL import Image
 import matplotlib.pyplot as plt
 import wandb
+import module_knn
 
 
 def calculate_means(dictionary):
@@ -479,6 +480,11 @@ def train(
     writer.write_scalars(1, step0_log)
   logging.info('Starting training loop at step %d.', start_step + 1)
   v={}
+  
+  result_val={}
+  for k_ in config.val.ks:
+    result_val['K_'+str(k_)]=0.0
+  
   for step in range(start_step + 1, total_steps + 1):
     with jax.profiler.StepTraceAnnotation('train', step_num=step):
       epoch = jnp.ones((num_local_devices, 1))*step/steps_per_epoch
@@ -513,6 +519,17 @@ def train(
       train_metrics.append(tm)
     for h in hooks:
       h(step)
+
+    ##################### VALIDATION ###################
+    if step in config.run_validation:
+        result_val = module_knn.knn_evaluate(
+          rng=rng,
+          config=config.val,
+          workdir=workdir,
+          writer=writer,
+          train_state=train_state,
+          model=model
+        )
     ###################### LOG TRAIN SUMMARY ########################
     if (step % config.get('log_summary_steps') == 1) or (step == total_steps):
       chrono.pause()
@@ -524,12 +541,11 @@ def train(
                                                train_metrics),
           extra_training_logs= ext_log,
           writer=writer)
-      print(ext_log)
       wb = train_utils.stack_forest(ext_log)
       for key, val in wb.items():
         train_summary[key]=float(val.mean())
-      print(train_summary)
       wandb.log(train_summary, step=step)
+      wandb.log(result_val, step)
       chrono.resume()
       train_metrics = []
       ext_log = []
@@ -547,6 +563,7 @@ def train(
           utils.save_checkpoint(workdir, unrep_train_state, max_to_keep=config.max_keep_checkpoint)
           del unrep_train_state
       chrono.resume()  # Un-pause now.
+    
   # Wait until computations are done before exiting.
   train_utils.barrier_across_hosts()
   # Return the train summary after last step.
