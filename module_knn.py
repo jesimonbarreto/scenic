@@ -48,7 +48,6 @@ from functools import partial
 from jax import jit
 
 import matplotlib.pyplot as plt
-import wandb
 
 
 FLAGS = flags.FLAGS
