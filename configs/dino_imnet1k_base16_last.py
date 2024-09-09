@@ -11,7 +11,7 @@ STDDEV_RGB = [0.229, 0.224, 0.225]
 
 
 def get_config():
-  global _IMAGENET_TEST_SIZE
+  global _IMAGENET_TRAIN_SIZE, _IMAGENET_TEST_SIZE
 
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
   config = ml_collections.ConfigDict()
