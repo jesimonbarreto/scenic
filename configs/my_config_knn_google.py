@@ -79,8 +79,8 @@ def get_config():
   config.train_dir = '/home/jesimonbarreto/weights/'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = False
   config.write_summary = True
-  #finetun_ckp_10778  layerwise_ckp_10778  lr00001better_ckp_10778  lr0001_ckp_10778
-  config.steps_checkpoints = ['finetun_ckp_10778','layerwise_ckp_10778','lr00001better_ckp_10778','lr0001_ckp_10778']
+  #finetun_ckp_10778- 1  layerwise_ckp_10778-2  lr00001better_ckp_10778-3  lr0001_ckp_10778-4
+  config.steps_checkpoints = [1,2,3,4]
   config.ks = [5,10,20]
   config.dir_files = '/mnt/disks/dataset/eval_files/'
 
