@@ -5,12 +5,13 @@ import ml_collections
 
 VARIANT = 'S/14'
 _IMAGENET_TRAIN_SIZE = 40608 #10152 (number of video filtered) * n pairs of each video #1281167
+_IMAGENET_TEST_SIZE = 50000
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 
 
 def get_config():
-  global _IMAGENET_TRAIN_SIZE, _IMAGENET_TEST_SIZE
+  global _IMAGENET_TEST_SIZE
 
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
   config = ml_collections.ConfigDict()
@@ -38,7 +39,7 @@ def get_config():
 
   # Training.'MVImagenet'
   config.max_grad_norm = 1
-  config.num_training_epochs = 2#17#400
+  config.num_training_epochs = 1#17#400
   config.batch_size = 64
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
