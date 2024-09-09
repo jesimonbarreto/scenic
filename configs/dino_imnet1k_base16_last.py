@@ -232,6 +232,8 @@ def get_config():
   config.val.dataset_configs.test_split = 'validation'
   config.val.dataset_configs.batch_size_train = 256
   config.val.dataset_configs.batch_size_test = 64
+  config.val.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.val.dataset_configs.batch_size_train
+  config.val.steps_per_epoch_eval = _IMAGENET_TEST_SIZE // config.val.dataset_configs.batch_size_test
   config.val.num_classes = 1000
   reference_resolution = 224
   crop_size = 224
