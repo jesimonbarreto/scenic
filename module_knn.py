@@ -119,8 +119,6 @@ def representation_fn_eval(
 def knn_evaluate(
   rng: jnp.ndarray,
   config: ml_collections.ConfigDict,
-  workdir: str,
-  writer: metric_writers.MetricWriter,
   train_state: utils.TrainState,
   model: nn.Module
 ):
@@ -130,23 +128,16 @@ def knn_evaluate(
       config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
   
   result = eval(
-      rng=rng,
       config=config,
       dataset=dataset,
-      workdir=workdir,
-      writer=writer,
       train_state=train_state,
       model=model
   )
   return result
   
 def eval(
-    *,
-    rng: jnp.ndarray,
     config: ml_collections.ConfigDict,
     dataset: dataset_utils.Dataset,
-    workdir: str,
-    writer: metric_writers.MetricWriter,
     train_state: utils.TrainState,
     model: nn.Module
 ):

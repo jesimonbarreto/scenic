@@ -562,8 +562,6 @@ def train(
   result_val = module_knn.knn_evaluate(
     rng=rng,
     config=config.val,
-    workdir=workdir,
-    writer=writer,
     train_state=train_state,
     model=model
   )
