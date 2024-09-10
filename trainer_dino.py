@@ -536,7 +536,7 @@ def train(
       for key, val in wb.items():
         train_summary[key]=float(val.mean())
       wandb.log(train_summary, step=step)
-      wandb.log(result_val, step)
+      wandb.log(result_val)
       chrono.resume()
       train_metrics = []
       ext_log = []
