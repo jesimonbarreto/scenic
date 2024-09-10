@@ -19,7 +19,7 @@ def get_config():
   config.project = 'Test'
   config.experiment_name = 'Dino_8k2Mhead_lr00001_finetun_val'
   #config
-  config.transfer_learning = True
+  config.transfer_learning = False
   config.layer_wise = False
   config.print_lr_infos = False
   # Dataset.
@@ -208,8 +208,6 @@ def get_config():
   config.max_keep_checkpoint = 20
 
   ####### Config val
-
-  config.run_validation = [5, 10778]
 
   """Returns the ViT experiment configuration."""
   config.val = ml_collections.ConfigDict()
