@@ -16,8 +16,8 @@ def get_config():
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Test'
-  config.experiment_name = 'Dino_8k2Mhead_lr00001_finetun_val'
+  config.project = 'Report'
+  config.experiment_name = 'Dino_8k2Mhead_lr00001'
   #config
   config.transfer_learning = False
   config.layer_wise = False
