@@ -181,7 +181,6 @@ def dino_train_step(
     loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
     loss_lwfv = loss_lwf(st_norm, st1_norm)
 
-    total_loss = loss_dino
     if config.mode == 'random':
       teacher_out = flax_model.apply(
         {'params': train_state.ema_params if use_ema else params},
@@ -209,7 +208,7 @@ def dino_train_step(
     
     loss_total = (0.5*loss_dino)+(loss_lwfv*0.5)
 
-    return total_loss, (loss_dino, loss_lwfv, center)
+    return loss_total, (loss_dino, loss_lwfv, center)
   
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
   (total_loss, (loss_dino, loss_lwfv, center)), grad = compute_gradient_fn(
