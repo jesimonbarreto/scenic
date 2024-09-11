@@ -82,7 +82,6 @@ def plot_example(train_batch, number_plot=5, dir_plot='/home/jesimonbarreto/imag
 
 def dino_train_step(
     train_state: utils.TrainState,
-    old_params: Any,
     batch: Batch,
     center: jnp.ndarray,
     epoch: int,
@@ -155,7 +154,7 @@ def dino_train_step(
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
     
     st1 = flax_model.apply(
-        {'params': old_params},
+        {'params': train_state.old_params},
         batch['sample'][0],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
@@ -445,7 +444,7 @@ def train(
   
   # Create the TrainState to track training state (i.e. params and optimizer).
   train_state = utils.TrainState(
-    global_step=0, opt_state=opt_state, tx=tx, params=params,
+    global_step=0, opt_state=opt_state, tx=tx, params=params, old_params=old_params,
       ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
   
   if config.save_state_0:
@@ -463,7 +462,7 @@ def train(
   train_state = train_state.replace(metadata={})
   # Replicate the training state: optimizer, params and rng.
   train_state = jax_utils.replicate(train_state)
-  del params, ema_params
+  del params, ema_params, old_params
   total_steps, steps_per_epoch = train_utils.get_num_training_steps(
       config, dataset.meta_data)
 
@@ -522,7 +521,6 @@ def train(
         fstexe = False
 
       train_state, center, tm = dino_train_step_pmapped(
-                                  old_params,
                                   train_state,
                                   train_batch,
                                   center,

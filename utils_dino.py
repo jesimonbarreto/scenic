@@ -45,6 +45,7 @@ class TrainState:
   opt_state: Optional[optax.OptState] = None
   ema_params: Optional[Any] = None
   params: Optional[Any] = None
+  old_params: Optional[Any] = None
   state: Optional[Any] = None
   ema_state: Optional[Any] = None
   global_step: Optional[int] = 0
