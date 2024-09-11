@@ -212,6 +212,7 @@ class ViTDINO(nn.Module):
             "x_norm_clstoken": x_norm[:, 0],
             "x_norm_patchtokens": x_norm[:, 1:],
             "x_prenorm": x,
+            "x_norm": x_norm,
             "masks": None,
             "x_train": x_train
         }
