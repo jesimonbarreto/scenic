@@ -235,6 +235,7 @@ def dino_train_step(
     new_train_state = train_state.replace(  # pytype: disable=attribute-error
         global_step=step + 1,
         opt_state=new_opt_state,
+        old_params=train_state.ema_params,
         params=new_params,
         ema_params=new_ema_params,
         rng=new_rng)

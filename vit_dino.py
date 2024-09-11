@@ -452,6 +452,8 @@ class ViTDinoModel(base_model.BaseModel):
       Returns:
           float: Cross-entropy loss.
       """
+      preds_softmax = jnp.asarray(preds_softmax)
+      targets_softmax = jnp.asarray(targets_softmax)
       # Calcula a cross-entropy: - sum(targets * log(preds))
       cross_entropy = -jnp.sum(targets_softmax * jnp.log(preds_softmax + 1e-9), axis=-1)
       
