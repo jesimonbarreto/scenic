@@ -1,7 +1,7 @@
 import ml_collections, os
 import jax.numpy as jnp
 
-VARIANT = 'B/14'
+VARIANT = 'S/14'
 _IMAGENET_TRAIN_SIZE = 15000 #1281167 #9469 #1281167
 _IMAGENET_TEST_SIZE = 3000 #50000
 MEAN_RGB = [0.485, 0.456, 0.406]
