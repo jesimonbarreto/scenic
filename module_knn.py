@@ -241,6 +241,7 @@ def eval(
   total_correct_predictions = {k: 0 for k in ks}
   total_samples = 0
   max_k = jnp.array(ks).max()
+  print_result=True
   for i in range(config.steps_per_epoch_eval):
       #print(f'processing step eval {i}')
       batch_eval = next(dataset.valid_iter)
@@ -252,8 +253,10 @@ def eval(
       #print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
       if not norm_res:
         emb_test = normalize(emb_test)
-    
-      print(f'embedding shape test {emb_test.shape}')
+      if print_result:
+          print(f'embedding shape test {emb_test.shape}')
+          print_result=False
+      
       sim_all = []
       labels = []
       len_test += len(batch_eval)

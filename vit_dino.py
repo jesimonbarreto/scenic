@@ -427,6 +427,40 @@ class ViTDinoModel(base_model.BaseModel):
     center = self.update_center(teacher_output, center)
     #jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
     return total_loss, center
+  
+  def loss_lwf(self,
+                    teacher_output: jnp.ndarray,
+                    student_output: jnp.ndarray,
+              ) -> float:
+    """Returns the cross-entropy loss."""
+
+    
+    student_out = opr.softmax((student_output) / self.student_temp, axis=-1)
+    student_out = jnp.split(student_out, 2)
+    
+    teacher_out = opr.softmax((teacher_output) / self.student_temp, axis=-1)
+    teacher_out = jnp.split(lax.stop_gradient(teacher_out), 2)
+
+    def cross_entropy(preds_softmax, targets_softmax):
+      """
+      Calcula a cross-entropy entre duas distribuições que já passaram pelo softmax.
+      
+      Args:
+          preds_softmax (jax.numpy.ndarray): Distribuições preditas (já normalizadas com softmax).
+          targets_softmax (jax.numpy.ndarray): Distribuições verdadeiras (também normalizadas com softmax).
+      
+      Returns:
+          float: Cross-entropy loss.
+      """
+      # Calcula a cross-entropy: - sum(targets * log(preds))
+      cross_entropy = -jnp.sum(targets_softmax * jnp.log(preds_softmax + 1e-9), axis=-1)
+      
+      # Retorna a média da cross-entropy ao longo de todas as amostras
+      return jnp.mean(cross_entropy)
+    
+    loss = cross_entropy(student_out, teacher_out)
+
+    return loss
     
   
   def reduce(self, value):
