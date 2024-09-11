@@ -82,6 +82,7 @@ def plot_example(train_batch, number_plot=5, dir_plot='/home/jesimonbarreto/imag
 
 def dino_train_step(
     train_state: utils.TrainState,
+    old_params: Any,
     batch: Batch,
     center: jnp.ndarray,
     epoch: int,
@@ -89,6 +90,7 @@ def dino_train_step(
     flax_model: nn.Module,
     momentum_parameter_scheduler: Callable[[int], float],
     loss_fn: Any,
+    loss_lwf: Any,
     metrics_fn: Any,
     steps_per_epoch: float,
     config: ml_collections.ConfigDict,
@@ -152,6 +154,16 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
     
+    st1 = flax_model.apply(
+        {'params': old_params},
+        batch['sample'][0],
+        seqlen=config.reference_seqlen,
+        seqlen_selection=config.reference_seqlen_selection,
+        drop_moment=drop_moment,
+        backbone = True,
+        train=True,
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
+    
     '''cc = flax_model.apply(
         {'params': params},
         batch['sample'][1],
@@ -165,6 +177,8 @@ def dino_train_step(
     #student_out = jnp.concatenate([st,cc])
     student_out = st
     loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
+    loss_lwfv = loss_lwf(student_out, st1)
+
     total_loss = loss_dino
     if config.mode == 'random':
       teacher_out = flax_model.apply(
@@ -191,16 +205,18 @@ def dino_train_step(
       total_loss += loss_dino/2
       total_loss /=2
     
-    loss_total = (0.5*loss_dino)+(loss_lwf*0.5)
+    loss_total = (0.5*loss_dino)+(loss_lwfv*0.5)
 
-    return total_loss, (loss_dino, center)
+    return total_loss, (loss_dino, loss_lwfv, center)
   
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
-  (total_loss, (loss_dino, center)), grad = compute_gradient_fn(
+  (total_loss, (loss_dino, loss_lwfv, center)), grad = compute_gradient_fn(
       train_state.params, center, epoch)
   #metrics = metrics_fn(logits, batch)
   metrics = (
-      dict(total_loss=(total_loss, 1)))
+      dict(total_loss=(total_loss, 1), 
+           dino_loss=(loss_dino, 1),
+          lwf_loss=(loss_lwfv, 1)))
 
   # Update the network parameters.
   grad = jax.lax.pmean(grad, axis_name='batch')
@@ -315,6 +331,7 @@ def train(
 
   # Only one model function but two sets of parameters.
   ema_params = copy.deepcopy(params)
+  old_params = copy.deepcopy(params)
 
   # Get learning rate and ema temperature schedulers.
   learning_rate_fn = lr_schedules.get_learning_rate_fn(config)
@@ -456,6 +473,7 @@ def train(
           dino_train_step,
           flax_model=model.flax_model,
           loss_fn=model.loss_function,
+          loss_lwf=model.loss_lwf,
           metrics_fn=model.get_metrics_fn,
           momentum_parameter_scheduler=momentum_parameter_scheduler,
           steps_per_epoch = steps_per_epoch,
@@ -504,6 +522,7 @@ def train(
         fstexe = False
 
       train_state, center, tm = dino_train_step_pmapped(
+                                  old_params,
                                   train_state,
                                   train_batch,
                                   center,

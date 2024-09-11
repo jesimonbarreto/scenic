@@ -17,10 +17,10 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Report'
-  config.experiment_name = 'Dino_8k2Mhead_layerwise'
+  config.experiment_name = 'Dino_8k2Mhead_Finetun'
   #config
-  config.transfer_learning = False
-  config.layer_wise = True
+  config.transfer_learning = True
+  config.layer_wise = False
   config.print_lr_infos = False
   # Dataset.
   config.dataset_name = 'dino_dataset'
