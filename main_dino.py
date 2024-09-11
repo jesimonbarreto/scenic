@@ -8,7 +8,8 @@ import ml_collections
 from scenic import app
 import dino_dataset  # pylint: disable=unused-import
 import ops  # pylint: disable=unused-import
-import trainer_dino as trainer
+#import trainer_dino as trainer
+import trainer_dino_LwF as trainer
 from scenic.train_lib import train_utils
 
 FLAGS = flags.FLAGS
