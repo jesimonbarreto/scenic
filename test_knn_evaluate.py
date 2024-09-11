@@ -164,8 +164,8 @@ def train(
   train_state = utils.TrainState(
       global_step=0, opt_state=opt_state, tx=tx, params=params,
       ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
-  train_dir= '/home/jesimonbarreto/random/'
-  step = 19020
+  train_dir= '/home/jesimonbarreto/teste/'
+  step = 10778
   print(f"step: {step}")
     
 
