@@ -143,7 +143,7 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
     
-    st_pred = flax_model.apply(
+    st = flax_model.apply(
         {'params': params},
         batch['sample'][0],
         seqlen=config.reference_seqlen,
@@ -152,8 +152,9 @@ def dino_train_step(
         backbone = True,
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
-    st = st_pred["x_train"]
-    st_norm = st_pred["x_norm"]
+    
+    st_norm = st["x_norm"]
+    st = st["x_train"]
     
     st1_norm = flax_model.apply(
         {'params': train_state.old_params},
