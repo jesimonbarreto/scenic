@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Report'
-  config.experiment_name = 'Dino_8k2Mhead_LwF_embed'
+  config.experiment_name = 'Dino_8k2Mhead_LwF_embed_correct'
   #config
   config.transfer_learning = False
   config.layer_wise = False
@@ -39,7 +39,7 @@ def get_config():
 
   # Training.'MVImagenet'
   config.max_grad_norm = 1
-  config.num_training_epochs = 2#17#400
+  config.num_training_epochs = 17#400
   config.batch_size = 64
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
