@@ -429,6 +429,20 @@ class ViTDinoModel(base_model.BaseModel):
     #jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
     return total_loss, center
   
+  def cosine_similarity(self, A, B):
+    dot_product = jnp.dot(A, B)
+    norm_A = jnp.linalg.norm(A)
+    norm_B = jnp.linalg.norm(B)
+    return dot_product / (norm_A * norm_B + 1e-9) 
+
+  def cosine_distance(self, A, B):
+      return 1 - self.cosine_similarity(A, B)
+
+  def cosine_loss(self, preds, targets):
+      cosine_distances = jnp.array([self.cosine_distance(p, t) for p, t in zip(preds, targets)])
+      return jnp.mean(cosine_distances)
+  
+
   def loss_lwf(self,
                     teacher_output: jnp.ndarray,
                     student_output: jnp.ndarray,

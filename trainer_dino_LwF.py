@@ -90,6 +90,7 @@ def dino_train_step(
     momentum_parameter_scheduler: Callable[[int], float],
     loss_fn: Any,
     loss_lwf: Any,
+    loss_cosine: Any,
     metrics_fn: Any,
     steps_per_epoch: float,
     config: ml_collections.ConfigDict,
@@ -153,7 +154,7 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    st_norm = st["x_norm"]
+    st_norm = st["x_norm_clstoken"]
     st = st["x_train"]
     
     st1_norm = flax_model.apply(
@@ -164,7 +165,7 @@ def dino_train_step(
         drop_moment=drop_moment,
         backbone = True,
         train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_norm"]
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_norm_clstoken"]
     
     '''cc = flax_model.apply(
         {'params': params},
@@ -180,6 +181,7 @@ def dino_train_step(
     student_out = st
     loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
     loss_lwfv = loss_lwf(st_norm, st1_norm)
+    loss_cosinev = loss_cosine(st_norm, st1_norm)
 
     if config.mode == 'random':
       teacher_out = flax_model.apply(
@@ -207,18 +209,20 @@ def dino_train_step(
       total_loss /=2
     
     alfa_loss = 0.05
-    loss_total = (alfa_loss*loss_dino)+((1-alfa_loss)*loss_lwfv)
+    loss_total = (alfa_loss*loss_dino)+((1-alfa_loss)*loss_lwfv) + loss_cosinev
 
-    return loss_total, (loss_dino, loss_lwfv, center)
+    return loss_total, (loss_dino, loss_lwfv, loss_cosinev, center)
   
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
-  (total_loss, (loss_dino, loss_lwfv, center)), grad = compute_gradient_fn(
+  (total_loss, (loss_dino, loss_lwfv, loss_cosinev, center)), grad = compute_gradient_fn(
       train_state.params, center, epoch)
   #metrics = metrics_fn(logits, batch)
   metrics = (
       dict(total_loss=(total_loss, 1), 
            dino_loss=(loss_dino, 1),
-          lwf_loss=(loss_lwfv, 1)))
+          lwf_loss=(loss_lwfv, 1),
+          cosine_loss=(loss_cosinev, 1)
+          ))
 
   # Update the network parameters.
   grad = jax.lax.pmean(grad, axis_name='batch')
@@ -477,6 +481,7 @@ def train(
           flax_model=model.flax_model,
           loss_fn=model.loss_function,
           loss_lwf=model.loss_lwf,
+          loss_cosine=model.cosine_loss,
           metrics_fn=model.get_metrics_fn,
           momentum_parameter_scheduler=momentum_parameter_scheduler,
           steps_per_epoch = steps_per_epoch,
