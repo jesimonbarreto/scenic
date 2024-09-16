@@ -206,7 +206,7 @@ def dino_train_step(
       total_loss += loss_dino/2
       total_loss /=2
     
-    alfa_loss = 0.2
+    alfa_loss = 0.05
     loss_total = (alfa_loss*loss_dino)+((1-alfa_loss)*loss_lwfv)
 
     return loss_total, (loss_dino, loss_lwfv, center)
