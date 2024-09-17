@@ -91,6 +91,7 @@ def dino_train_step(
     loss_fn: Any,
     loss_lwf: Any,
     loss_cosine: Any,
+    loss_l2: Any,
     metrics_fn: Any,
     steps_per_epoch: float,
     config: ml_collections.ConfigDict,
@@ -182,6 +183,7 @@ def dino_train_step(
     loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
     loss_lwfv = loss_lwf(st_norm, st1_norm)
     loss_cosinev = loss_cosine(st_norm, st1_norm)
+    loss_l2v = loss_l2(st_norm, st1_norm)
 
     if config.mode == 'random':
       teacher_out = flax_model.apply(
@@ -208,21 +210,24 @@ def dino_train_step(
       total_loss += loss_dino/2
       total_loss /=2
     
-    alfa_loss = 0.2
-    p1_loss = ((10*loss_lwfv) + (1000*loss_cosinev))/2
+    alfa_loss = 0.5
+     
+    p1_loss = 10*loss_lwfv #+ (1000*loss_cosinev))/2
+    p1_loss = loss_l2v
     loss_total = (alfa_loss*loss_dino) + (1-alfa_loss)*p1_loss
 
-    return loss_total, (loss_dino, 10*loss_lwfv, 1000*loss_cosinev, center)
+    return loss_total, (loss_dino, 10*loss_lwfv, 1000*loss_cosinev, loss_l2v, center)
   
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
-  (total_loss, (loss_dino, loss_lwfv, loss_cosinev, center)), grad = compute_gradient_fn(
+  (total_loss, (loss_dino, loss_lwfv, loss_cosinev, loss_l2, center)), grad = compute_gradient_fn(
       train_state.params, center, epoch)
   #metrics = metrics_fn(logits, batch)
   metrics = (
       dict(total_loss=(total_loss, 1), 
            dino_loss=(loss_dino, 1),
           lwf_loss=(loss_lwfv, 1),
-          cosine_loss=(loss_cosinev, 1)
+          cosine_loss=(loss_cosinev, 1),
+          l2_loss=(loss_l2, 1)
           ))
 
   # Update the network parameters.
@@ -483,6 +488,7 @@ def train(
           loss_fn=model.loss_function,
           loss_lwf=model.loss_lwf,
           loss_cosine=model.cosine_loss,
+          loss_l2=model.l2_loss
           metrics_fn=model.get_metrics_fn,
           momentum_parameter_scheduler=momentum_parameter_scheduler,
           steps_per_epoch = steps_per_epoch,
