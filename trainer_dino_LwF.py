@@ -181,9 +181,9 @@ def dino_train_step(
     #student_out = jnp.concatenate([st,cc])
     student_out = st
     loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
-    loss_lwfv = loss_lwf(st_norm, st1_norm)
-    loss_cosinev = loss_cosine(st_norm, st1_norm)
-    loss_l2v = loss_l2(st_norm, st1_norm)
+    loss_lwfv = loss_lwf(st, st1_norm)
+    loss_cosinev = loss_cosine(st, st1_norm)
+    loss_l2v = loss_l2(st, st1_norm)
 
     if config.mode == 'random':
       teacher_out = flax_model.apply(
