@@ -443,7 +443,10 @@ class ViTDinoModel(base_model.BaseModel):
       return jnp.mean(cosine_distances)
   
   def l2_loss(self, preds, targets):
-      return jnp.mean((preds - targets) ** 2)
+      preds = preds.reshape(preds.shape[0], -1) 
+      targets = targets.reshape(targets.shape[0], -1)
+      squared_diff = jnp.square(preds - targets)
+      return jnp.mean(squared_diff, axis=1)
 
   def loss_lwf(self,
                     teacher_output: jnp.ndarray,
