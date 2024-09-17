@@ -166,7 +166,7 @@ def dino_train_step(
         drop_moment=drop_moment,
         backbone = True,
         train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_norm_clstoken"]
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
     
     '''cc = flax_model.apply(
         {'params': params},
@@ -488,7 +488,7 @@ def train(
           loss_fn=model.loss_function,
           loss_lwf=model.loss_lwf,
           loss_cosine=model.cosine_loss,
-          loss_l2=model.l2_loss
+          loss_l2=model.l2_loss,
           metrics_fn=model.get_metrics_fn,
           momentum_parameter_scheduler=momentum_parameter_scheduler,
           steps_per_epoch = steps_per_epoch,
