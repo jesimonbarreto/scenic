@@ -181,7 +181,7 @@ def dino_train_step(
     #student_out = jnp.concatenate([st,cc])
     student_out = st
     loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
-    loss_lwfv = loss_lwf(st, st1_norm)
+    loss_lwfv, _ = loss_fn(st1_norm, student_out, center, epoch)#loss_lwf(st, st1_norm)
     loss_cosinev = loss_cosine(st, st1_norm)
     loss_l2v = loss_l2(st, st1_norm)
 
