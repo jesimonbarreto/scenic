@@ -179,11 +179,17 @@ def dino_train_step(
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})'''
     
     #student_out = jnp.concatenate([st,cc])
+    print('Norm shape')
+    print(st_norm.shape)
+    print('Norm shape')
+    print(st.shape)
+    
     student_out = st
     loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
     loss_lwfv, _ = loss_fn(st1_norm, student_out, center, epoch)#loss_lwf(st, st1_norm)
     loss_cosinev = loss_cosine(st, st1_norm)
     loss_l2v = loss_l2(st, st1_norm)
+
 
     if config.mode == 'random':
       teacher_out = flax_model.apply(
