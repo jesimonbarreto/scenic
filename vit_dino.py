@@ -442,11 +442,15 @@ class ViTDinoModel(base_model.BaseModel):
       cosine_distances = jnp.array([self.cosine_distance(p, t) for p, t in zip(preds, targets)])
       return jnp.mean(cosine_distances)
   
-  def l2_loss(self, preds, targets):
+  '''def l2_loss(self, preds, targets):
       #preds = preds.reshape(preds.shape[0], -1) 
       #targets = targets.reshape(targets.shape[0], -1)
       squared_diff = jnp.square(preds - targets)
-      return jnp.mean(squared_diff, axis=1)
+      return jnp.mean(squared_diff, axis=1)'''
+  
+  # Função para calcular L2 loss
+  def l2_loss(self, preds, targets):
+    return jnp.mean((preds - targets) ** 2)
 
   def loss_lwf(self,
                     teacher_output: jnp.ndarray,
