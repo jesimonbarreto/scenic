@@ -158,7 +158,7 @@ def dino_train_step(
     st_norm = st["x_norm_clstoken"]
     st = st["x_train"]
     
-    st1_norm = flax_model.apply(
+    st1 = flax_model.apply(
         {'params': train_state.old_params},
         batch['sample'][0],
         seqlen=config.reference_seqlen,
@@ -166,7 +166,10 @@ def dino_train_step(
         drop_moment=drop_moment,
         backbone = True,
         train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+    
+    st1_norm = st1["x_norm_clstoken"]
+    st1 = st1["x_train"]
     
     '''cc = flax_model.apply(
         {'params': params},
@@ -179,16 +182,11 @@ def dino_train_step(
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})'''
     
     #student_out = jnp.concatenate([st,cc])
-    print('Norm shape')
-    print(st_norm.shape)
-    print('Norm shape')
-    print(st.shape)
-    
     student_out = st
     loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
-    loss_lwfv, _ = loss_fn(st1_norm, student_out, center, epoch)#loss_lwf(st, st1_norm)
-    loss_cosinev = loss_cosine(st, st1_norm)
-    loss_l2v = loss_l2(st, st1_norm)
+    loss_lwfv, _ = loss_fn(st1, student_out, center, epoch)#loss_lwf(st, st1_norm)
+    loss_cosinev = loss_cosine(st_norm, st1_norm)
+    loss_l2v = loss_l2(st_norm, st1_norm)
 
 
     if config.mode == 'random':
