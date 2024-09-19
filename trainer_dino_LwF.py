@@ -217,10 +217,10 @@ def dino_train_step(
     alfa_loss = 0.7
      
     #p1_loss = 10*loss_lwfv #+ (1000*loss_cosinev))/2
-    p1_loss = (100*loss_l2v + 10*loss_lwfv + 1000*loss_cosinev)/3
+    p1_loss = (100*loss_l2v + loss_lwfv + 1000*loss_cosinev)/3
     loss_total = alfa_loss*loss_dino + (1-alfa_loss)*p1_loss
 
-    return loss_total, (loss_dino, 10*loss_lwfv, 1000*loss_cosinev, loss_l2v, center)
+    return loss_total, (loss_dino, loss_lwfv, 1000*loss_cosinev, 100*loss_l2v, center)
   
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
   (total_loss, (loss_dino, loss_lwfv, loss_cosinev, loss_l2, center)), grad = compute_gradient_fn(
