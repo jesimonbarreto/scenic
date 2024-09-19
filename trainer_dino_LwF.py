@@ -605,9 +605,13 @@ def train(
     model=model
   )
   wandb.log(result_val)
+  wandb.log(result_val)
+  wandb.log(result_val)
+  wandb.log(result_val)
   print('Finishing Validation')
   # Wait until computations are done before exiting.
   train_utils.barrier_across_hosts()
+  print(result_val)
   
   # Return the train summary after last step.
   return train_state, train_summary

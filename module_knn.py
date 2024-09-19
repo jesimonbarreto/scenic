@@ -306,5 +306,5 @@ def eval(
   print("Total Accuracy:")
   for k, accuracy in total_accuracies.items():
         print(f"K:{k} Accuracy: {accuracy:.4f}")
-        result['K_'+str(k)]=round(accuracy,4)
+        result['K_'+str(k)]=round(accuracy*100,2)
   return result
