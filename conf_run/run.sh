@@ -1,3 +1,4 @@
+cd /home/jesimonbarreto/scenic
 sudo -E python -m main_dino --config=configs/var/dino_mvnet_lrl_all.py --workdir=../test
 sudo rm -rf ../test
 sudo -E python -m main_dino --config=configs/var/dino_mvnet_lrl_alm.py --workdir=../test
