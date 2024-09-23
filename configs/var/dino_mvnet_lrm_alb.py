@@ -16,9 +16,9 @@ def get_config():
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Report'
-  config.experiment_name = 'Dino_8k2Mhead_LwF_embed_l2_cos'
-  #config
+  config.project = 'Report_var'
+  config.experiment_name = 'LwF_lrm_alb'
+  #confim
   config.transfer_learning = False
   config.layer_wise = False
   config.print_lr_infos = False
@@ -38,7 +38,7 @@ def get_config():
   config.dir_plot = '/home/jesimonbarreto/images/'
 
   # Training.'MVImagenet'
-  config.alpha_loss = 0.1
+  config.alpha_loss = 0.9
   config.max_grad_norm = 1
   config.num_training_epochs = 17#400
   config.batch_size = 64
@@ -173,7 +173,7 @@ def get_config():
   config.query_max_seqlen = 70
 
   # Learning rate.
-  config.lr=0.0001
+  config.lr=0.001
   #cosine schedule lr
   config.lr_configs = ml_collections.ConfigDict()
   config.lr_configs.learning_rate_schedule = 'compound'
