@@ -40,7 +40,7 @@ def get_config():
   # Training.'MVImagenet'
   config.alpha_loss = 0.1
   config.max_grad_norm = 1
-  config.num_training_epochs = 17#400
+  config.num_training_epochs = 2#400
   config.batch_size = 64
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
