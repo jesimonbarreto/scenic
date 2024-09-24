@@ -45,6 +45,8 @@ filter_imagnet = [2, 7, 10, 12, 13, 15, 19, 20, 21, 22, 23, 26, 33, 34, 47,
                   149, 151, 152, 158, 166, 168, 173, 175, 179, 187, 197,
                   200, 214, 221, 224]
 
+n_total_pairs = 0
+
 class Builder(tfds.core.GeneratorBasedBuilder):
   """DatasetBuilder for mvimgnet dataset."""
 
@@ -156,8 +158,8 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   def _generate_examples(self, datapath):
     """Yields examples."""
     for label in tf.io.gfile.listdir(datapath):
-      if int(label) not in filter_imagnet:
-         continue
+      #if int(label) not in filter_imagnet:
+      #   continue
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
         dir_search = os.path.join(datapath, label, obj_var,'images', "*.jpg")
         frames_video = tf.io.gfile.glob(dir_search)
@@ -186,4 +188,6 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             "image2": img2,
             "label": int(label)
           }
+          n_total_pairs+=1
+          print('number total samples '+str(n_total_pairs))
           yield str(k)+'_'+id, record
