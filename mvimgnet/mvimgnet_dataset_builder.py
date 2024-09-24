@@ -45,7 +45,6 @@ filter_imagnet = [2, 7, 10, 12, 13, 15, 19, 20, 21, 22, 23, 26, 33, 34, 47,
                   149, 151, 152, 158, 166, 168, 173, 175, 179, 187, 197,
                   200, 214, 221, 224]
 
-n_total_pairs = 0
 
 class Builder(tfds.core.GeneratorBasedBuilder):
   """DatasetBuilder for mvimgnet dataset."""
@@ -54,6 +53,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   RELEASE_NOTES = {
       '1.0.0': 'Initial release.',
   }
+  n_total_pairs = 0
 
 
   def _info(self) -> tfds.core.DatasetInfo:
