@@ -166,7 +166,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         #base_names = [os.path.basename(fpath) for fpath in frames_video]
         id = label+'_'+obj_var
         dist = 5
-        n = 3
+        n = 3 #4
 
         # Ordena a lista de paths usando o número da sequência como chave
         frames_video = sorted(frames_video, key=self.get_sequence_number)
