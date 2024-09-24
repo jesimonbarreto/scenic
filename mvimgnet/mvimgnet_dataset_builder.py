@@ -188,6 +188,6 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             "image2": img2,
             "label": int(label)
           }
-          n_total_pairs+=1
-          print('number total samples '+str(n_total_pairs))
+          self.n_total_pairs+=1
+          print('number total samples '+str(self.n_total_pairs))
           yield str(k)+'_'+id, record
