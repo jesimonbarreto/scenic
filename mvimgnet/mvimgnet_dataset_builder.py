@@ -73,7 +73,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #  encoding_format= 'jpeg'),
             'image1': tfds.features.Image(encoding_format='jpeg'),
             'image2': tfds.features.Image(encoding_format='jpeg'),
-            'label': tfds.features.ClassLabel(names=list(mvimgnet_classes)),
+            #'label': tfds.features.ClassLabel(names=list(mvimgnet_classes)),
         }),
         # If there's a common (input, target) tuple from the
         # features, specify them here. They'll be used if
@@ -186,7 +186,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #"video": video_,
             "image1": img1,
             "image2": img2,
-            "label": int(label)
+            #"label": int(label)
           }
           self.n_total_pairs+=1
           print('number total samples '+str(self.n_total_pairs))
