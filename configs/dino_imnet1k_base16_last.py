@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Report_var'
-  config.experiment_name = 'Dino_8k2Mhead_LwF_embed_mvimagenet_all'
+  config.experiment_name = 'LwF_mvimagenetall'
   #config
   config.transfer_learning = False
   config.layer_wise = False
