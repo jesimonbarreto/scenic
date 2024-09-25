@@ -599,7 +599,7 @@ def train(
 
   ##################### VALIDATION ###################
   print('Starting Validation...')
-  '''result_val = module_knn.knn_evaluate(
+  result_val = module_knn.knn_evaluate(
     dataset=dataset_val,
     config=config.val,
     train_state=train_state,
@@ -609,7 +609,7 @@ def train(
   wandb.log(result_val)
   wandb.log(result_val)
   wandb.log(result_val)
-  print('Finishing Validation')'''
+  print('Finishing Validation')
   # Wait until computations are done before exiting.
   train_utils.barrier_across_hosts()
   print(result_val)

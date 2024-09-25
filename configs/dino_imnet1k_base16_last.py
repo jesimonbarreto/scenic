@@ -4,7 +4,7 @@
 import ml_collections
 
 VARIANT = 'S/14'
-_IMAGENET_TRAIN_SIZE = 40608 #10152 (number of video filtered) * n pairs of each video #1281167
+_IMAGENET_TRAIN_SIZE = 237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
 _IMAGENET_TEST_SIZE = 50000
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
@@ -79,7 +79,7 @@ def get_config():
         '|random_blur(0.1, data_key="x2")' +
         '|random_solarize(0.2, data_key="x2")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
-        '|keep("x1", "x2", "label")'
+        '|keep("x1", "x2")'
     )
   else:
     config.dataset_configs.pp_train = (
@@ -118,7 +118,7 @@ def get_config():
         '|random_solarize(0.2, data_key="x4")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x4")'+
         
-        '|keep("x1", "x2", "x3", "x4", "label")'
+        '|keep("x1", "x2", "x3", "x4")'
     )
   
   # For IMAGENET-1K
