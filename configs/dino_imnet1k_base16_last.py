@@ -173,7 +173,7 @@ def get_config():
   config.query_max_seqlen = 70
 
   # Learning rate.
-  config.lr=0.0001
+  config.lr=0.001
   #cosine schedule lr
   config.lr_configs = ml_collections.ConfigDict()
   config.lr_configs.learning_rate_schedule = 'compound'
