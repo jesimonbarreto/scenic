@@ -193,7 +193,7 @@ class ViTDINO(nn.Module):
           dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
               x, deterministic=not train)
     x_norm = nn.LayerNorm(name='encoder_norm')(x)
-
+    x_cls = x_norm[:, 0]
     '''x_out = ProjectionModule(
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
@@ -206,7 +206,7 @@ class ViTDINO(nn.Module):
           bottleneck_dim=self.head_bottleneck_dim,
           output_dim=self.head_output_dim,
           name='projection_head')(
-              x_norm, train)#.reshape((-1, self.head_output_dim))'''
+              x_cls, train)#.reshape((-1, self.head_output_dim))'''
 
     return {
             "x_norm_clstoken": x_norm[:, 0],
@@ -459,32 +459,23 @@ class ViTDinoModel(base_model.BaseModel):
     """Returns the cross-entropy loss."""
 
     
-    student_out = opr.softmax((student_output) / self.student_temp, axis=-1)
+    student_out = student_output / self.student_temp
     student_out = jnp.split(student_out, 2)
     
     teacher_out = opr.softmax((teacher_output) / self.student_temp, axis=-1)
     teacher_out = jnp.split(lax.stop_gradient(teacher_out), 2)
 
-    def cross_entropy(preds_softmax, targets_softmax):
-      """
-      Calcula a cross-entropy entre duas distribuições que já passaram pelo softmax.
-      
-      Args:
-          preds_softmax (jax.numpy.ndarray): Distribuições preditas (já normalizadas com softmax).
-          targets_softmax (jax.numpy.ndarray): Distribuições verdadeiras (também normalizadas com softmax).
-      
-      Returns:
-          float: Cross-entropy loss.
-      """
-      preds_softmax = jnp.asarray(preds_softmax)
-      targets_softmax = jnp.asarray(targets_softmax)
-      # Calcula a cross-entropy: - sum(targets * log(preds))
-      cross_entropy = -jnp.sum(targets_softmax * jnp.log(preds_softmax + 1e-9), axis=-1)
-      
-      # Retorna a média da cross-entropy ao longo de todas as amostras
-      return jnp.mean(cross_entropy)
-    
-    loss = cross_entropy(student_out, teacher_out)
+    total_loss = 0
+    n_loss_terms = 0
+    for iq, q in enumerate(teacher_out):
+        for v in range(len(student_out)):
+            if v == iq:
+                # we skip cases where student and teacher operate on the same view
+                continue
+            loss = jnp.sum(-q * opr.log_softmax(student_out[v], axis=-1), axis=-1)
+            total_loss += jnp.mean(loss)
+            n_loss_terms += 1
+    total_loss /= n_loss_terms
 
     return loss
     
