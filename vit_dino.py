@@ -465,8 +465,8 @@ class ViTDinoModel(base_model.BaseModel):
     teacher_out = opr.softmax((teacher_output) / self.student_temp, axis=-1)
     teacher_out = jnp.split(lax.stop_gradient(teacher_out), 2)
 
-    jax.debug.print("🤯 teaf: {epoch} 🤯", epoch=teacher_out.shape)
-    jax.debug.print("🤯 stuf: {epoch} 🤯", epoch=student_out.shape)
+    #jax.debug.print("🤯 teaf: {epoch} 🤯", epoch=teacher_out.shape)
+    #jax.debug.print("🤯 stuf: {epoch} 🤯", epoch=student_out.shape)
     total_loss = 0
     n_loss_terms = 0
     for iq, q in enumerate(teacher_out):
