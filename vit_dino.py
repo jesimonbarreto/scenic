@@ -480,7 +480,7 @@ class ViTDinoModel(base_model.BaseModel):
     total_loss /= n_loss_terms
     jax.debug.print("🤯 Lossf: {epoch} 🤯", epoch=total_loss.shape)
 
-    return loss
+    return total_loss
     
   
   def reduce(self, value):
