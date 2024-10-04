@@ -478,7 +478,7 @@ class ViTDinoModel(base_model.BaseModel):
             total_loss += jnp.mean(loss)
             n_loss_terms += 1
     total_loss /= n_loss_terms
-    jax.debug.print("🤯 Lossf: {epoch} 🤯", epoch=total_loss.shape)
+    #jax.debug.print("🤯 Lossf: {epoch} 🤯", epoch=total_loss.shape)
 
     return total_loss
     
