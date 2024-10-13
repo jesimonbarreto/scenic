@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Report_var'
-  config.experiment_name = 'LwF_mvimagenetall_head'
+  config.experiment_name = 'LwF_youtube8mall_head'
   #config
   config.transfer_learning = False
   config.layer_wise = False
