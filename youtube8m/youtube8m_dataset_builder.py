@@ -162,7 +162,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
       frames_video = tf.io.gfile.glob(dir_search)
       id = video+'_'
       dist = 1
-      n = 30 #4
+      n = 60 #4
 
       # Ordena a lista de paths usando o número da sequência como chave
       frames_video = sorted(frames_video, key=self.get_sequence_number)
