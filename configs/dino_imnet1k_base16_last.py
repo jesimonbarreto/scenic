@@ -4,7 +4,7 @@
 import ml_collections
 
 VARIANT = 'S/14'
-_IMAGENET_TRAIN_SIZE = 237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
+_IMAGENET_TRAIN_SIZE = 18850 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
 _IMAGENET_TEST_SIZE = 50000
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
@@ -123,7 +123,7 @@ def get_config():
   
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.dataset = 'mvimgnet'
+  config.dataset_configs.dataset = 'youtube8m'#'mvimgnet'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
 
