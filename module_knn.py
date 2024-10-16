@@ -99,7 +99,8 @@ def representation_fn_eval(
     project_feats = project_feats,
   )'''
   embedding = flax_model.apply(
-        {'params': train_state.params},
+        #{'params': train_state.params},
+        {'params': train_state.old_params},
         batch['image_resized'],
         seqlen=-1,
         seqlen_selection='consecutive',

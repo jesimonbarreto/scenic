@@ -16,8 +16,8 @@ def get_config():
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Report_var'
-  config.experiment_name = 'LwF_youtube8mall_head'
+  config.project = 'Result_final'
+  config.experiment_name = 'Vitsmall_pretreined'
   #config
   config.transfer_learning = False
   config.layer_wise = False
@@ -40,7 +40,7 @@ def get_config():
   # Training.'MVImagenet'
   config.alpha_loss = 0.7
   config.max_grad_norm = 1
-  config.num_training_epochs = 17#400
+  config.num_training_epochs = 1#17#400
   config.batch_size = 64
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
