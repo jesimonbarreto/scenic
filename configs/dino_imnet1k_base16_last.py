@@ -4,7 +4,7 @@
 import ml_collections
 
 VARIANT = 'S/14'
-_IMAGENET_TRAIN_SIZE = 19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
+_IMAGENET_TRAIN_SIZE = 40608 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
 _IMAGENET_TEST_SIZE = 50000
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Result_final'
-  config.experiment_name = 'Vitsmall_pretreined'
+  config.experiment_name = 'Vitsmall_pretreined_10epochs'
   #config
   config.transfer_learning = False
   config.layer_wise = False
