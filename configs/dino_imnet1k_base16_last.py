@@ -123,7 +123,7 @@ def get_config():
   
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.dataset = 'youtube8m'#'mvimgnet'
+  config.dataset_configs.dataset = 'mvimgnet'#'youtube8m'#'mvimgnet'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
 
