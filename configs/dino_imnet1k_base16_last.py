@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Result_final'
-  config.experiment_name = 'Vitsmall_pretreined_10epochs'
+  config.experiment_name = 'Vitsmall_pretreined_mvimagenetall_lwf_random'
   #config
   config.transfer_learning = False
   config.layer_wise = False
