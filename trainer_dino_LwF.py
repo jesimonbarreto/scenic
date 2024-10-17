@@ -209,11 +209,46 @@ def dino_train_step(
           drop_moment=drop_moment,
           backbone = True,
           train=True,
-          rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
+          rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+      
+      st_norm = st["x_norm_clstoken"]
+      st = st["x_train"]
+      
+      st1 = flax_model.apply(
+          {'params': train_state.old_params},
+          batch['sample'][1],
+          seqlen=config.reference_seqlen,
+          seqlen_selection=config.reference_seqlen_selection,
+          drop_moment=drop_moment,
+          backbone = True,
+          train=True,
+          rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+      
+      st1_norm = st1["x_norm_clstoken"]
+      st1 = st1["x_train"]
+      
+      '''cc = flax_model.apply(
+          {'params': params},
+          batch['sample'][1],
+          seqlen=config.reference_seqlen,
+          seqlen_selection=config.reference_seqlen_selection,
+          drop_moment=drop_moment,
+          backbone = True,
+          train=True,
+          rngs={'dropout': dropout_rng, 'droptok': droptok_rng})'''
+      
+      #student_out = jnp.concatenate([st,cc])
       student_out = st
-      loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
-      total_loss += loss_dino/2
-      total_loss /=2
+      loss_dino1, center = loss_fn(teacher_out, student_out, center, epoch)
+      loss_lwfv += loss_lwf(st1, student_out)#loss_fn(st1, student_out, center, epoch)#loss_lwf(st, st1_norm)
+      loss_cosinev += loss_cosine(st_norm, st1_norm)
+      loss_l2v += loss_l2(st_norm, st1_norm)
+      
+      loss_dino = (loss_dino + loss_dino1)/2
+      loss_lwfv /= 2
+      loss_cosinev /= 2
+      loss_l2v /=2
+
     
      
     #p1_loss = 10*loss_lwfv #+ (1000*loss_cosinev))/2
