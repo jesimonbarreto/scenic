@@ -40,11 +40,11 @@ def are_weights_close(weights1, weights2, atol=1e-6, rtol=1e-6):
     if isinstance(weights1, frozen_dict.FrozenDict) and isinstance(weights2, frozen_dict.FrozenDict):
         for key in weights1:
             if not are_weights_close(weights1[key], weights2[key], atol, rtol):
-                return 0
-        return 1
+                return jnp.array(0)
+        return jnp.array(1)
     else:
         # Compare arrays directly using jnp.allclose for non-dictionary (ndarray) elements
-        return int(jnp.allclose(weights1, weights2, atol=atol, rtol=rtol))
+        return jnp.asarray(jnp.allclose(weights1, weights2, atol=atol, rtol=rtol), dtype=jnp.int32)
 
 def compare_weight_dicts(params1, params2, atol=1e-6, rtol=1e-6):
     return are_weights_close(params1, params2, atol, rtol)
