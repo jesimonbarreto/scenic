@@ -36,23 +36,19 @@ import wandb
 import module_knn
 
 def are_weights_close(weights1, weights2, atol=1e-6, rtol=1e-6):
-    # Check if the parameters are FrozenDicts and handle recursively
+    # Se os parâmetros forem FrozenDicts, lidar recursivamente
     if isinstance(weights1, frozen_dict.FrozenDict) and isinstance(weights2, frozen_dict.FrozenDict):
-        result = jnp.array(1)  # Initialize with 1 (assuming all are close)
         for key in weights1:
-            # Use JAX's `jnp.where` to handle conditionals without Python `if`
-            result = jnp.where(
-                are_weights_close(weights1[key], weights2[key], atol, rtol) == 0,
-                jnp.array(0),  # If any weights are not close, set result to 0
-                result
-            )
-        return result
+            # Se qualquer comparação for diferente, retornamos 0
+            if are_weights_close(weights1[key], weights2[key], atol, rtol) == 0:
+                return jnp.array(0)
+        return jnp.array(1)  # Retorna 1 se todas as comparações forem iguais
     else:
-        # Directly compare arrays using `jnp.allclose`
-        return jnp.asarray(jnp.allclose(weights1, weights2, atol=atol, rtol=rtol), dtype=jnp.int32)
+        # Comparar arrays diretamente com jnp.allclose
+        return jnp.where(jnp.allclose(weights1, weights2, atol=atol, rtol=rtol), 1, 0)
 
 def compare_weight_dicts(params1, params2, atol=1e-6, rtol=1e-6):
-    return int(are_weights_close(params1, params2, atol, rtol))
+    return are_weights_close(params1, params2, atol, rtol)
 
 def calculate_means(dictionary):
   """Calculates the mean of values in each NumPy array within a dictionary.
