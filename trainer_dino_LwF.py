@@ -36,13 +36,18 @@ import wandb
 import module_knn
 
 def are_weights_close(weights1, weights2, atol=1e-6, rtol=1e-6):
-  return jnp.allclose(weights1, weights2, atol=atol, rtol=rtol)
+    # Recursively compare if weights1 and weights2 are frozen dictionaries
+    if isinstance(weights1, frozen_dict.FrozenDict) and isinstance(weights2, frozen_dict.FrozenDict):
+        for key in weights1:
+            if not are_weights_close(weights1[key], weights2[key], atol, rtol):
+                return 0
+        return 1
+    else:
+        # Compare arrays directly using jnp.allclose for non-dictionary (ndarray) elements
+        return int(jnp.allclose(weights1, weights2, atol=atol, rtol=rtol))
 
-def compare_weight_dicts(params1, params2):
-    for layer in params1:
-        if not are_weights_close(params1[layer], params2[layer]):
-            return 0
-    return 1
+def compare_weight_dicts(params1, params2, atol=1e-6, rtol=1e-6):
+    return are_weights_close(params1, params2, atol, rtol)
 
 def calculate_means(dictionary):
   """Calculates the mean of values in each NumPy array within a dictionary.
