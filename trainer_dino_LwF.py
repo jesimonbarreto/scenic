@@ -38,11 +38,11 @@ import module_knn
 def are_weights_close(weights1, weights2, atol=1e-6, rtol=1e-6):
     # Se os parâmetros forem FrozenDicts, lidar recursivamente
     if isinstance(weights1, frozen_dict.FrozenDict) and isinstance(weights2, frozen_dict.FrozenDict):
+        result = jnp.array(1)  # Inicializar o resultado com 1 (presumindo que todos são iguais)
         for key in weights1:
-            # Se qualquer comparação for diferente, retornamos 0
-            if are_weights_close(weights1[key], weights2[key], atol, rtol) == 0:
-                return jnp.array(0)
-        return jnp.array(1)  # Retorna 1 se todas as comparações forem iguais
+            # Atualiza o resultado de maneira compatível com JAX sem usar if
+            result = result * are_weights_close(weights1[key], weights2[key], atol, rtol)
+        return result
     else:
         # Comparar arrays diretamente com jnp.allclose
         return jnp.where(jnp.allclose(weights1, weights2, atol=atol, rtol=rtol), 1, 0)
