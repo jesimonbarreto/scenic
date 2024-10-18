@@ -52,7 +52,7 @@ def are_weights_close(weights1, weights2, atol=1e-6, rtol=1e-6):
         return jnp.asarray(jnp.allclose(weights1, weights2, atol=atol, rtol=rtol), dtype=jnp.int32)
 
 def compare_weight_dicts(params1, params2, atol=1e-6, rtol=1e-6):
-    return are_weights_close(params1, params2, atol, rtol)
+    return int(are_weights_close(params1, params2, atol, rtol))
 
 def calculate_means(dictionary):
   """Calculates the mean of values in each NumPy array within a dictionary.
