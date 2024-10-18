@@ -36,14 +36,19 @@ import wandb
 import module_knn
 
 def are_weights_close(weights1, weights2, atol=1e-6, rtol=1e-6):
-    # Recursively compare if weights1 and weights2 are frozen dictionaries
+    # Check if the parameters are FrozenDicts and handle recursively
     if isinstance(weights1, frozen_dict.FrozenDict) and isinstance(weights2, frozen_dict.FrozenDict):
+        result = jnp.array(1)  # Initialize with 1 (assuming all are close)
         for key in weights1:
-            if not are_weights_close(weights1[key], weights2[key], atol, rtol):
-                return jnp.array(0)
-        return jnp.array(1)
+            # Use JAX's `jnp.where` to handle conditionals without Python `if`
+            result = jnp.where(
+                are_weights_close(weights1[key], weights2[key], atol, rtol) == 0,
+                jnp.array(0),  # If any weights are not close, set result to 0
+                result
+            )
+        return result
     else:
-        # Compare arrays directly using jnp.allclose for non-dictionary (ndarray) elements
+        # Directly compare arrays using `jnp.allclose`
         return jnp.asarray(jnp.allclose(weights1, weights2, atol=atol, rtol=rtol), dtype=jnp.int32)
 
 def compare_weight_dicts(params1, params2, atol=1e-6, rtol=1e-6):
