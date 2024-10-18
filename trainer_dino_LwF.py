@@ -35,6 +35,14 @@ import matplotlib.pyplot as plt
 import wandb
 import module_knn
 
+def are_weights_close(weights1, weights2, atol=1e-6, rtol=1e-6):
+  return jnp.allclose(weights1, weights2, atol=atol, rtol=rtol)
+
+def compare_weight_dicts(params1, params2):
+    for layer in params1:
+        if not are_weights_close(params1[layer], params2[layer]):
+            return 0
+    return 1
 
 def calculate_means(dictionary):
   """Calculates the mean of values in each NumPy array within a dictionary.
@@ -291,7 +299,9 @@ def dino_train_step(
         params=new_params,
         ema_params=new_ema_params,
         rng=new_rng)
-  return new_train_state, center, metrics
+    equal = compare_weight_dicts(train_state.old_params, new_train_state.old_params)
+
+  return new_train_state, center, metrics, equal
 
 
 def train(
@@ -576,7 +586,7 @@ def train(
                      number_crops=config.ncrops)
         fstexe = False
 
-      train_state, center, tm = dino_train_step_pmapped(
+      train_state, center, tm, equal = dino_train_step_pmapped(
                                   train_state,
                                   train_batch,
                                   center,
@@ -613,6 +623,7 @@ def train(
         train_summary[key]=float(val.mean())
       wandb.log(train_summary, step=step)
       wandb.log(result_val)
+      wandb.log({'equal':equal})
       chrono.resume()
       train_metrics = []
       ext_log = []
@@ -640,9 +651,6 @@ def train(
     train_state=train_state,
     model=model
   )
-  wandb.log(result_val)
-  wandb.log(result_val)
-  wandb.log(result_val)
   wandb.log(result_val)
   print('Finishing Validation')
   # Wait until computations are done before exiting.
