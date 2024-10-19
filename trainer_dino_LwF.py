@@ -596,7 +596,6 @@ def train(
                                   train_batch,
                                   center,
                                   epoch)
-      print(f"equal {equal}")
       if config.transfer_learning or config.layer_wise:
         #print(train_state.opt_state)
         for inner_state in train_state.opt_state.inner_states.values():
