@@ -206,7 +206,7 @@ def get_config():
   config.checkpoint = False  # Do checkpointing.
   config.checkpoint_steps = 500
   config.log_summary_steps = 5
-  config.max_keep_checkpoint = 4
+  config.max_keep_checkpoint = 5
 
   ####### Config val
 

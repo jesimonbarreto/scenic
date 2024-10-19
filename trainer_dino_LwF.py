@@ -305,9 +305,8 @@ def dino_train_step(
         params=new_params,
         ema_params=new_ema_params,
         rng=new_rng)
-    equal = compare_weight_dicts(train_state.old_params, new_train_state.old_params)
 
-  return new_train_state, center, metrics, equal
+  return new_train_state, center, metrics
 
 
 def train(
@@ -592,7 +591,7 @@ def train(
                      number_crops=config.ncrops)
         fstexe = False
 
-      train_state, center, tm, equal = dino_train_step_pmapped(
+      train_state, center, tm = dino_train_step_pmapped(
                                   train_state,
                                   train_batch,
                                   center,
@@ -629,7 +628,6 @@ def train(
         train_summary[key]=float(val.mean())
       wandb.log(train_summary, step=step)
       wandb.log(result_val)
-      wandb.log({'equal':equal})
       chrono.resume()
       train_metrics = []
       ext_log = []
