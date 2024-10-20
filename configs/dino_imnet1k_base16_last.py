@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Result_final'
-  config.experiment_name = 'random_mvimagenetall'
+  config.experiment_name = 'video_mvimagenetall'
   #config
   config.transfer_learning = False
   config.layer_wise = False
@@ -30,7 +30,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'random' # video or random
+  config.mode = 'video' # video or random
   
   #plot
   config.plot_ex = False
