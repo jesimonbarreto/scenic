@@ -359,7 +359,7 @@ def eval(
       if not norm_res:
         emb_test = normalize(emb_test)
     
-      print(f'embeeding shape test {emb_test.shape}')
+      #print(f'embeeding shape test {emb_test.shape}')
       sim_all = []
       labels = []
       len_test += len(batch_eval)
@@ -396,7 +396,7 @@ def eval(
         correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
         total_correct_predictions[k] += correct_predictions
         if print_result:
-          print(f'Using k = {k} -- batch {batch_size}/{correct_predictions} certos')
+          #print(f'Using k = {k} -- batch {batch_size}/{correct_predictions} certos')
           print_result = False
       total_samples += batch_size
       
