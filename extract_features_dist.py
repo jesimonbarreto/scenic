@@ -312,17 +312,14 @@ def train(
         #print(img.shape)
         result = extract_features(img)
         #result = jnp.squeeze(result)
-        print(result['x_norm_clstoken'].shape)
+        #print(result['x_norm_clstoken'].shape)
         img = jnp.squeeze(result['x_norm_clstoken'][0, 0, 0])
-        print(f'shape {img.shape}')
+        #print(f'shape {img.shape}')
         embedding = normalize(img.reshape(1,-1))
         #print(img.shape)
-        np.save(dir_video+resul_name+'.npy', jnp.array(embedding))
+        np.save(os.path.join(dir_video,'images',resul_name+'.npy'), jnp.array(embedding))
         print('Saving')
-        print(dir_video+resul_name+'.npy')
-        break
-      break
-    break
+        print(os.path.join(dir_video,'images',resul_name+'.npy'))
 
 
 if __name__ == '__main__':
