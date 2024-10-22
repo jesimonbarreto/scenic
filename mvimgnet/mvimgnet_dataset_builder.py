@@ -174,6 +174,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         # Seleciona os pares
         pairs = self.select_pairs_with_distance(frames_video, dist, n)
         
+        
         if len(pairs) == 0:
            continue
         
