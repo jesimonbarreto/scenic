@@ -281,15 +281,18 @@ def train(
   ##########################################################################################
     # Load image
   dir_base = '/mnt/disks/dataset/mvimgnet/data/'
-  print(dir_base)
+  print(f'dir base: {dir_base}')
   classes_n = [d for d in os.listdir(dir_base) if os.path.isdir(os.path.join(dir_base, d))]
-  print(classes_n)
+  print(f'Classes : {classes_n}')
   for class_n in classes_n:
     dir_classes= os.path.join(dir_base, class_n)
     videos_n = [d for d in os.listdir(dir_classes) if os.path.isdir(os.path.join(dir_classes, d))] 
-    for video in videos_n: 
+    print(f'Videos : {videos_n}')
+    for video in videos_n:
+      print(f'Video : {video}')
       dir_video = os.path.join(dir_base, class_n, video,)
       for name_img in glob.glob(os.path.join(dir_video, '*.*')):
+        print(f'Image : {name_img}')
         img = Image.open(name_img).convert('RGB')
         resul_name = name_img.split('/')[-1].split('.')[0]
 
