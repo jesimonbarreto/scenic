@@ -313,7 +313,7 @@ def train(
         result = extract_features(img)
         #result = jnp.squeeze(result)
         img = jnp.squeeze(result['x_norm_clstoken'][0, 0, 0])
-        embedding = normalize(embedding)
+        embedding = normalize(img)
         #print(img.shape)
         np.save(dir_video+resul_name+'.npy', jnp.array(embedding))
         print('Saving')
