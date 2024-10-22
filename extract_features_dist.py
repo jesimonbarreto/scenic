@@ -283,11 +283,9 @@ def train(
   dir_base = '/mnt/disks/dataset/mvimgnet/data/'
   print(f'dir base: {dir_base}')
   classes_n = [d for d in os.listdir(dir_base) if os.path.isdir(os.path.join(dir_base, d))]
-  print(f'Classes : {classes_n}')
   for class_n in classes_n:
     dir_classes= os.path.join(dir_base, class_n)
     videos_n = [d for d in os.listdir(dir_classes) if os.path.isdir(os.path.join(dir_classes, d))] 
-    print(f'Videos : {videos_n}')
     for video in videos_n:
       print(f'Video : {video}')
       dir_video = os.path.join(dir_base, class_n, video,)
