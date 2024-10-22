@@ -291,7 +291,7 @@ def train(
     for video in videos_n:
       print(f'Video : {video}')
       dir_video = os.path.join(dir_base, class_n, video,)
-      for name_img in glob.glob(os.path.join(dir_video, '*.*')):
+      for name_img in glob.glob(os.path.join(dir_video,'images', '*.*')):
         print(f'Image : {name_img}')
         img = Image.open(name_img).convert('RGB')
         resul_name = name_img.split('/')[-1].split('.')[0]
