@@ -312,6 +312,7 @@ def train(
         #print(img.shape)
         result = extract_features(img)
         #result = jnp.squeeze(result)
+        print(f'shape {result['x_norm_clstoken'].shape}')
         img = jnp.squeeze(result['x_norm_clstoken'][0, 0, 0])
         print(f'shape {img.shape}')
         embedding = normalize(img)
