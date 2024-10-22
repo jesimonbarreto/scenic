@@ -315,7 +315,7 @@ def train(
         print(result['x_norm_clstoken'].shape)
         img = jnp.squeeze(result['x_norm_clstoken'][0, 0, 0])
         print(f'shape {img.shape}')
-        embedding = normalize(img)
+        embedding = normalize(img.reshape(1,-1))
         #print(img.shape)
         np.save(dir_video+resul_name+'.npy', jnp.array(embedding))
         print('Saving')
