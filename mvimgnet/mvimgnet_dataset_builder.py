@@ -6,8 +6,17 @@ from tensorflow_datasets.core.utils.lazy_imports_utils import tensorflow as tf
 
 import os
 import numpy as np
+import jax
+import jax.numpy as jnp
 import re
 import random
+# Set seeds for reproducibility
+seed_value = 42
+random.seed(seed_value)  # Fixes seed for Python's random module
+
+# JAX seed, typically used for JAX random operations (if needed)
+jax_key = jax.random.PRNGKey(seed_value)
+
 
 mvimgnet_classes = [
     "bag", "bottle", "washer", "vessel", "train", "telephone", "table", "stove", "sofa", "skateboard", 
@@ -154,6 +163,80 @@ class Builder(tfds.core.GeneratorBasedBuilder):
           pairs.append((sorted_paths[start_index], sorted_paths[end_index]))
       
       return pairs
+  
+  def load_npz(self, npz_path):
+    """Loads an .npz file and returns the array with shape (1, 384)."""
+    return jnp.load(npz_path)#['arr_0']
+
+  def calculate_cosine_distance_dot(self, vector1, vector2):
+      """Calculates the cosine distance using the dot product."""
+      # Dot product between vectors
+      dot_prod = jnp.dot(vector1.flatten(), vector2.flatten())
+      # Norms of the vectors
+      norm_v1 = jnp.linalg.norm(vector1)
+      norm_v2 = jnp.linalg.norm(vector2)
+      
+      # Cosine distance
+      distance = 1 - (dot_prod / (norm_v1 * norm_v2))
+      return distance
+
+  def check_npz_exists(self, frames_video):
+      """Checks if all .npz files corresponding to the frames exist."""
+      for frame in frames_video:
+          npz_path = frame.replace('.png', '.npz')
+          if not os.path.exists(npz_path):
+              return False
+      return True
+
+  def find_most_distant_pairs(self, frames_video, n):
+    """
+    Compares the cosine distances between the embeddings of the frames
+    and returns the n pairs with the greatest distances, along with the maximum and minimum distances.
+    """
+    # Check if all .npz files exist
+    if not self.check_npz_exists(frames_video):
+        return None
+
+    # Load the embedding vectors (1, 384) for each frame
+    vectors = []
+    for frame in frames_video:
+        npz_path = frame.replace('.png', '.npz')
+        vectors.append(self.load_npz(npz_path))
+
+    n_frames = len(vectors)
+    distances = []
+    
+    # Calculate the cosine distance between each pair of frames
+    for i in range(n_frames):
+        for j in range(i + 1, n_frames):
+            dist = self.calculate_cosine_distance_dot(vectors[i], vectors[j])
+            distances.append((dist, frames_video[i], frames_video[j]))  # Save the distance and the paths of the corresponding frames
+    
+    # Sort distances in descending order (most distant pairs first)
+    distances.sort(reverse=True, key=lambda x: x[0])
+    
+    # Form the 'n' most distant pairs, without repeating frames
+    pairs = []
+    used = set()
+    
+    for dist, frame1, frame2 in distances:
+        if frame1 not in used and frame2 not in used:
+            pairs.append((frame1, frame2))
+            used.add(frame1)
+            used.add(frame2)
+        
+        # Stop when we have 'n' pairs
+        if len(pairs) == n:
+            break
+    
+    # Extract the distances for the selected pairs
+    selected_distances = [dist for dist, frame1, frame2 in distances if (frame1, frame2) in pairs or (frame2, frame1) in pairs]
+    
+    # Calculate the maximum and minimum distance from the selected pairs
+    max_distance = max(selected_distances) if selected_distances else None
+    min_distance = min(selected_distances) if selected_distances else None
+
+    return pairs, max_distance, min_distance
 
   def _generate_examples(self, datapath):
     """Yields examples."""
@@ -172,17 +255,23 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         frames_video = sorted(frames_video, key=self.get_sequence_number)
 
         # Seleciona os pares
-        pairs = self.select_pairs_with_distance(frames_video, dist, n)
+        #pairs = self.select_pairs_with_distance(frames_video, dist, n)
+        pairs = self.find_most_distant_pairs(frames_video, n)
+        #metrics mse, 
+        if pairs is None:
+           continue
         
-        
+        pairs, max_distance, min_distance = pairs
         if len(pairs) == 0:
            continue
         
+        print(f'Max {max_distance} Min {min_distance}')
+        
         for k ,image_path in enumerate(pairs):
           img1 = self.process_image(image_path[0])
-          img1 = img1.astype(np.uint8)
+          img1 = img1.astype(jnp.uint8)
           img2 = self.process_image(image_path[1])
-          img2 = img2.astype(np.uint8)
+          img2 = img2.astype(jnp.uint8)
           record = {
             #"video": video_,
             "image1": img1,
