@@ -200,7 +200,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     # Load the embedding vectors (1, 384) for each frame
     vectors = []
     for frame in frames_video:
-        npz_path = frame.replace('.jpg', '.npz')
+        npz_path = frame.replace('.jpg', '.npy')
         vectors.append(self.load_npz(npz_path))
 
     n_frames = len(vectors)
