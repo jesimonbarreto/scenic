@@ -166,7 +166,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   
   def load_npz(self, npz_path):
     """Loads an .npz file and returns the array with shape (1, 384)."""
-    return jnp.load(npz_path)#['arr_0']
+    return jnp.load(npz_path, allow_pickle=True)#['arr_0']
 
   def calculate_cosine_distance_dot(self, vector1, vector2):
       """Calculates the cosine distance using the dot product."""
