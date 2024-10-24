@@ -241,8 +241,8 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   def _generate_examples(self, datapath):
     """Yields examples."""
     for label in tf.io.gfile.listdir(datapath):
-      if int(label) not in filter_imagnet:
-         continue
+      #if int(label) not in filter_imagnet:
+      #   continue
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
         dir_search = os.path.join(datapath, label, obj_var,'images', "*.jpg")
         frames_video = tf.io.gfile.glob(dir_search)
@@ -255,10 +255,17 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         frames_video = sorted(frames_video, key=self.get_sequence_number)
 
         # Seleciona os pares
-        pairs = self.select_pairs_with_distance(frames_video, dist, n)
+        #pairs = self.select_pairs_with_distance(frames_video, dist, n)
+        pairs = self.find_most_distant_pairs(frames_video, n)
+        #metrics mse, 
+        if pairs is None:
+           continue
         
+        pairs, max_distance, min_distance = pairs
         if len(pairs) == 0:
            continue
+        
+        print(f'Max {max_distance} Min {min_distance}')
         
         for k ,image_path in enumerate(pairs):
           img1 = self.process_image(image_path[0])
