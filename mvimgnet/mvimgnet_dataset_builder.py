@@ -272,5 +272,5 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #"label": int(label)
           }
           self.n_total_pairs+=1
-          print('number total samples '+str(self.n_total_pairs))
+          #print('number total samples '+str(self.n_total_pairs))
           yield str(k)+'_'+id, record
