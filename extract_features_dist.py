@@ -1,4 +1,6 @@
 """Script for Knn evalulation."""
+##(reverse-i-search)`extrac': sudo -E python -m extract_features_dist --config=configs/my_config_knn.py --workdir=../test_generate
+
 import functools
 
 from clu import metric_writers

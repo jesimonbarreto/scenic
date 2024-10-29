@@ -14,7 +14,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Eval_report'
-  config.experiment_name = 'Eval_Dino_8k2Mhead_video'
+  config.experiment_name = 'Eval_Dino_8k2Mhead_random_limited'
   config.extract_train = True
   # Dataset.
   config.dataset_name = 'eval_dataset'
@@ -76,7 +76,7 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/home/jesimonbarreto/video_limiclass'#'/home/jesimonbarreto/exp_test_now/'
+  config.train_dir = '/home/jesimonbarreto/random_limiclass'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = False
   config.write_summary = True
   config.steps_checkpoints = [10778]
