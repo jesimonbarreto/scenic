@@ -294,11 +294,12 @@ def train(
       print(f'Video : {video}')
       print(f'classes {ps} /total {total_classes_n}')
       print(f'video {vs} /total {total_video_n}')
+      dir_video = os.path.join(dir_base, class_n, video,)
       npz_files = glob.glob(os.path.join(dir_video,'images', '*.npz'))
       if npz_files:
           print("File .npz found:")
           continue
-      dir_video = os.path.join(dir_base, class_n, video,)
+      
       for name_img in glob.glob(os.path.join(dir_video,'images', '*.*')):
         print(f'Image : {name_img}')
         img = Image.open(name_img).convert('RGB')
