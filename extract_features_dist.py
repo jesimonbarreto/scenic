@@ -285,13 +285,19 @@ def train(
   dir_base = '/mnt/disks/dataset/mvimgnet/data/'
   print(f'dir base: {dir_base}')
   classes_n = [d for d in os.listdir(dir_base) if os.path.isdir(os.path.join(dir_base, d))]
-  print(classes_n)
-  print(nada)
-  for class_n in classes_n:
+  total_classes_n = len(class_n)
+  for ps, class_n in enumerate(classes_n):
     dir_classes= os.path.join(dir_base, class_n)
     videos_n = [d for d in os.listdir(dir_classes) if os.path.isdir(os.path.join(dir_classes, d))] 
-    for video in videos_n:
+    total_video_n = len(videos_n)
+    for vs, video in enumerate(videos_n):
       print(f'Video : {video}')
+      print(f'classes {ps} /total {total_classes_n}')
+      print(f'video {vs} /total {total_video_n}')
+      npz_files = glob.glob(os.path.join(dir_video,'images', '*.npz'))
+      if npz_files:
+          print("File .npz found:")
+          continue
       dir_video = os.path.join(dir_base, class_n, video,)
       for name_img in glob.glob(os.path.join(dir_video,'images', '*.*')):
         print(f'Image : {name_img}')
