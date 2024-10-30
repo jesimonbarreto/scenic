@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Result_final'
-  config.experiment_name = 'video_transf_'
+  config.experiment_name = 'video_transf_no_sol'
   #config
   config.transfer_learning = False
   config.layer_wise = False
@@ -76,7 +76,7 @@ def get_config():
         '|value_range(0, 1, data_key="x2")' +
         #'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
         #'|random_grayscale(0.2, data_key="x2")' +
-        '|random_blur(0.1, data_key="x2")' +
+        #'|random_blur(0.1, data_key="x2")' +
         '|random_solarize(0.2, data_key="x2")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
         '|keep("x1", "x2")'
