@@ -295,7 +295,7 @@ def train(
       print(f'classes {ps+1} /total {total_classes_n}')
       print(f'video {vs+1} /total {total_video_n}')
       dir_video = os.path.join(dir_base, class_n, video,)
-      npz_files = glob.glob(os.path.join(dir_video,'images', '*.npz'))
+      npz_files = glob.glob(os.path.join(dir_video,'images', '*.npy'))
       if npz_files:
           print("File .npz found:")
           continue
