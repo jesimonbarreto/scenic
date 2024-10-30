@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Result_final'
-  config.experiment_name = 'video_transf_no_sol'
+  config.experiment_name = 'video_transf_sol'
   #config
   config.transfer_learning = False
   config.layer_wise = False
