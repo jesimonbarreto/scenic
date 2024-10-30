@@ -292,15 +292,14 @@ def train(
     total_video_n = len(videos_n)
     for vs, video in enumerate(videos_n):
       print(f'Video : {video}')
-      print(f'classes {ps} /total {total_classes_n}')
-      print(f'video {vs} /total {total_video_n}')
+      print(f'classes {ps+1} /total {total_classes_n}')
+      print(f'video {vs+1} /total {total_video_n}')
       dir_video = os.path.join(dir_base, class_n, video,)
       npz_files = glob.glob(os.path.join(dir_video,'images', '*.npz'))
       if npz_files:
           print("File .npz found:")
           continue
-      
-      for name_img in glob.glob(os.path.join(dir_video,'images', '*.*')):
+      for name_img in glob.glob(os.path.join(dir_video,'images', '*.jpg')):
         print(f'Image : {name_img}')
         img = Image.open(name_img).convert('RGB')
         resul_name = name_img.split('/')[-1].split('.')[0]
