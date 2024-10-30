@@ -14,7 +14,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Eval_transfor'
-  config.experiment_name = 'Eval_video_transform'
+  config.experiment_name = 'Eval_video_transform_xx'
   config.extract_train = True
   # Dataset.
   config.dataset_name = 'eval_dataset'
