@@ -10,6 +10,8 @@ import jax
 import jax.numpy as jnp
 import re
 import random
+from PIL import Image
+
 # Set seeds for reproducibility
 seed_value = 42
 random.seed(seed_value)  # Fixes seed for Python's random module
@@ -188,6 +190,19 @@ class Builder(tfds.core.GeneratorBasedBuilder):
               return False
       return True
 
+  
+  def limited_true_function(self, max_true=10):
+    true_count = 0
+
+    def deterministic_true():
+        nonlocal true_count
+        if true_count < max_true:
+            true_count += 1
+            return True
+        return False
+
+    return deterministic_true
+  
   def find_most_distant_pairs(self, frames_video, n):
     """
     Compares the cosine distances between the embeddings of the frames
@@ -240,6 +255,10 @@ class Builder(tfds.core.GeneratorBasedBuilder):
 
   def _generate_examples(self, datapath):
     """Yields examples."""
+    detmn_true = self.limited_true_function(max_true=20)
+    dir_saveimage = "/home/jesimonbarreto/plots/"
+    cont = 1
+
     for label in tf.io.gfile.listdir(datapath):
       #if int(label) not in filter_imagnet:
       #   continue
@@ -255,16 +274,29 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         frames_video = sorted(frames_video, key=self.get_sequence_number)
 
         # Seleciona os pares
-        pairs = self.select_pairs_with_distance(frames_video, dist, n)
+        #pairs = self.select_pairs_with_distance(frames_video, dist, n)
+        pairs = self.find_most_distant_pairs(frames_video, n)
+        #metrics mse, 
+        if pairs is None:
+           continue
         
+        pairs, max_distance, min_distance = pairs
         if len(pairs) == 0:
            continue
         
+        print(f'Max {max_distance} Min {min_distance}')
+        
         for k ,image_path in enumerate(pairs):
+          plot_image = detmn_true()
           img1 = self.process_image(image_path[0])
           img1 = img1.astype(jnp.uint8)
           img2 = self.process_image(image_path[1])
           img2 = img2.astype(jnp.uint8)
+          if plot_image:
+            Image.fromarray(img1).save(f"{dir_saveimage}{cont}_1.png")
+            Image.fromarray(img2).save(f"{dir_saveimage}{cont}_2.png")
+            cont+=1
+
           record = {
             #"video": video_,
             "image1": img1,
@@ -272,5 +304,5 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #"label": int(label)
           }
           self.n_total_pairs+=1
-          #print('number total samples '+str(self.n_total_pairs))
+          print('number total samples '+str(self.n_total_pairs))
           yield str(k)+'_'+id, record

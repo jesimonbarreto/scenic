@@ -249,23 +249,16 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         #base_names = [os.path.basename(fpath) for fpath in frames_video]
         id = label+'_'+obj_var
         dist = 5
-        n = 3 #4
+        n = 4
 
         # Ordena a lista de paths usando o número da sequência como chave
         frames_video = sorted(frames_video, key=self.get_sequence_number)
 
         # Seleciona os pares
-        #pairs = self.select_pairs_with_distance(frames_video, dist, n)
-        pairs = self.find_most_distant_pairs(frames_video, n)
-        #metrics mse, 
-        if pairs is None:
-           continue
+        pairs = self.select_pairs_with_distance(frames_video, dist, n)
         
-        pairs, max_distance, min_distance = pairs
         if len(pairs) == 0:
            continue
-        
-        print(f'Max {max_distance} Min {min_distance}')
         
         for k ,image_path in enumerate(pairs):
           img1 = self.process_image(image_path[0])
@@ -279,5 +272,5 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #"label": int(label)
           }
           self.n_total_pairs+=1
-          print('number total samples '+str(self.n_total_pairs))
+          #print('number total samples '+str(self.n_total_pairs))
           yield str(k)+'_'+id, record
