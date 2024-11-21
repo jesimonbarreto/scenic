@@ -142,7 +142,10 @@ def dino_train_step(
   n_pos = config.n_ref_positions  # Number of reference positions.
   bs = batch['x1'].shape[0]  # Per-device batch size.
   n_q_foc = config.dataset_configs.number_of_focal_queries
-  batch = utils.prepare_input(batch, config)
+  if config.mode == 'frameduo':
+    batch = utils.prepare_input_frame(batch, config, epoch)
+  else:  
+    batch = utils.prepare_input(batch, config)
 
   def training_loss_fn(params, center, epoch):
     # Step 1): Predict teacher network, predict student.
