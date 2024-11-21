@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Result_final'
-  config.experiment_name = 'random_mvimagenetall_lim_classes'
+  config.experiment_name = 'random_mvimagenetall_lim_classes_img1'
   #config
   config.transfer_learning = False
   config.layer_wise = False
