@@ -67,18 +67,18 @@ def get_config():
         f'|copy("image2", "x2")'+
         f'|crop_random(224, {config.global_crops_scale}, data_key="x1")' +
         f'|crop_random(224, {config.global_crops_scale}, data_key="x2")' +
-        '|random_flip(p=0.5, data_key="x1")' +
+        '|random_flip(0.5, data_key="x1")' +
         '|value_range(0, 1, data_key="x1")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
         '|random_grayscale(0.2, data_key="x1")' +
-        '|random_blur(1.0, data_key="x1")' +
+        '|random_blur(224, 1.0, data_key="x1")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        '|random_flip(p=0.5, data_key="x2")' +
+        '|random_flip(0.5, data_key="x2")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
         '|random_grayscale(0.2, data_key="x2")' +
-        '|random_blur(0.1, data_key="x2")' +
+        '|random_blur(224, 0.1, data_key="x2")' +
         '|random_solarize(0.2, data_key="x2")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
         '|keep("x1", "x2")'
