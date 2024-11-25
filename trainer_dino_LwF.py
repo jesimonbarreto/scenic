@@ -87,6 +87,7 @@ def plot_example(train_batch, number_plot=5, dir_plot='/home/jesimonbarreto/imag
     img = train_batch['x2'][0,stepe]
     print(f'4 max {jnp.max(img)} min {jnp.min(img)}')
     img = normalize_vector(img)
+    print(f'5 max {jnp.max(img)} min {jnp.min(img)}')
     plt.imsave(os.path.join(dir_plot,f'imagex2_{stepe}.jpg'), img)
     for vcrop in range(number_crops):
       print(f'{vcrop} de {number_crops}')
