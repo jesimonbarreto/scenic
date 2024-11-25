@@ -34,7 +34,7 @@ def get_config():
   
   #plot
   config.plot_ex = True
-  config.number_plot = 7
+  config.number_plot = 8
   config.dir_plot = '/home/jesimonbarreto/images/'
 
   # Training.'MVImagenet'
@@ -65,9 +65,9 @@ def get_config():
         #'|decode(inkey=("image2"), outkey=("image2"))' +
         f'copy("image1", "x1")'+
         f'|copy("image2", "x2")'+
-        f'|crop_random(224, {config.global_crops_scale}, data_key="x1")' +
-        f'|crop_random(224, {config.global_crops_scale}, data_key="x2")' +
-        '|random_flip(0.5, data_key="x1")' +
+        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("image1", "x1"))' +
+        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("image2", "x2"))' +
+        '|random_flip(0.5, data_key="x2")' +
         '|value_range(0, 1, data_key="x1")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
         '|random_grayscale(0.2, data_key="x1")' +
