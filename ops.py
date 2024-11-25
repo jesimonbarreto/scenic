@@ -608,10 +608,10 @@ def generate_crops(resize_size=None,
   return _generate_crops
 
 
-@registry.Registry.register("preprocess_ops.random_flip", "function")
+@registry.Registry.register("preprocess_ops.random_flip_image", "function")
 @utils.InKeyOutKey()
 @utils.BatchedImagePreprocessing
-def random_flip():
+def random_flip_image():
   def _flip(image):
     seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
     image = tf.image.stateless_random_flip_left_right(image, seed)
