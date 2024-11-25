@@ -218,11 +218,11 @@ def copy_file(resize_size=224):
   return copy_file
 
 
-@registry.Registry.register("preprocess_ops.copy_resize_file", "function")
-@TwoInKeysTwoOutKeys()
-def copy_resize_file(resize_size=224, global_scale=None):
+@registry.Registry.register("preprocess_ops.random_crop", "function")
+@utils.InKeyOutKey()
+def random_crop(resize_size=224, global_scale=None):
   """Crop and flip an image and keep track of these operations with a mask."""
-  def copy_resize_file(image, image_):
+  def _random_crop(image):
 
     resize_method=tf.image.ResizeMethod.BICUBIC
     #resized_image = tf.image.resize(image, [resize_size, resize_size], resize_method)
@@ -236,14 +236,14 @@ def copy_resize_file(resize_size=224, global_scale=None):
     image_cropped.set_shape([None, None, image.shape[-1]])
     image_cropped = tf.image.resize(image_cropped, [resize_size, resize_size], resize_method)
     
-    seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
+    '''seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
     image_cropped = tf.image.stateless_random_flip_left_right(image_cropped, seed)
     image = tf.image.resize(image, [256, 256], resize_method)
     image = tf.image.central_crop(image, 0.875)
-    image = tf.image.resize(image, [resize_size, resize_size], resize_method)
+    image = tf.image.resize(image, [resize_size, resize_size], resize_method)'''
 
-    return image, image_cropped
-  return copy_resize_file
+    return image_cropped
+  return _random_crop
 
 '''@registry.Registry.register("preprocess_ops.resize_small", "function")
 @utils.InKeyOutKey()
