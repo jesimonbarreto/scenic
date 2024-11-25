@@ -65,8 +65,8 @@ def get_config():
         #'|decode(inkey=("image2"), outkey=("image2"))' +
         f'copy("image1", "x1")'+
         f'|copy("image2", "x2")'+
-        f'|random_crop(224, {config.global_crops_scale}, data_key="x1")' +
-        f'|random_crop(224, {config.global_crops_scale}, data_key="x2")' +
+        f'|random_crop_distorcedbb(224, {config.global_crops_scale}, data_key="x1")' +
+        f'|random_crop_distorcedbb(224, {config.global_crops_scale}, data_key="x2")' +
         #'|random_flip(0.5, data_key="x1")' +
         '|value_range(0, 1, data_key="x1")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +

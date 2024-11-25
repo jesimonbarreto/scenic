@@ -218,11 +218,11 @@ def copy_file(resize_size=224):
   return copy_file
 
 
-@registry.Registry.register("preprocess_ops.my_random_crop", "function")
+@registry.Registry.register("preprocess_ops.random_crop_distorcedbb", "function")
 @utils.InKeyOutKey()
-def my_random_crop(resize_size=224, global_scale=None):
+def random_crop_distorcedbb(resize_size=224, global_scale=None):
   """Crop and flip an image and keep track of these operations with a mask."""
-  def _my_random_crop(image):
+  def dbb_random_crop(image):
 
     resize_method=tf.image.ResizeMethod.BICUBIC
     #resized_image = tf.image.resize(image, [resize_size, resize_size], resize_method)
@@ -243,7 +243,7 @@ def my_random_crop(resize_size=224, global_scale=None):
     image = tf.image.resize(image, [resize_size, resize_size], resize_method)'''
 
     return image_cropped
-  return _my_random_crop
+  return dbb_random_crop
 
 '''@registry.Registry.register("preprocess_ops.resize_small", "function")
 @utils.InKeyOutKey()
