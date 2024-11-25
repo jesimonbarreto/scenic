@@ -47,7 +47,7 @@ def get_config():
   total_steps = config.num_training_epochs * config.steps_per_epoch
 
   #DINO
-  config.global_crops_scale = (0.14, 1.0) 
+  config.global_crops_scale = (0.4, 1.0) 
   config.local_crops_number = 0 #if 0, global scale = 0.14,1.0
   config.local_crops_scale = (0.05,0.25)
   config.student_temp = 0.1
@@ -65,8 +65,9 @@ def get_config():
         #'|decode(inkey=("image2"), outkey=("image2"))' +
         f'copy("image1", "x1")'+
         f'|copy("image2", "x2")'+
-        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
-        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
+        f'|copy_resize_file(224, {config.global_crops_scale}, data_key="x1")' +
+        f'|copy_resize_file(224, {config.global_crops_scale}, data_key="x2")' +
+        '|random_flip(p=0.5, data_key="x1")' +
         '|value_range(0, 1, data_key="x1")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
         '|random_grayscale(0.2, data_key="x1")' +
@@ -74,6 +75,7 @@ def get_config():
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
+        '|random_flip(p=0.5, data_key="x2")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
         '|random_grayscale(0.2, data_key="x2")' +
         '|random_blur(0.1, data_key="x2")' +
