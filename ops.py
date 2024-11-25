@@ -611,7 +611,7 @@ def generate_crops(resize_size=None,
 @registry.Registry.register("preprocess_ops.random_flip", "function")
 @utils.InKeyOutKey()
 @utils.BatchedImagePreprocessing
-def random_flip(p=0.5, sgin=2):
+def random_flip(p=0.5):
   def _flip(image):
     seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
     return tf.cond(
