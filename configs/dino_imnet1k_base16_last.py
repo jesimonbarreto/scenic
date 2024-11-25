@@ -67,7 +67,7 @@ def get_config():
         f'|copy("image2", "x2")'+
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("image1", "x1"))' +
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("image2", "x2"))' +
-        '|random_flip(0.5, data_key="x2")' +
+        #'|random_flip(0.5, data_key="x1")' +
         '|value_range(0, 1, data_key="x1")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
         '|random_grayscale(0.2, data_key="x1")' +
@@ -75,7 +75,7 @@ def get_config():
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        '|random_flip(0.5, data_key="x2")' +
+        #'|random_flip(0.5, data_key="x2")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
         '|random_grayscale(0.2, data_key="x2")' +
         '|random_blur(224, 0.1, data_key="x2")' +
