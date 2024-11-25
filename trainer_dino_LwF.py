@@ -79,15 +79,16 @@ def plot_example(train_batch, number_plot=5, dir_plot='/home/jesimonbarreto/imag
   
   for stepe in range(number_plot):
     img = train_batch['x1'][0,stepe]
-    print(f'1 max {jnp.max(img)} min {jnp.min(img)}')
+    print(f'x1 before_norm max {jnp.max(img)} min {jnp.min(img)}')
     img = normalize_vector(img)
-    print(f'2 max {jnp.max(img)} min {jnp.min(img)}')
+    img = jnp.where(img > 1.0, 1.0, img)
+    print(f'2 after_norm max {jnp.max(img)} min {jnp.min(img)}')
     plt.imsave(os.path.join(dir_plot,f'imagex1_{stepe}.jpg'), img)  # Using matplotlib
-    print(f'3 max {jnp.max(img)} min {jnp.min(img)}')
     img = train_batch['x2'][0,stepe]
-    print(f'4 max {jnp.max(img)} min {jnp.min(img)}')
+    print(f'4 before_norm x2 max {jnp.max(img)} min {jnp.min(img)}')
     img = normalize_vector(img)
-    print(f'5 max {jnp.max(img)} min {jnp.min(img)}')
+    img = jnp.where(img > 1.0, 1.0, img)
+    print(f'5 after_norm x2 max {jnp.max(img)} min {jnp.min(img)}')
     plt.imsave(os.path.join(dir_plot,f'imagex2_{stepe}.jpg'), img)
     for vcrop in range(number_crops):
       print(f'{vcrop} de {number_crops}')
