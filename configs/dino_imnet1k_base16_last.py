@@ -33,8 +33,8 @@ def get_config():
   config.mode = 'random' # video or random
   
   #plot
-  config.plot_ex = False
-  config.number_plot = 2
+  config.plot_ex = True
+  config.number_plot = 7
   config.dir_plot = '/home/jesimonbarreto/images/'
 
   # Training.'MVImagenet'
