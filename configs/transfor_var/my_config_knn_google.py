@@ -13,7 +13,7 @@ def get_config():
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Eval_transfor'
+  config.project = 'Eval_transfor_ng'
   config.experiment_name = 'Eval_video_transform_xx'
   config.extract_train = True
   # Dataset.

@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Result_final'
-  config.experiment_name = 'random_mvimagenetall_lim_classes'
+  config.experiment_name = 'dino_video_sol'
   #config
   config.transfer_learning = False
   config.layer_wise = False
@@ -33,14 +33,14 @@ def get_config():
   config.mode = 'video' # video or random
   
   #plot
-  config.plot_ex = True
+  config.plot_ex = False
   config.number_plot = 8
   config.dir_plot = '/home/jesimonbarreto/images/'
 
   # Training.'MVImagenet'
   config.alpha_loss = 0.7
   config.max_grad_norm = 1
-  config.num_training_epochs = 1#17#400
+  config.num_training_epochs = 17#400
   config.batch_size = 64
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -67,18 +67,18 @@ def get_config():
         f'|copy("image2", "x2")'+
         f'|random_crop_distorcedbb(224, {config.global_crops_scale}, data_key="x1")' +
         f'|random_crop_distorcedbb(224, {config.global_crops_scale}, data_key="x2")' +
-        '|random_flip_image(data_key="x1")' +
+        #'|random_flip_image(data_key="x1")' +
         '|value_range(0, 1, data_key="x1")' +
-        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
-        '|random_grayscale(0.2, data_key="x1")' +
-        '|random_blur(224, 1.0, data_key="x1")' +
+        #'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
+        #'|random_grayscale(0.2, data_key="x1")' +
+        #'|random_blur(224, 1.0, data_key="x1")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        '|random_flip_image(data_key="x2")' +
-        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
-        '|random_grayscale(0.2, data_key="x2")' +
-        '|random_blur(224, 0.1, data_key="x2")' +
+        #'|random_flip_image(data_key="x2")' +
+        #'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
+        #'|random_grayscale(0.2, data_key="x2")' +
+        #'|random_blur(224, 0.1, data_key="x2")' +
         '|random_solarize(0.2, data_key="x2")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
         '|keep("x1", "x2")'

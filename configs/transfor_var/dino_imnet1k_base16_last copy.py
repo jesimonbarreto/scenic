@@ -4,7 +4,7 @@
 import ml_collections
 
 VARIANT = 'S/14'
-_IMAGENET_TRAIN_SIZE = 395670 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
+_IMAGENET_TRAIN_SIZE = 395670 #237402 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
 _IMAGENET_TEST_SIZE = 50000
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Result_final'
-  config.experiment_name = 'video_transf_blur'
+  config.experiment_name = 'random_mvimagenetall_lim_classes'
   #config
   config.transfer_learning = False
   config.layer_wise = False
@@ -34,7 +34,7 @@ def get_config():
   
   #plot
   config.plot_ex = False
-  config.number_plot = 2
+  config.number_plot = 8
   config.dir_plot = '/home/jesimonbarreto/images/'
 
   # Training.'MVImagenet'
@@ -47,7 +47,7 @@ def get_config():
   total_steps = config.num_training_epochs * config.steps_per_epoch
 
   #DINO
-  config.global_crops_scale = (0.14, 1.0) 
+  config.global_crops_scale = (0.4, 1.0) 
   config.local_crops_number = 0 #if 0, global scale = 0.14,1.0
   config.local_crops_scale = (0.05,0.25)
   config.student_temp = 0.1
@@ -65,22 +65,49 @@ def get_config():
         #'|decode(inkey=("image2"), outkey=("image2"))' +
         f'copy("image1", "x1")'+
         f'|copy("image2", "x2")'+
-        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
-        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
+        f'|random_crop_distorcedbb(224, {config.global_crops_scale}, data_key="x1")' +
+        f'|random_crop_distorcedbb(224, {config.global_crops_scale}, data_key="x2")' +
+        '|random_flip_image(data_key="x1")' +
         '|value_range(0, 1, data_key="x1")' +
-        #'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
-        #'|random_grayscale(0.2, data_key="x1")' +
-        '|random_blur(1.0, data_key="x1")' +
+        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
+        '|random_grayscale(0.2, data_key="x1")' +
+        '|random_blur(224, 1.0, data_key="x1")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        #'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
-        #'|random_grayscale(0.2, data_key="x2")' +
-        '|random_blur(0.1, data_key="x2")' +
-        #'|random_solarize(0.2, data_key="x2")' +
+        '|random_flip_image(data_key="x2")' +
+        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
+        '|random_grayscale(0.2, data_key="x2")' +
+        '|random_blur(224, 0.1, data_key="x2")' +
+        '|random_solarize(0.2, data_key="x2")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
         '|keep("x1", "x2")'
     )
+  elif config.mode == 'frame':
+    config.dataset_configs.pp_train = (
+        #'decode(inkey=("image1"), outkey=("image1"))' +
+        #'|decode(inkey=("image2"), outkey=("image2"))' +
+        f'copy("image1", "x1")'+
+        f'|copy("image1", "x2")'+
+        f'|random_crop_distorcedbb(224, {config.global_crops_scale}, data_key="x1")' +
+        f'|random_crop_distorcedbb(224, {config.global_crops_scale}, data_key="x2")' +
+        '|random_flip_image(data_key="x1")' +
+        '|value_range(0, 1, data_key="x1")' +
+        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
+        '|random_grayscale(0.2, data_key="x1")' +
+        '|random_blur(224, 1.0, data_key="x1")' +
+        f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
+
+        '|value_range(0, 1, data_key="x2")' +
+        '|random_flip_image(data_key="x2")' +
+        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
+        '|random_grayscale(0.2, data_key="x2")' +
+        '|random_blur(224, 0.1, data_key="x2")' +
+        '|random_solarize(0.2, data_key="x2")' +
+        f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
+        '|keep("x1", "x2")'
+    )
+  
   else:
     config.dataset_configs.pp_train = (
         #'decode(inkey=("image1"), outkey=("image1"))' +
