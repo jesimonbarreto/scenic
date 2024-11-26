@@ -611,7 +611,7 @@ def generate_crops(resize_size=None,
 @registry.Registry.register("preprocess_ops.random_flip_image", "function")
 @utils.InKeyOutKey()
 @utils.BatchedImagePreprocessing()
-def random_flip_image(p):
+def random_flip_image(p=0.1):
   """Randomly converts imageto gray."""
   def _to_flip(image):
     seed = tf.random.uniform(shape=[2], maxval=2**31 - 1, dtype=tf.int32)
