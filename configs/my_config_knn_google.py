@@ -29,8 +29,8 @@ def get_config():
   config.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
-  config.dataset_configs.batch_size_train = 256
-  config.dataset_configs.batch_size_test = 64
+  config.dataset_configs.batch_size_train = 512 #256
+  config.dataset_configs.batch_size_test = 128 #64
   config.num_classes = 1000
   reference_resolution = 224
   crop_size = 224
@@ -76,10 +76,10 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/home/jesimonbarreto/random_limiclass'#'/home/jesimonbarreto/exp_test_now/'
+  config.train_dir = '/home/jesimonbarreto/test'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = False
   config.write_summary = True
-  config.steps_checkpoints = [10778]
+  config.steps_checkpoints = [5254]
   config.ks = [5,10,20]
   config.dir_files = '/mnt/disks/dataset/eval_files/'
 
