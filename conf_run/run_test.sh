@@ -1,4 +1,4 @@
 cd /home/jesimonbarreto/scenic
 sudo rm -rf ../test
 sudo -E python -m main_dino --config=configs/dino_imnet1k_base16_last.py --workdir=../test
-sudo -E python -m knn_main --config=configs/my_config_knn.py --workdir=../test_
+sudo -E python -m knn_main --config=configs/my_config_knn_google.py --workdir=../test_
