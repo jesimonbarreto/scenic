@@ -14,7 +14,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Eval_report'
-  config.experiment_name = 'Eval_Dino_8k2Mhead_random_limited'
+  config.experiment_name = 'Eval_Dino_dino_semLwF'
   config.extract_train = True
   # Dataset.
   config.dataset_name = 'eval_dataset'
