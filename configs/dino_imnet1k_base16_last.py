@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Result_final'
-  config.experiment_name = 'random_mvimagenetal_lwf_b64'
+  config.experiment_name = 'video_mvimagenetal_lwf_b64'
   #config
   config.transfer_learning = False
   config.layer_wise = False
