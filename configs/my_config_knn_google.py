@@ -14,7 +14,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Eval_report'
-  config.experiment_name = 'Eval_Dino_dino_fwl'
+  config.experiment_name = 'Eval_Dino_dino_lwf_b64'
   config.extract_train = True
   # Dataset.
   config.dataset_name = 'eval_dataset'
@@ -29,8 +29,8 @@ def get_config():
   config.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
-  config.dataset_configs.batch_size_train = 512 #256
-  config.dataset_configs.batch_size_test = 128 #64
+  config.dataset_configs.batch_size_train = 256 #512
+  config.dataset_configs.batch_size_test = 64 #128
   config.num_classes = 1000
   reference_resolution = 224
   crop_size = 224
