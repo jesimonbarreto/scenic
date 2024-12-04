@@ -77,7 +77,7 @@ def get_config():
 
   #dir of checkpoints
   config.train_dir = '/home/jesimonbarreto/test'#'/home/jesimonbarreto/exp_test_now/'
-  config.preextracted = False
+  config.preextracted = True #False
   config.write_summary = True
   config.steps_checkpoints = [84065] #5253
   config.ks = [5,10,20]
