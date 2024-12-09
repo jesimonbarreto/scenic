@@ -10,6 +10,9 @@ import jax
 import jax.numpy as jnp
 import re
 import random
+from sklearn.cluster import KMeans
+from PIL import Image
+
 # Set seeds for reproducibility
 seed_value = 42
 random.seed(seed_value)  # Fixes seed for Python's random module
@@ -82,12 +85,15 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #  encoding_format= 'jpeg'),
             'image1': tfds.features.Image(encoding_format='jpeg'),
             'image2': tfds.features.Image(encoding_format='jpeg'),
+            'image3': tfds.features.Image(encoding_format='jpeg'),
+            'image4': tfds.features.Image(encoding_format='jpeg'),
+            'image5': tfds.features.Image(encoding_format='jpeg'),
             #'label': tfds.features.ClassLabel(names=list(mvimgnet_classes)),
         }),
         # If there's a common (input, target) tuple from the
         # features, specify them here. They'll be used if
         # `as_supervised=True` in `builder.as_dataset`.
-        supervised_keys=('image1','image2', 'label'),  # Set to `None` to disable
+        supervised_keys=('image1','image2', 'image3','image4','image5', 'label'),  # Set to `None` to disable
         homepage='https://dataset-homepage/',
     )
 
@@ -188,6 +194,62 @@ class Builder(tfds.core.GeneratorBasedBuilder):
               return False
       return True
 
+  
+  def limited_true_function(self, max_true=10):
+    true_count = 0
+
+    def deterministic_true():
+        nonlocal true_count
+        if true_count < max_true:
+            true_count += 1
+            return True
+        return False
+
+    return deterministic_true
+  
+  def cluster_frames_and_find_representatives(self, frames_video, k):
+    """
+    Clusters the embeddings of the frames into k groups and returns the most representative
+    frame (closest to the centroid) for each group.
+    """
+    # Check if all .npz files exist
+    if not self.check_npz_exists(frames_video):
+        return None
+
+    # Load the embedding vectors (1, 384) for each frame
+    vectors = []
+    for frame in frames_video:
+        npz_path = frame.replace('.jpg', '.npy')
+        vectors.append(self.load_npz(npz_path))
+
+    vectors = np.array(vectors)  # Convert list to numpy array for clustering
+    n_frames = len(vectors)
+
+    # Ensure there are enough frames for clustering
+    if n_frames < k:
+        raise ValueError(f"Number of frames ({n_frames}) is less than the number of clusters (k={k}).")
+
+    # Perform k-means clustering
+    kmeans = KMeans(n_clusters=k, random_state=42)
+    cluster_labels = kmeans.fit_predict(vectors)
+    centroids = kmeans.cluster_centers_
+
+    # Find the most representative frame for each cluster
+    representatives = []
+    for cluster_idx in range(k):
+        # Get the indices of frames in the current cluster
+        cluster_indices = np.where(cluster_labels == cluster_idx)[0]
+
+        # Find the frame closest to the cluster centroid
+        distances_to_centroid = [
+            self.calculate_cosine_distance_dot(vectors[i], centroids[cluster_idx])
+            for i in cluster_indices
+        ]
+        closest_index = cluster_indices[np.argmin(distances_to_centroid)]
+        representatives.append(frames_video[closest_index])
+
+    return representatives
+  
   def find_most_distant_pairs(self, frames_video, n):
     """
     Compares the cosine distances between the embeddings of the frames
@@ -240,6 +302,10 @@ class Builder(tfds.core.GeneratorBasedBuilder):
 
   def _generate_examples(self, datapath):
     """Yields examples."""
+    detmn_true = self.limited_true_function(max_true=20)
+    dir_saveimage = "/home/jesimonbarreto/plots/"
+    cont = 1
+
     for label in tf.io.gfile.listdir(datapath):
       if int(label) not in filter_imagnet:
          continue
@@ -250,21 +316,44 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         id = label+'_'+obj_var
         dist = 5
         n = 4
+        #if increase you need change dataset config in infos
+        k = 5
 
         # Ordena a lista de paths usando o número da sequência como chave
         frames_video = sorted(frames_video, key=self.get_sequence_number)
 
         # Seleciona os pares
-        pairs = self.select_pairs_with_distance(frames_video, dist, n)
-        
-        if len(pairs) == 0:
+        #pairs = self.select_pairs_with_distance(frames_video, dist, n)
+        #pairs = self.find_most_distant_pairs(frames_video, n)
+        pairs = self.cluster_frames_and_find_representatives(frames_video, k)
+        #metrics mse, 
+        if pairs is None:
            continue
         
-        for k ,image_path in enumerate(pairs):
+        #pairs, max_distance, min_distance = pairs
+        #if len(pairs) == 0:
+        #   continue
+        
+        #print(f'Max {max_distance} Min {min_distance}')
+        record = {}
+        for v, image_path in enumerate(pairs):
+           img = self.process_image(image_path)
+           img = img.astype(jnp.uint8)
+           record['image'+str(v+1)] = img
+        
+        yield str(v)+'_'+id, record
+
+        '''for k ,image_path in enumerate(pairs):
+          plot_image = False#detmn_true()
           img1 = self.process_image(image_path[0])
           img1 = img1.astype(jnp.uint8)
           img2 = self.process_image(image_path[1])
           img2 = img2.astype(jnp.uint8)
+          if plot_image:
+            Image.fromarray(img1).save(f"{dir_saveimage}{cont}_1.png")
+            Image.fromarray(img2).save(f"{dir_saveimage}{cont}_2.png")
+            cont+=1
+
           record = {
             #"video": video_,
             "image1": img1,
@@ -272,5 +361,5 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #"label": int(label)
           }
           self.n_total_pairs+=1
-          #print('number total samples '+str(self.n_total_pairs))
-          yield str(k)+'_'+id, record
+          print('number total samples '+str(self.n_total_pairs))
+          yield str(k)+'_'+id, record'''
