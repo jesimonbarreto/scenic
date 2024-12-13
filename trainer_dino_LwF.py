@@ -108,7 +108,7 @@ def dino_train_step(
     loss_lwf: Any,
     loss_cosine: Any,
     loss_l2: Any,
-    alpha_loss: float,
+    alpha_loss: jnp.ndarray,
     metrics_fn: Any,
     steps_per_epoch: float,
     config: ml_collections.ConfigDict,
@@ -269,10 +269,13 @@ def dino_train_step(
       loss_l2v /=2
 
     
-     
+    loss_l2v = float(alpha_loss[0])*loss_l2v
+    loss_lwfv = float(alpha_loss[1])*loss_lwfv
+    loss_cosinev = float(alpha_loss[2])*loss_cosinev
     #p1_loss = 10*loss_lwfv #+ (1000*loss_cosinev))/2
     p1_loss = loss_l2v + loss_lwfv + loss_cosinev
-    loss_total = alpha_loss*loss_dino + (1-alpha_loss)*p1_loss
+    beta = float(alpha_loss[3])
+    loss_total = beta*loss_dino + (1-beta)*p1_loss
 
     return loss_total, (loss_dino, loss_lwfv, loss_cosinev, loss_l2v, center)
   
@@ -548,7 +551,7 @@ def train(
           loss_lwf=model.loss_lwf,
           loss_cosine=model.cosine_loss,
           loss_l2=model.l2_loss,
-          alpha_loss=config.alpha_loss,
+          alpha_loss=jnp.array(config.alpha_loss),
           metrics_fn=model.get_metrics_fn,
           momentum_parameter_scheduler=momentum_parameter_scheduler,
           steps_per_epoch = steps_per_epoch,
