@@ -260,8 +260,8 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     cont = 1
 
     for label in tf.io.gfile.listdir(datapath):
-      #if int(label) not in filter_imagnet:
-      #   continue
+      if int(label) not in filter_imagnet:
+         continue
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
         dir_search = os.path.join(datapath, label, obj_var,'images', "*.jpg")
         frames_video = tf.io.gfile.glob(dir_search)
