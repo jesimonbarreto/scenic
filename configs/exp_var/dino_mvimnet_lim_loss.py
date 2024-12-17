@@ -39,7 +39,10 @@ def get_config():
 
   # Training.'MVImagenet'
   #Loss: L2, Lwf, cosine, v*dino X (1-v)other
-  config.alpha_loss = [10/3, 1/3, 1, 0.7]
+  config.alpha_loss = 10/3
+  config.beta_loss = 1/3
+  config.gama_loss = 1
+  config.teta_loss= 0.7
   config.max_grad_norm = 1
   config.num_training_epochs = 17#400
   config.batch_size = 64
