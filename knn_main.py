@@ -14,6 +14,8 @@ from jax.nn import softmax
 
 import os
 import sys
+import re
+
 
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
 
@@ -53,6 +55,32 @@ import wandb
 
 FLAGS = flags.FLAGS
 
+def get_highest_checkpoint(directory):
+    """
+    Retorna o caminho completo do arquivo checkpoint com o maior número no formato `checkpoint_numero`.
+
+    Args:
+        directory (str): Caminho do diretório onde buscar os arquivos.
+
+    Returns:
+        str: Caminho completo do arquivo com o maior número encontrado no formato `checkpoint_numero`, ou None se não encontrar.
+    """
+    checkpoint_pattern = re.compile(r"^checkpoint_(\d+)$")
+    highest_checkpoint = None
+    highest_number = -1
+
+    for file_name in os.listdir(directory):
+        match = checkpoint_pattern.match(file_name)
+        if match:
+            number = int(match.group(1))
+            if number > highest_number:
+                highest_number = number
+                highest_checkpoint = file_name
+
+    if highest_checkpoint:
+        return os.path.join(directory, highest_checkpoint)
+
+    return None
 
 # Aliases for custom types:
 Batch = Dict[str, jnp.ndarray]
@@ -203,16 +231,17 @@ def eval(
 
   for step in steps:
 
-    print(f"step: {step}")
-    
+    #print(f"step: {step}")
 
     if not config.preextracted:
-      ckpt_file = os.path.join(train_dir,'checkpoint_'+str(step))  
+      
+      ckpt_file = get_highest_checkpoint(train_dir) #os.path.join(train_dir,'checkpoint_'+str(step))  
       ckpt_info = ckpt_file.split('/')
       ckpt_dir = '/'.join(ckpt_info[:-1])
       ckpt_num = ckpt_info[-1].split('_')[-1]
+      step = int(ckpt_num)
       print(f"file: {ckpt_file}")
-      print(f"ckpt_num: {ckpt_num}")
+      print(f"ckpt_num / Step: {ckpt_num}")
 
       #try:
 
