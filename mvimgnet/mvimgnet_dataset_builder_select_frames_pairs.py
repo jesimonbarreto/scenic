@@ -284,7 +284,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         if len(pairs) == 0:
            continue
         
-        print(f'Max {max_distance} Min {min_distance}')
+        #print(f'Max {max_distance} Min {min_distance}')
         
         for k ,image_path in enumerate(pairs):
           plot_image = detmn_true()
