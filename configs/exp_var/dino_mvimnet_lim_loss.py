@@ -16,7 +16,7 @@ def get_config():
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Experiments Variations'
+  config.project = 'Experiments_variations'
   config.experiment_name = 'video_mvimagenet_5f_limclasses_loss'
   #config
   config.transfer_learning = False
