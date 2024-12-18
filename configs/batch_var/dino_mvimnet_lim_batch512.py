@@ -45,7 +45,7 @@ def get_config():
   config.teta_loss= 0.7
   config.max_grad_norm = 1
   config.num_training_epochs = 17#400
-  config.batch_size = 1024 #64
+  config.batch_size = 512 #64
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
   total_steps = config.num_training_epochs * config.steps_per_epoch
@@ -59,7 +59,7 @@ def get_config():
   config.ncrops = 0 #change other parameters
   config.warmup_teacher_temp = 0.04
   config.teacher_temp = 0.07
-  config.warmup_teacher_temp_epochs = 0
+  config.warmup_teacher_temp_epochs = 5
   
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
