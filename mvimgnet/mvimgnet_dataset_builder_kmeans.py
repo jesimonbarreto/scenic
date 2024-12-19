@@ -189,7 +189,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   def check_npz_exists(self, frames_video):
       """Checks if all .npz files corresponding to the frames exist."""
       for frame in frames_video:
-          npz_path = frame.replace('.png', '.npz')
+          npz_path = frame.replace('.jpg', '.npz')
           if not os.path.exists(npz_path):
               return False
       return True
