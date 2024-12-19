@@ -324,7 +324,7 @@ def train(
     rng: jnp.ndarray,
     config: ml_collections.ConfigDict,
     dataset: dataset_utils.Dataset,
-    dataset_val: dataset_utils.Dataset,
+    #dataset_val: dataset_utils.Dataset,
     workdir: str,
     writer: metric_writers.MetricWriter,
 ) -> Tuple[Any, Any]:
@@ -352,14 +352,6 @@ def train(
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
 
-  # Start a run, tracking hyperparameters
-  wandb.init(
-      # set the wandb project where this run will be logged
-      project=config.project,
-      name=config.experiment_name,
-      # track hyperparameters and run metadata with wandb.config
-      config=config.to_dict()
-  )
 
 
   num_local_devices = jax.local_device_count()
