@@ -232,7 +232,7 @@ def get_config():
   config.checkpoint = True  # Do checkpointing.
   config.checkpoint_steps = 500
   config.log_summary_steps = 5
-  config.max_keep_checkpoint = 3
+  config.max_keep_checkpoint = 2
 
   ####### Config val
 
