@@ -317,7 +317,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         dist = 5
         n = 4
         #if increase you need change dataset config in infos
-        k = 5
+        k = 2
 
         # Ordena a lista de paths usando o número da sequência como chave
         frames_video = sorted(frames_video, key=self.get_sequence_number)
