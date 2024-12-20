@@ -223,6 +223,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         vectors.append(self.load_npz(npz_path))
 
     vectors = np.array(vectors)  # Convert list to numpy array for clustering
+    print(vectors.shape)
     n_frames = len(vectors)
 
     # Ensure there are enough frames for clustering
