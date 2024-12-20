@@ -222,7 +222,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         npz_path = frame.replace('.jpg', '.npy')
         vectors.append(self.load_npz(npz_path))
 
-    vectors = np.array(vectors)  # Convert list to numpy array for clustering
+    vectors = np.squeeze(np.array(vectors))  # Convert list to numpy array for clustering
     print(vectors.shape)
     n_frames = len(vectors)
 
