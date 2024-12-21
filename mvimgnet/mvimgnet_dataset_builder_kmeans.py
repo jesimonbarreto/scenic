@@ -221,8 +221,9 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     for frame in frames_video:
         npz_path = frame.replace('.jpg', '.npy')
         vectors.append(self.load_npz(npz_path))
-
-    vectors = np.squeeze(np.array(vectors))  # Convert list to numpy array for clustering
+    vectors = np.squeeze(np.array(vectors))
+    if len(vectors.shape)<=1:
+        vectors = vectors.reshape(1,-1)
     #print(vectors.shape)
     n_frames = len(vectors)
 
