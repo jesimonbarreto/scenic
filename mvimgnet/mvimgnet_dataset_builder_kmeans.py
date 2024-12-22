@@ -229,7 +229,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
 
     # Ensure there are enough frames for clustering
     if n_frames < k:
-        raise ValueError(f"Number of frames ({n_frames}) is less than the number of clusters (k={k}).")
+        return None
 
     # Perform k-means clustering
     kmeans = KMeans(n_clusters=k, random_state=42)
