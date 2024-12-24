@@ -15,7 +15,6 @@ from jax.nn import softmax
 import os
 import sys
 import re
-import shutil
 
 
 if sys.version_info.major == 3 and sys.version_info.minor >= 10:
@@ -52,7 +51,6 @@ from jax import jit
 
 import matplotlib.pyplot as plt
 import wandb
-import platform
 
 
 FLAGS = flags.FLAGS
@@ -228,7 +226,7 @@ def eval(
   train_dir = config.get('train_dir')
   print(f'{train_dir}')
   steps = config.get('steps_checkpoints')
-  files_save = os.path.join(config.get('dir_files'), str(platform.node()))
+  files_save = config.get('dir_files')
   num_classes = config.get('num_classes')
 
   for step in steps:
@@ -301,10 +299,10 @@ def eval(
     dir_save_y = os.path.join(files_save,f'y_{step}')
 
     if not os.path.exists(dir_save_ckp):
-      os.makedirs(dir_save_ckp, exist_ok=True)
+      os.makedirs(dir_save_ckp)
     
     if not os.path.exists(dir_save_y):
-      os.makedirs(dir_save_y, exist_ok=True)
+      os.makedirs(dir_save_y)
     if config.get('extract_train'):
       print('Starting to extract features train')
       print_result = True
@@ -443,16 +441,6 @@ def eval(
           "K": k,
           "Accuracy": round(accuracy,4)
         })
-
-  try:
-    shutil.rmtree(files_save)
-    print(f"Diretório '{files_save}' e seu conteúdo foram removidos com sucesso.")
-  except FileNotFoundError:
-      print(f"Diretório '{files_save}' não encontrado.")
-  except PermissionError:
-      print(f"Permissão negada ao tentar excluir '{files_save}'.")
-  except Exception as e:
-      print(f"Erro ao excluir o diretório '{files_save}': {e}")
 
   train_utils.barrier_across_hosts()
 
