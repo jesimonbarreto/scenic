@@ -248,7 +248,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         frames_video = tf.io.gfile.glob(dir_search)
         #base_names = [os.path.basename(fpath) for fpath in frames_video]
         id = label+'_'+obj_var
-        dist = 7 # 3,5,7,9,10
+        dist =  10 # 3,5,7,9,10
         n = 3
 
         # Ordena a lista de paths usando o número da sequência como chave
