@@ -260,7 +260,7 @@ def eval(
 
   for step_name in steps:
 
-    #print(f"step: {step}")
+    print(f"step: {step_name}")
 
     if not config.preextracted:
       
@@ -467,7 +467,7 @@ def eval(
     for k, accuracy in total_accuracies.items():
         print(f"K:{k} Accuracy: {accuracy:.4f}")
         wandb.log({
-          "K": k,
+          "step": step,
           "Accuracy": round(accuracy,4)
         })
 
