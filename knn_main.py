@@ -105,7 +105,7 @@ def get_all_checkpoint(directory):
     if len(checkpoints)>0:
         return checkpoints
 
-    return None
+    return []
 
 # Aliases for custom types:
 Batch = Dict[str, jnp.ndarray]
