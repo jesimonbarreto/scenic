@@ -82,6 +82,31 @@ def get_highest_checkpoint(directory):
 
     return None
 
+def get_all_checkpoint(directory):
+    """
+    Retorna o caminho completo do arquivo checkpoint com o maior número no formato `checkpoint_numero`.
+
+    Args:
+        directory (str): Caminho do diretório onde buscar os arquivos.
+
+    Returns:
+        str: Caminho completo do arquivo com o maior número encontrado no formato `checkpoint_numero`, ou None se não encontrar.
+    """
+    checkpoint_pattern = re.compile(r"^checkpoint_(\d+)$")
+    highest_checkpoint = None
+    highest_number = -1
+    checkpoints = []
+
+    for file_name in os.listdir(directory):
+        match = checkpoint_pattern.match(file_name)
+        if match:
+            checkpoints.append(os.path.join(directory,file_name))
+
+    if len(checkpoints)>0:
+        return checkpoints
+
+    return None
+
 # Aliases for custom types:
 Batch = Dict[str, jnp.ndarray]
 MetricFn = Callable[
@@ -225,17 +250,21 @@ def eval(
 
   train_dir = config.get('train_dir')
   print(f'{train_dir}')
-  steps = config.get('steps_checkpoints')
+  step_type = config.get('steps_checkpoints') #-1 all checkpoints, 1 the last one
   files_save = config.get('dir_files')
   num_classes = config.get('num_classes')
+  if step_type[0] < 0:
+     steps = get_all_checkpoint(train_dir)
+  else:
+     steps = get_highest_checkpoint(train_dir)
 
-  for step in steps:
+  for step_name in steps:
 
     #print(f"step: {step}")
 
     if not config.preextracted:
       
-      ckpt_file = get_highest_checkpoint(train_dir) #os.path.join(train_dir,'checkpoint_'+str(step))  
+      ckpt_file = step_name
       ckpt_info = ckpt_file.split('/')
       ckpt_dir = '/'.join(ckpt_info[:-1])
       ckpt_num = ckpt_info[-1].split('_')[-1]
