@@ -208,7 +208,7 @@ def get_config():
   config.save_state_0 = False
   config.xprof = True  # Profile using xprof.
   config.checkpoint = True  # Do checkpointing.
-  config.checkpoint_steps = int(config.steps_per_epoch) * 5
+  config.checkpoint_steps = 5000
   config.log_summary_steps = 5
   config.max_keep_checkpoint = 20
 
