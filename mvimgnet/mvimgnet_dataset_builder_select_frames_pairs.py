@@ -303,14 +303,14 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             used_frames.add(farthest_idx)
 
     # Extract distances for the selected pairs
-    distances = [
-        self.calculate_cosine_distance_dot(self.load_npz(pair[0]), self.load_npz(pair[1]))
-        for pair in pairs
-    ]
+    #distances = [
+    #    self.calculate_cosine_distance_dot(self.load_npz(pair[0].replace('.jpg', '.npy')), self.load_npz(pair[1].replace('.jpg', '.npy')))
+    #    for pair in pairs
+    #]
 
     # Calculate the maximum and minimum distance from the selected pairs
-    max_distance = max(distances) if distances else None
-    min_distance = min(distances) if distances else None
+    max_distance = 0 #max(distances) if distances else None
+    min_distance = 0 #min(distances) if distances else None
 
     return pairs, max_distance, min_distance
 
