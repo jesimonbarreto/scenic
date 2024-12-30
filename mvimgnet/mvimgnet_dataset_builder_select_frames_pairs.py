@@ -252,6 +252,68 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     min_distance = min(selected_distances) if selected_distances else None
 
     return pairs, max_distance, min_distance
+  
+  import random
+
+
+
+
+
+  def find_most_distant_pairs_randomized(self, frames_video, n):
+    """
+    Selects frames randomly and finds the farthest frame from each selected frame,
+    forming n pairs while ensuring no frame is reused in multiple pairs.
+    """
+    # Check if all .npz files exist
+    if not self.check_npz_exists(frames_video):
+        return None
+
+    # Load the embedding vectors (1, 384) for each frame
+    vectors = []
+    for frame in frames_video:
+        npz_path = frame.replace('.jpg', '.npy')
+        vectors.append(self.load_npz(npz_path))
+
+    # List to track used frames
+    used_frames = set()
+    pairs = []
+
+    while len(pairs) < n and len(used_frames) < len(frames_video):
+        # Randomly select a frame that hasn't been used yet
+        available_frames = [i for i in range(len(frames_video)) if i not in used_frames]
+        if not available_frames:
+            break
+
+        random_idx = random.choice(available_frames)
+        used_frames.add(random_idx)
+
+        # Find the farthest frame from the selected frame
+        farthest_idx = None
+        max_distance = -float('inf')
+        
+        for i in range(len(vectors)):
+            if i != random_idx and i not in used_frames:
+                dist = self.calculate_cosine_distance_dot(vectors[random_idx], vectors[i])
+                if dist > max_distance:
+                    max_distance = dist
+                    farthest_idx = i
+        
+        if farthest_idx is not None:
+            pairs.append((frames_video[random_idx], frames_video[farthest_idx]))
+            used_frames.add(farthest_idx)
+
+    # Extract distances for the selected pairs
+    distances = [
+        self.calculate_cosine_distance_dot(self.load_npz(pair[0]), self.load_npz(pair[1]))
+        for pair in pairs
+    ]
+
+    # Calculate the maximum and minimum distance from the selected pairs
+    max_distance = max(distances) if distances else None
+    min_distance = min(distances) if distances else None
+
+    return pairs, max_distance, min_distance
+
 
   def _generate_examples(self, datapath):
     """Yields examples."""
@@ -275,7 +337,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
 
         # Seleciona os pares
         #pairs = self.select_pairs_with_distance(frames_video, dist, n)
-        pairs = self.find_most_distant_pairs(frames_video, n)
+        pairs = self.find_most_distant_pairs_randomized(frames_video, n)
         #metrics mse, 
         if pairs is None:
            continue
