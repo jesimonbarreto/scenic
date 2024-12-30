@@ -78,9 +78,9 @@ def get_highest_checkpoint(directory):
                 highest_checkpoint = file_name
 
     if highest_checkpoint:
-        return os.path.join(directory, highest_checkpoint)
+        return [os.path.join(directory, highest_checkpoint)]
 
-    return None
+    return []
 
 def get_all_checkpoint(directory):
     """

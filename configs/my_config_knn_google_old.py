@@ -13,7 +13,7 @@ def get_config():
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Eval_new_epoch'
+  config.project = 'Eval_new_Sel_pairs_random'
   config.experiment_name = 'Eval_Dino_8k2Mhead'
   config.extract_train = True
   # Dataset.
@@ -79,7 +79,7 @@ def get_config():
   config.train_dir = '/mnt/disks/dataset/test'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = False
   config.write_summary = True
-  config.steps_checkpoints = [-1]
+  config.steps_checkpoints = [800]
   config.ks = [5,10,20]
   config.dir_files = '/mnt/disks/dataset/eval_files/'
 
