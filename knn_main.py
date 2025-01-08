@@ -49,7 +49,6 @@ from jax.lax import map as map_
 from functools import partial
 from jax import jit
 
-import matplotlib.pyplot as plt
 import wandb
 
 
@@ -180,6 +179,16 @@ def knn_evaluate(
   lead_host = jax.process_index() == 0
 
   data_rng, rng = jax.random.split(rng)
+
+  # Start a run, tracking hyperparameters
+  wandb.init(
+      # set the wandb project where this run will be logged
+      project=config.project,
+      name=config.experiment_name,
+      # track hyperparameters and run metadata with wandb.config
+      config=config.to_dict()
+  )
+
   dataset = train_utils.get_dataset(
       config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
   
@@ -203,15 +212,6 @@ def eval(
   
   # Build the loss_fn, metrics, and flax_model.
   model = vit.ViTDinoModel(config, dataset.meta_data)
-
-  # Start a run, tracking hyperparameters
-  wandb.init(
-      # set the wandb project where this run will be logged
-      project=config.project,
-      name=config.experiment_name,
-      # track hyperparameters and run metadata with wandb.config
-      config=config.to_dict()
-  )
 
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
