@@ -59,7 +59,7 @@ def split_train_test_balanceado(video_dict, train_ratio=0.75):
     return train_videos, test_videos
 
 # Função para salvar as referências dos vídeos no formato .npz
-def save_video_references_npz(train_videos, test_videos, train_file='train.npz', test_file='test.npz'):
+def save_video_references_npz(train_videos, test_videos, train_file='/mnt/disks/dataset/mvimgnet/train.npz', test_file='/mnt/disks/dataset/mvimgnet/test.npz'):
     # Convertendo para formato numpy.array (listas de vídeos)
     np.savez(train_file, **train_videos)
     np.savez(test_file, **test_videos)
