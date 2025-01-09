@@ -25,7 +25,7 @@ from scenic.dataset_lib import dataset_utils
 from scenic.dataset_lib import datasets
 import tensorflow as tf
 import tensorflow_datasets as tfds
-import mvimgnet.mvimgnet_dataset_builder_kmeans
+import mvimgnet.mvimgnet_dataset_builder
 TRAIN_IMAGES = 1281167
 EVAL_IMAGES = 50000
 NUM_CLASSES = 1000
