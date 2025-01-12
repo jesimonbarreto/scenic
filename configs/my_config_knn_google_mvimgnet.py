@@ -13,7 +13,7 @@ def get_config():
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Eval_new_Sel_kmeans'
+  config.project = 'Eval_new_mvimgnetest'
   config.experiment_name = 'Eval_Dino_8k2Mhead'
   config.extract_train = True
   # Dataset.
@@ -25,7 +25,7 @@ def get_config():
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
-  config.dataset_configs.dataset = 'mvimgnet'
+  config.dataset_configs.dataset = 'mvimgnetest'
   config.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'test'
@@ -57,18 +57,18 @@ def get_config():
 
   config.dataset_configs.pp_train = (
       'decode' +
-      '|copy("image1", "image_resized")' +
+      '|copy("image", "image_resized")' +
       #f'|adjust_labels({config.dataset_configs.desired_classes}, {config.num_classes},{config.dataset_configs.filter_classes}, key="label", key_result="label_adj")' +
       f'|onehot({config.num_classes_filter}, key="label", key_result="label_onehot")' +
-      '|resize_small(256, data_key="image1")'+
+      '|resize_small(256, data_key="image")'+
       '|resize_small(256, data_key="image_resized")'+
-      '|central_crop(224, data_key="image1")'+
+      '|central_crop(224, data_key="image")'+
       '|central_crop(224, data_key="image_resized")'+
-      '|value_range(0, 1, data_key="image1")' +
+      '|value_range(0, 1, data_key="image")' +
       '|value_range(0, 1, data_key="image_resized")' +
-      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image1")'+
+      f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'+
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")'+
-      '|keep("image1", "image_resized", "label", "label_onehot")'
+      '|keep("image", "image_resized", "label", "label_onehot")'
       #'|keep("image", "image_resized", "label_adj", "label", "label_onehot")'
   )
 

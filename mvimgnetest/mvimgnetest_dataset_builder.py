@@ -49,11 +49,6 @@ mvimgnet_classes = [
     "inflator", "ironmongery", "bulb"
 ]
 
-filter_imagnet = [2, 7, 10, 12, 13, 15, 19, 20, 21, 22, 23, 26, 33, 34, 47,
-                  49, 51, 76, 81, 83, 84, 94, 96, 113, 120, 123, 133, 136,
-                  149, 151, 152, 158, 166, 168, 173, 175, 179, 187, 197,
-                  200, 214, 221, 224]
-
 
 class Builder(tfds.core.GeneratorBasedBuilder):
   """DatasetBuilder for mvimgnet dataset."""
@@ -80,34 +75,22 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #'video': tfds.features.Video(
             #  video_shape,
             #  encoding_format= 'jpeg'),
-            'image1': tfds.features.Image(encoding_format='jpeg'),
-            'image2': tfds.features.Image(encoding_format='jpeg'),
+            'image': tfds.features.Image(encoding_format='jpeg'),
             'label': tfds.features.ClassLabel(names=list(mvimgnet_classes)),
         }),
         # If there's a common (input, target) tuple from the
         # features, specify them here. They'll be used if
         # `as_supervised=True` in `builder.as_dataset`.
-        supervised_keys=('image1','image2', 'label'),  # Set to `None` to disable
+        supervised_keys=('image', 'label'),  # Set to `None` to disable
         homepage='https://dataset-homepage/',
     )
 
   def _split_generators(self, dl_manager: tfds.download.DownloadManager):
     """Returns SplitGenerators."""
-    # TODO(MVImgNet): Downloads the data and defines the splits
-    #path = dl_manager.download_and_extract('https://todo-data-url')
 
     path = '/mnt/disks/dataset/mvimgnet/data/'
     train_path = os.path.join(path, 'train')
-    test_path = os.path.join(path, 'test')
-    
-
-    # TODO(MVImgNet): Returns the Dict[split names, Iterator[Key, Example]]
-  
-    '''dirname = self.builder_config.dirname
-    url = _URL_PREFIX + "{}.tgz".format(dirname)
-    path = dl_manager.download_and_extract(url)
-    train_path = os.path.join(path, dirname, "train")
-    val_path = os.path.join(path, dirname, "val")'''
+    test_path = os.path.join(path, 'test')  
 
     return [
         tfds.core.SplitGenerator(
@@ -124,20 +107,6 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         ),
     ]
 
-  '''def _generate_examples(self, datapath):
-    """Yields examples."""
-    for label in tf.io.gfile.listdir(datapath):
-      for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
-        for fpath in tf.io.gfile.glob(os.path.join(datapath, label, obj_var, "*.jpg")):
-          fname = os.path.basename(fpath)
-          record = {
-              "image": fpath,
-              "label": mvimgnet_classes[label],
-              "label_number": label,
-              "obj_var": obj_var
-          }
-          yield fname, record
-  '''
   def process_image(self, image_path):
       # Leia o arquivo da imagem
       image = tf.io.read_file(image_path)
@@ -158,93 +127,19 @@ class Builder(tfds.core.GeneratorBasedBuilder):
           return int(match.group(1))
       return None
   
-  # Função para selecionar pares com distância x entre as posições
-  def select_pairs_with_distance(self, sorted_paths, x, n):
-      max_start_index = len(sorted_paths) - x - 1
-      if max_start_index < 0:
-          #raise ValueError("Distância x é muito grande para a lista fornecida.")
-         return []
-      pairs = []
-      for _ in range(n):
-          start_index = random.randint(0, max_start_index)
-          end_index = start_index + x
-          pairs.append((sorted_paths[start_index], sorted_paths[end_index]))
-      
-      return pairs
-  
-  def load_npz(self, npz_path):
-    """Loads an .npz file and returns the array with shape (1, 384)."""
-    return jnp.load(npz_path, allow_pickle=True)#['arr_0']
-
-  def calculate_cosine_distance_dot(self, vector1, vector2):
-      """Calculates the cosine distance using the dot product."""
-      # Dot product between vectors
-      dot_prod = jnp.dot(vector1.flatten(), vector2.flatten())
-      # Norms of the vectors
-      norm_v1 = jnp.linalg.norm(vector1)
-      norm_v2 = jnp.linalg.norm(vector2)
-      
-      # Cosine distance
-      distance = 1 - (dot_prod / (norm_v1 * norm_v2))
-      return distance
-
-  def check_npz_exists(self, frames_video):
-      """Checks if all .npz files corresponding to the frames exist."""
-      for frame in frames_video:
-          npz_path = frame.replace('.png', '.npz')
-          if not os.path.exists(npz_path):
-              return False
-      return True
-
-  def find_most_distant_pairs(self, frames_video, n):
-    """
-    Compares the cosine distances between the embeddings of the frames
-    and returns the n pairs with the greatest distances, along with the maximum and minimum distances.
-    """
-    # Check if all .npz files exist
-    if not self.check_npz_exists(frames_video):
-        return None
-
-    # Load the embedding vectors (1, 384) for each frame
-    vectors = []
-    for frame in frames_video:
-        npz_path = frame.replace('.jpg', '.npy')
-        vectors.append(self.load_npz(npz_path))
-
-    n_frames = len(vectors)
-    distances = []
+  # Função para selecionar n valores aleatórios
+  def select_random_values(self, sorted_paths, n):
+    # Garantir que n não seja maior que o número de elementos disponíveis
+    n = min(n, len(sorted_paths))
     
-    # Calculate the cosine distance between each pair of frames
-    for i in range(n_frames):
-        for j in range(i + 1, n_frames):
-            dist = self.calculate_cosine_distance_dot(vectors[i], vectors[j])
-            distances.append((dist, frames_video[i], frames_video[j]))  # Save the distance and the paths of the corresponding frames
+    # Selecionar n valores aleatórios sem substituição
+    random_indices = random.sample(range(len(sorted_paths)), n)
     
-    # Sort distances in descending order (most distant pairs first)
-    distances.sort(reverse=True, key=lambda x: x[0])
+    # Retornar os valores correspondentes aos índices selecionados
+    random_values = [sorted_paths[i] for i in random_indices]
     
-    # Form the 'n' most distant pairs, without repeating frames
-    pairs = []
-    used = set()
-    
-    for dist, frame1, frame2 in distances:
-        if frame1 not in used and frame2 not in used:
-            pairs.append((frame1, frame2))
-            used.add(frame1)
-            used.add(frame2)
-        
-        # Stop when we have 'n' pairs
-        if len(pairs) == n:
-            break
-    
-    # Extract the distances for the selected pairs
-    selected_distances = [dist for dist, frame1, frame2 in distances if (frame1, frame2) in pairs or (frame2, frame1) in pairs]
-    
-    # Calculate the maximum and minimum distance from the selected pairs
-    max_distance = max(selected_distances) if selected_distances else None
-    min_distance = min(selected_distances) if selected_distances else None
+    return random_values
 
-    return pairs, max_distance, min_distance
 
   def _generate_examples(self, datapath):
     """Yields examples."""
@@ -255,12 +150,10 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     
     if file_path == 'train':
         file_path = '/mnt/disks/dataset/mvimgnet/train.npz'
-        dist =  5 # 3,5,7,9,10
-        n = 3
     else:
         file_path = '/mnt/disks/dataset/mvimgnet/test.npz'
-        dist =  5 # 3,5,7,9,10
-        n = 3
+    
+    n = 3
 
 
     train_ref = np.load(file_path, allow_pickle=True)
@@ -268,8 +161,6 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     
 
     for label in tf.io.gfile.listdir(datapath):
-      #if int(label) not in filter_imagnet:
-      #   continue
       if label not in keys_ref:
          print('label')
          print(label)
@@ -286,25 +177,25 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         id = label+'_'+obj_var
 
         # Ordena a lista de paths usando o número da sequência como chave
-        frames_video = sorted(frames_video, key=self.get_sequence_number)
+        #frames_video = sorted(frames_video, key=self.get_sequence_number)
 
         # Seleciona os pares
-        pairs = self.select_pairs_with_distance(frames_video, dist, n)
+        samples = self.select_random_values(frames_video, n)
         
-        if len(pairs) == 0:
+        if len(samples) == 0:
            continue
         
-        for k ,image_path in enumerate(pairs):
-          img1 = self.process_image(image_path[0])
-          img1 = img1.astype(jnp.uint8)
-          img2 = self.process_image(image_path[1])
-          img2 = img2.astype(jnp.uint8)
+        for k, image_path in enumerate(samples):
+          img = self.process_image(image_path)
+          img = img.astype(jnp.uint8)
           record = {
-            #"video": video_,
-            "image1": img1,
-            "image2": img2,
+            "image": img,
             "label": int(label)
           }
-          self.n_total_pairs+=1
-          #print('number total samples '+str(self.n_total_pairs))
           yield str(k)+'_'+id, record
+
+        #ROdar novamente [sem filtro de classes]
+        #COnfigurar dataset mvimgnet
+        #alterar validação para usar esse
+        #Carregar dados
+        #executar experimentop
