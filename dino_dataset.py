@@ -13,6 +13,7 @@ import data_utils
 import tensorflow as tf
 import mvimagenet_dataset
 import youtube8m_dataset
+import mvimagenetest_dataset
 
 
 #tamanho das amostras estao indo é diferente para o batch

@@ -43,6 +43,7 @@ import jax.numpy as jnp
 from scenic.dataset_lib import dataset_utils
 from scenic.dataset_lib import datasets
 from scenic.dataset_lib.big_transfer import builder
+import mvimagenetest_dataset
 
 
 @datasets.add_dataset('eval_dataset')
