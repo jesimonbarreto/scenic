@@ -258,12 +258,12 @@ def eval(
   elif step_type[0] > 0:
      steps = get_highest_checkpoint(train_dir)
   else:
-     steps = ['loadbase']
+     steps = ['1']
 
   for step_name in steps:
 
     print(f"step: {step_name}")
-
+    step = int(step_name)
     if not config.preextracted:
       
       ckpt_file = step_name
