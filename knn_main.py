@@ -255,8 +255,10 @@ def eval(
   num_classes = config.get('num_classes')
   if step_type[0] < 0:
      steps = get_all_checkpoint(train_dir)
-  else:
+  elif step_type[0] > 0:
      steps = get_highest_checkpoint(train_dir)
+  else:
+     steps = ['loadbase']
 
   for step_name in steps:
 
