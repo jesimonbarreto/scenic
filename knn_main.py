@@ -264,6 +264,7 @@ def eval(
 
     print(f"step: {step_name}")
     step = int(step_name)
+    
     if not config.preextracted:
       
       ckpt_file = step_name
