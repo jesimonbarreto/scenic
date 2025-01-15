@@ -13,8 +13,8 @@ def get_config():
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Eval_new_mvimgnetest'
-  config.experiment_name = 'Eval_Dinov2_baseline'
+  config.project = 'Eval_new_mvimgnetest_baseline'
+  config.experiment_name = 'Eval_Dinov2'
   config.extract_train = True
   # Dataset.
   config.dataset_name = 'eval_dataset'
