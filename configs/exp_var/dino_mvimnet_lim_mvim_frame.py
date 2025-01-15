@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Experiments_mvimgnet_frame'
-  config.experiment_name = 'video_mvimagenet_5f_limclasses'
+  config.experiment_name = 'video_mvimagenet'
   #config
   config.transfer_learning = False
   config.layer_wise = False
