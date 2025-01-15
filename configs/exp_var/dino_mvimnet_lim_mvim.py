@@ -16,8 +16,8 @@ def get_config():
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Experiments_mvimgnet'
-  config.experiment_name = 'video_mvimagenet_5f_limclasses'
+  config.project = 'Experiments_mvimgnet_video'
+  config.experiment_name = 'video_mvimagenet'
   #config
   config.transfer_learning = False
   config.layer_wise = False
@@ -212,9 +212,9 @@ def get_config():
   config.save_state_0 = False
   config.xprof = True  # Profile using xprof.
   config.checkpoint = True  # Do checkpointing.
-  config.checkpoint_steps = int(config.steps_per_epoch) * 5
+  config.checkpoint_steps = 10000
   config.log_summary_steps = 5
-  config.max_keep_checkpoint = 3
+  config.max_keep_checkpoint = 5
 
   ####### Config val
 
