@@ -3,5 +3,3 @@ cd /home/jesimonbarreto/scenic
 sudo rm -rf /mnt/disks/dataset/eval_files/
 sudo -E python -m knn_main --config=configs/my_config_knn_google_mvimgnet_dv2.py --workdir=../test_
 sudo -E python -m knn_main --config=configs/my_config_knn_google_mvimgnet_dv2.py --workdir=../test_
-sudo -E python -m knn_main --config=configs/my_config_knn_google_mvimgnet_dv2.py --workdir=../test_
-sudo -E python -m knn_main --config=configs/my_config_knn_google_mvimgnet_dv2.py --workdir=../test_
