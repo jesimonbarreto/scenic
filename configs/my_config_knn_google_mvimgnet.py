@@ -14,7 +14,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Eval_new_mvimgnetest_expsequence'
-  config.experiment_name = 'Eval_Dino'
+  config.experiment_name = 'Eval_training'
   config.extract_train = True
   # Dataset.
   config.dataset_name = 'eval_dataset'
