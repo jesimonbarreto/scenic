@@ -263,7 +263,6 @@ def eval(
   for step_name in steps:
 
     print(f"step: {step_name}")
-    step = int(step_name)
     
     if not config.preextracted:
       
@@ -292,6 +291,7 @@ def eval(
       train_state = jax_utils.replicate(train_state)
 
     else:
+      step = int(step_name)
       '''=============================================='''
       print('Here... trying load')
       from load_params import load_params
