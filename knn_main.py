@@ -335,9 +335,12 @@ def eval(
     
     if not os.path.exists(dir_save_y):
       os.makedirs(dir_save_y)
+    
     if config.get('extract_train'):
       print('Starting to extract features train')
       print_result = True
+      print(f'Step per epoch {config.steps_per_epoch}')
+      wandb.log({'extract_steps_per_epoch':config.steps_per_epoch})
       for i in range(config.steps_per_epoch):
         path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
         batch_train = next(dataset.train_iter)
@@ -352,10 +355,12 @@ def eval(
         label_train = batch_train['label']
         emb_train = emb_train[0]
         bl, bg, emb = emb_train.shape
+        wandb.log({'extract_train_batch':bl*bg, 'batch_train_n':i})
         emb_train = emb_train.reshape((bl*bg, emb))
         label_train = label_train.reshape((bl*bg))
         jnp.savez(path_file, emb=emb_train, label=label_train)
       print('Finishing extract features train')
+      print(f'the last file {path_file}')
     else:
       print('Not extract train')
 
@@ -408,10 +413,12 @@ def eval(
     total_correct_predictions = {k: 0 for k in ks}
     total_samples = 0
     max_k = jnp.array(ks).max()
+    wandb.log({'steps_per_epoch_eval':config.steps_per_epoch_eval})
     for i in range(config.steps_per_epoch_eval):
       #print(f'processing step eval {i}')
       batch_eval = next(dataset.valid_iter)
       emb_test = extract_features(batch_eval)[0]
+      print(f'{emb_test.shape}')
       bl, bg, emb = emb_test.shape
       emb_test = emb_test.reshape((bl*bg, emb))
       label_eval = batch_eval['label'].reshape((bl*bg))
@@ -419,11 +426,12 @@ def eval(
       #print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
       if not norm_res:
         emb_test = normalize(emb_test)
-    
+      wandb.log({'extract_test_batch':bl*bg, 'batch_test_n':i})
       #print(f'embeeding shape test {emb_test.shape}')
       sim_all = []
       labels = []
       len_test += len(batch_eval)
+      wandb.log({'use_steps_per_epoch':config.steps_per_epoch})
       for j in range(config.steps_per_epoch):
         emb_file_save = os.path.join(dir_save_ckp,f'ckp_{step}_b{j}')
         data_load = jnp.load(emb_file_save+'.npz')
@@ -433,6 +441,15 @@ def eval(
         sim = calculate_similarity(emb_train, emb_test)
         sim_all.append(sim)
         labels.append(label_train)
+        if i == 0:
+          wandb.log({'usetrain_batch0':emb_train.shape[0], 
+                     'batch_test_n0':j,
+                     'table_test0':len(sim_all)})
+        
+        if i == config.steps_per_epoch_eval-1:
+          wandb.log({'usetrain_batchlast':emb_train.shape[0], 
+                     'batch_test_nlast':j,
+                     'table_testlast':len(sim_all)})
       
       sim_all = jnp.concatenate(sim_all, axis=1)
       labels = jnp.concatenate(labels)
@@ -456,6 +473,9 @@ def eval(
       for k in ks:
         correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
         total_correct_predictions[k] += correct_predictions
+        wandb.log({f'batch_size_{k}':batch_size, 
+                     'correct_predictions{k}':correct_predictions,
+                     'acc_rel{k}':correct_predictions/batch_size})
         if print_result:
           #print(f'Using k = {k} -- batch {batch_size}/{correct_predictions} certos')
           print_result = False
@@ -466,11 +486,13 @@ def eval(
     total_accuracies = {k: total_correct_predictions[k] / total_samples for k in ks}
 
     # Resultado
+    print(f"number total samples: {total_samples}")
     print("Total Accuracy:")
     for k, accuracy in total_accuracies.items():
         print(f"K:{k} Accuracy: {accuracy:.4f}")
         wandb.log({
           "step": step,
+          "K": k,
           "Accuracy": round(accuracy,4)
         })
 
