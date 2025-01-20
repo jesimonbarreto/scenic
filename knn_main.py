@@ -178,11 +178,7 @@ def knn_evaluate(
   writer: metric_writers.MetricWriter,
 ) -> None:
   
-  rng = random.PRNGKey(config.rng_seed)
-  print(f'RNG {rng}')
-  data_rng, rng = random.split(rng)
-  print(f'RNG {rng}')
-  print(f'Data_rng {data_rng}')
+  
   # Start a run, tracking hyperparameters
   wandb.init(
       # set the wandb project where this run will be logged
@@ -191,6 +187,12 @@ def knn_evaluate(
       # track hyperparameters and run metadata with wandb.config
       config=config.to_dict()
   )
+
+  rng = random.PRNGKey(config.rng_seed)
+  print(f'RNG {rng}')
+  data_rng, rng = random.split(rng)
+  print(f'RNG {rng}')
+  print(f'Data_rng {data_rng}')
 
   dataset = train_utils.get_dataset(
       config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
