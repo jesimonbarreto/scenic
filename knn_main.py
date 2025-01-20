@@ -26,7 +26,7 @@ else:
 import vit_dino as vit
 import utils_dino as utils
 import jax
-jax.config.update("jax_default_matmul_precision", "bfloat16")
+jax.config.update("jax_default_matmul_precision", "float16")
 import jax.numpy as jnp
 import tensorflow_datasets as tfds
 import datasets
@@ -118,7 +118,7 @@ LrFn = Callable[[jnp.ndarray], jnp.ndarray]
 
 def normalize(inputs, p=2.0, axis=1, eps=1e-12):
     norms = jnp.linalg.norm(inputs, ord=p, axis=axis, keepdims=True)
-    return (inputs / jnp.maximum(norms, eps)).astype(jnp.bfloat16)
+    return (inputs / jnp.maximum(norms, eps)).astype(jnp.float16)
 
 def representation_fn_eval(
     train_state: train_utils.TrainState,
@@ -162,7 +162,7 @@ def representation_fn_eval(
         backbone = True,
         train=False)
   embedding = jnp.squeeze(embedding['x_norm_clstoken'])
-  embedding = normalize(embedding).astype(jnp.bfloat16)
+  embedding = normalize(embedding).astype(jnp.float16)
 
   if gather_to_host:
     embedding = jax.lax.all_gather(embedding, 'batch')
@@ -363,7 +363,7 @@ def eval(
         wandb.log({'extract_train_batch':bl*bg, 'batch_train_n':i})
         emb_train = emb_train.reshape((bl*bg, emb))
         label_train = label_train.reshape((bl*bg))
-        jnp.savez(path_file, emb=emb_train.astype(jnp.bfloat16), label=label_train)
+        jnp.savez(path_file, emb=emb_train.astype(jnp.float16), label=label_train)
       print('Finishing extract features train')
       print(f'the last file {path_file}')
     else:
@@ -385,8 +385,6 @@ def eval(
     p_argsort = jax.pmap(jnp.argsort, in_axes=0)
 
     def calculate_similarity(train_samples, test_samples):
-      train_samples = train_samples
-      test_samples = test_samples
       return jnp.dot(test_samples, train_samples.T)
 
     def compute_distance(U, V):
@@ -470,7 +468,7 @@ def eval(
       labels = labels[topk_indices]#jnp.take_along_axis(labels, topk_indices, axis=-1)
 
       batch_size = labels.shape[0]
-      topk_sims_transform = softmax((topk_sims / T).astype(jnp.bfloat16), axis=1)
+      topk_sims_transform = softmax((topk_sims / T).astype(jnp.float16), axis=1)
       
       matmul = one_hot(labels, num_classes=num_classes) * topk_sims_transform[:, :, None]
       
