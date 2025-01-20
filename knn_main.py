@@ -385,8 +385,8 @@ def eval(
     p_argsort = jax.pmap(jnp.argsort, in_axes=0)
 
     def calculate_similarity(train_samples, test_samples):
-      train_samples = train_samples.astype(jnp.bfloat16)
-      test_samples = test_samples.astype(jnp.bfloat16)
+      train_samples = train_samples
+      test_samples = test_samples
       return jnp.dot(test_samples, train_samples.T)
 
     def compute_distance(U, V):
