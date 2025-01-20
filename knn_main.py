@@ -179,8 +179,10 @@ def knn_evaluate(
 ) -> None:
   
   rng = random.PRNGKey(config.rng_seed)
+  print(f'RNG {rng}')
   data_rng, rng = random.split(rng)
-
+  print(f'RNG {rng}')
+  print(f'Data_rng {data_rng}')
   # Start a run, tracking hyperparameters
   wandb.init(
       # set the wandb project where this run will be logged
