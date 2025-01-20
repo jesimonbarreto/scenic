@@ -26,7 +26,7 @@ else:
 import vit_dino as vit
 import utils_dino as utils
 import jax
-jax.config.update("jax_default_matmul_precision", "float16")
+#jax.config.update("jax_default_matmul_precision", "float16")
 import jax.numpy as jnp
 import tensorflow_datasets as tfds
 import datasets
