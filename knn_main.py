@@ -26,6 +26,7 @@ else:
 import vit_dino as vit
 import utils_dino as utils
 import jax
+jax.config.update("jax_default_matmul_precision", "bfloat16")
 import jax.numpy as jnp
 import tensorflow_datasets as tfds
 import datasets
@@ -45,6 +46,7 @@ from flax import jax_utils
 from flax import linen as nn
 from jax import vmap
 from jax.lax import map as map_
+import jax.random as random
 
 from functools import partial
 from jax import jit
@@ -114,9 +116,9 @@ MetricFn = Callable[
 LossFn = Callable[[jnp.ndarray, Batch, Optional[jnp.ndarray]], float]
 LrFn = Callable[[jnp.ndarray], jnp.ndarray]
 
-def normalize(input, p=2.0, axis=1, eps=1e-12):
-    norms = jnp.linalg.norm(input, ord=p, axis=axis, keepdims=True)
-    return input / jnp.maximum(norms, eps)
+def normalize(inputs, p=2.0, axis=1, eps=1e-12):
+    norms = jnp.linalg.norm(inputs, ord=p, axis=axis, keepdims=True)
+    return (inputs / jnp.maximum(norms, eps)).astype(jnp.bfloat16)
 
 def representation_fn_eval(
     train_state: train_utils.TrainState,
@@ -160,7 +162,7 @@ def representation_fn_eval(
         backbone = True,
         train=False)
   embedding = jnp.squeeze(embedding['x_norm_clstoken'])
-  embedding = normalize(embedding)
+  embedding = normalize(embedding).astype(jnp.bfloat16)
 
   if gather_to_host:
     embedding = jax.lax.all_gather(embedding, 'batch')
@@ -175,10 +177,9 @@ def knn_evaluate(
   workdir: str,
   writer: metric_writers.MetricWriter,
 ) -> None:
-
-  lead_host = jax.process_index() == 0
-
-  data_rng, rng = jax.random.split(rng)
+  
+  rng = random.PRNGKey(config.rng_seed)
+  data_rng, rng = random.split(rng)
 
   # Start a run, tracking hyperparameters
   wandb.init(
@@ -221,7 +222,6 @@ def eval(
        input_spec=[(dataset.meta_data['input_shape'],
                     dataset.meta_data.get('input_dtype', jnp.float32))],
        config=config, rngs=init_rng)
-  rng, init_rng = jax.random.split(rng)
 
   # Only one model function but two sets of parameters.
   ema_params = copy.deepcopy(params)
@@ -345,20 +345,21 @@ def eval(
         path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
         batch_train = next(dataset.train_iter)
         emb_train = extract_features(batch_train)
-        norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
+        
         if print_result:
           print(f'shape emb_train {emb_train.shape}')
-          print(f'processing batch {i} shape {emb_train.shape}. Norma 1 {norm_res}')
+          #print(f'processing batch {i} shape {emb_train.shape}. Norma 1 {norm_res}')
           print_result=False
-        if not norm_res:
-          emb_train = normalize(emb_train)
+        #norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
+        #if not norm_res:
+        #  emb_train = normalize(emb_train)
         label_train = batch_train['label']
         emb_train = emb_train[0]
         bl, bg, emb = emb_train.shape
         wandb.log({'extract_train_batch':bl*bg, 'batch_train_n':i})
         emb_train = emb_train.reshape((bl*bg, emb))
         label_train = label_train.reshape((bl*bg))
-        jnp.savez(path_file, emb=emb_train, label=label_train)
+        jnp.savez(path_file, emb=emb_train.astype(jnp.bfloat16), label=label_train)
       print('Finishing extract features train')
       print(f'the last file {path_file}')
     else:
@@ -380,6 +381,8 @@ def eval(
     p_argsort = jax.pmap(jnp.argsort, in_axes=0)
 
     def calculate_similarity(train_samples, test_samples):
+      train_samples = train_samples.astype(jnp.bfloat16)
+      test_samples = test_samples.astype(jnp.bfloat16)
       return jnp.dot(test_samples, train_samples.T)
 
     def compute_distance(U, V):
@@ -422,10 +425,10 @@ def eval(
       bl, bg, emb = emb_test.shape
       emb_test = emb_test.reshape((bl*bg, emb))
       label_eval = batch_eval['label'].reshape((bl*bg))
-      norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2))==1
+      #norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2))==1
       #print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
-      if not norm_res:
-        emb_test = normalize(emb_test)
+      #if not norm_res:
+      #  emb_test = normalize(emb_test)
       wandb.log({'extract_test_batch':bl*bg, 'batch_test_n':i})
       #print(f'embeeding shape test {emb_test.shape}')
       sim_all = []
@@ -463,7 +466,7 @@ def eval(
       labels = labels[topk_indices]#jnp.take_along_axis(labels, topk_indices, axis=-1)
 
       batch_size = labels.shape[0]
-      topk_sims_transform = softmax(topk_sims / T, axis=1)
+      topk_sims_transform = softmax((topk_sims / T).astype(jnp.bfloat16), axis=1)
       
       matmul = one_hot(labels, num_classes=num_classes) * topk_sims_transform[:, :, None]
       
@@ -474,8 +477,8 @@ def eval(
         correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
         total_correct_predictions[k] += correct_predictions
         wandb.log({f'batch_size_{k}':batch_size, 
-                     'correct_predictions{k}':correct_predictions,
-                     'acc_rel{k}':correct_predictions/batch_size})
+                     f'correct_predictions{k}':correct_predictions,
+                     f'acc_rel{k}':correct_predictions/batch_size})
         if print_result:
           #print(f'Using k = {k} -- batch {batch_size}/{correct_predictions} certos')
           print_result = False
