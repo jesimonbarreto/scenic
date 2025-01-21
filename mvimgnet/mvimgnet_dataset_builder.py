@@ -262,16 +262,16 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     for label in tf.io.gfile.listdir(datapath):
       #if int(label) not in filter_imagnet:
       #   continue
-      if label not in keys_ref:
+      '''if label not in keys_ref:
          print('label')
          print(label)
          print('keys label')
          print(keys_ref)
-         continue
+         continue'''
       train_class_ref = train_ref[label]
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
-        if obj_var not in train_class_ref:
-           continue
+        '''if obj_var not in train_class_ref:
+           continue'''
         dir_search = os.path.join(datapath, label, obj_var, 'images', "*.jpg")
         frames_video = tf.io.gfile.glob(dir_search)
         #base_names = [os.path.basename(fpath) for fpath in frames_video]
