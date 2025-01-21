@@ -44,7 +44,7 @@ def get_config():
   config.gama_loss = 1
   config.teta_loss= 0.7
   config.max_grad_norm = 1
-  config.num_training_epochs = 17#400
+  config.num_training_epochs = 110#400
   config.batch_size = 64
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -208,9 +208,9 @@ def get_config():
   config.save_state_0 = False
   config.xprof = True  # Profile using xprof.
   config.checkpoint = True  # Do checkpointing.
-  config.checkpoint_steps = int(config.steps_per_epoch) * 5
+  config.checkpoint_steps = 5000
   config.log_summary_steps = 5
-  config.max_keep_checkpoint = 3
+  config.max_keep_checkpoint = 10
 
   ####### Config val
 
