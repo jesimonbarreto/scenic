@@ -230,7 +230,7 @@ def train(
     rng: jnp.ndarray,
     config: ml_collections.ConfigDict,
     dataset: dataset_utils.Dataset,
-    dataset_val: dataset_utils.Dataset,
+    #dataset_val: dataset_utils.Dataset,
     workdir: str,
     writer: metric_writers.MetricWriter,
 ) -> Tuple[Any, Any]:
