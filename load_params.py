@@ -472,5 +472,5 @@ PYTORCH_STYLE_WEIGHTS = {
     'dinov2_vitb14': '/home/jesimonbarreto/dinov2_vitb14.npz',
     'dinov2_vitl14': '/home/jesimonbarreto/dinov2_vitl14.npz',
     'dino_vitb16': '/home/jesimonbarreto/dino_vitb16.npz',
-    'dino_deits16': '/home/jesimonbarreto/dino_deits16.npz',
+    'dino_vitdeits16': '/home/jesimonbarreto/dino_deits16.npz',
 }
