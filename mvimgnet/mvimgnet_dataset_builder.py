@@ -270,8 +270,8 @@ class Builder(tfds.core.GeneratorBasedBuilder):
          continue'''
       train_class_ref = train_ref[label]
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
-        '''if obj_var not in train_class_ref:
-           continue'''
+        if obj_var not in train_class_ref:
+           continue
         dir_search = os.path.join(datapath, label, obj_var, 'images', "*.jpg")
         frames_video = tf.io.gfile.glob(dir_search)
         #base_names = [os.path.basename(fpath) for fpath in frames_video]

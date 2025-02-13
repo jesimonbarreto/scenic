@@ -13,7 +13,7 @@ def get_config():
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Eval_new_normal'
+  config.project = 'Eval_new_mvimagenet'
   config.experiment_name = 'Eval_Dino_8k2Mhead'
   config.extract_train = True
   # Dataset.
@@ -25,7 +25,7 @@ def get_config():
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
-  config.dataset_configs.dataset = 'imagenet2012'
+  config.dataset_configs.dataset = 'mvimgnetest' #'imagenet2012'
   config.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
@@ -36,7 +36,7 @@ def get_config():
   crop_size = 224
   config.T = 0.07
 
-  config.dataset_configs.filter_classes = True
+  config.dataset_configs.filter_classes = False
   if config.dataset_configs.filter_classes:
     config.dataset_configs.desired_classes = [
                                               897, 827, 764, 761, 742, 721, 651,
