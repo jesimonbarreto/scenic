@@ -1,5 +1,5 @@
 import ml_collections, os
-
+import jax.numpy as jnp
 VARIANT = 'S/16'
 _IMAGENET_TRAIN_SIZE = 1281167 #9469 #1281167
 _IMAGENET_TEST_SIZE = 50000
@@ -9,14 +9,13 @@ MEAN = [0.5]
 STD = [0.5]
 
 def get_config():
-
+  global _IMAGENET_TRAIN_SIZE, _IMAGENET_TEST_SIZE
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Eval_Dino'
   config.experiment_name = 'Eval_Dino_S'
   config.extract_train = True
-  config.experiment_name = '100ep_run'
   # Dataset.
   config.dataset_name = 'eval_dataset'
   config.data_dtype_str = 'float32'
@@ -30,17 +29,37 @@ def get_config():
   config.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
-  config.dataset_configs.batch_size_train = 64
-  config.dataset_configs.batch_size_test = 64
+  config.dataset_configs.batch_size_train = 256
+  config.dataset_configs.batch_size_test = 50
   config.num_classes = 1000
   reference_resolution = 224
   crop_size = 224
   config.T = 0.07
 
+  config.dataset_configs.filter_classes = False
+  if config.dataset_configs.filter_classes:
+    config.dataset_configs.desired_classes = [
+                                              897, 827, 764, 761, 742, 721, 651,
+                                              650, 637, 632, 620, 738, 534, 508,
+                                              435, 412, 879, 859, 463, 470, 481,
+                                              473, 587, 313, 872, 629, 745, 760,
+                                              963, 938, 937, 987, 943, 955, 953,
+                                              957, 954, 752, 792, 626, 951, 112,
+                                              928
+                                              ]
+    #update number classes variables
+    config.num_classes_filter = config.num_classes#len(config.dataset_configs.desired_classes)
+    _IMAGENET_TRAIN_SIZE = 1281167#732-1300 per class in the ILSVRC2012 training set. #update quantity samples train each class selected
+    _IMAGENET_TEST_SIZE = 2134#update quantity samples train each class selected
+  else:
+    config.num_classes_filter = config.num_classes
+
+
   config.dataset_configs.pp_train = (
       'decode' +
       '|copy("image", "image_resized")' +
-      f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
+      #f'|adjust_labels({config.dataset_configs.desired_classes}, {config.num_classes},{config.dataset_configs.filter_classes}, key="label", key_result="label_adj")' +
+      f'|onehot({config.num_classes_filter}, key="label", key_result="label_onehot")' +
       '|resize_small(256, data_key="image")'+
       '|resize_small(256, data_key="image_resized")'+
       '|central_crop(224, data_key="image")'+
@@ -50,26 +69,15 @@ def get_config():
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'+
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")'+
       '|keep("image", "image_resized", "label", "label_onehot")'
+      #'|keep("image", "image_resized", "label_adj", "label", "label_onehot")'
   )
-  ''' '|copy("image", "image_resized")' +
-  f'|onehot({config.num_classes}, key="label", key_result="label_onehot")' +
-  f'|resize_small({reference_resolution}, method="area", antialias=True, inkey=("image"), outkey=("image"))' +
-  f'|resize_small({reference_resolution}, method="area", antialias=True, inkey=("image_resized"), outkey=("image_resized"))' +
-  #f'|copy_resize_file({reference_resolution}, inkey=("image", "image_resized"), outkey=("image", "image_resized"))' +
-  f'|dino_transform(size={reference_resolution}, crop_size={crop_size}, mean={MEAN}, std={STD}, inkey=("image"), outkey=("image"))'
-  f'|dino_transform(size={reference_resolution}, crop_size={crop_size}, mean={MEAN}, std={STD}, inkey=("image_resized"), outkey=("image_resized"))'
-  #'|value_range(0, 1, data_key="image_resized")' +
-  #'|value_range(0, 1, data_key="image")' +
-  #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")' +
-  #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")' '''
-  #)
+
 
   ### kNN
 
   #dir of checkpoints
   config.train_dir = '/home/jesimonbarreto/test'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = True
-  #config.preextracted = True
   config.write_summary = True
   config.steps_checkpoints = [0]
   config.ks = [5,10,20]
@@ -128,7 +136,7 @@ def get_config():
                              'B': 12,
                              'L': 24,
                              'H': 32}[version]
-  config.model.head_output_dim = 4096 #65536 
+  config.model.head_output_dim = 8192 #4096 #65536 
   config.model.attention_dropout_rate = 0.0
   config.model.dropout_rate = 0.0
   config.model.stochastic_depth = 0.1
@@ -160,7 +168,7 @@ def get_config():
   config.weight_decay = 0.04
   #verificar
   config.weight_decay_end = 0.4
-  config.lr=0.0005
+  config.lr=0.000005
   config.warmup_epochs=10
   config.optimizer = 'adamw'
   config.drop_path_rate= 0.1

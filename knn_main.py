@@ -26,7 +26,6 @@ else:
 import vit_dino as vit
 import utils_dino as utils
 import jax
-#jax.config.update("jax_default_matmul_precision", "float16")
 import jax.numpy as jnp
 import tensorflow_datasets as tfds
 import datasets
@@ -46,7 +45,6 @@ from flax import jax_utils
 from flax import linen as nn
 from jax import vmap
 from jax.lax import map as map_
-import jax.random as random
 
 from functools import partial
 from jax import jit
@@ -116,9 +114,9 @@ MetricFn = Callable[
 LossFn = Callable[[jnp.ndarray, Batch, Optional[jnp.ndarray]], float]
 LrFn = Callable[[jnp.ndarray], jnp.ndarray]
 
-def normalize(inputs, p=2.0, axis=1, eps=1e-12):
-    norms = jnp.linalg.norm(inputs, ord=p, axis=axis, keepdims=True)
-    return inputs / jnp.maximum(norms, eps)
+def normalize(input, p=2.0, axis=1, eps=1e-12):
+    norms = jnp.linalg.norm(input, ord=p, axis=axis, keepdims=True)
+    return input / jnp.maximum(norms, eps)
 
 def representation_fn_eval(
     train_state: train_utils.TrainState,
@@ -177,8 +175,8 @@ def knn_evaluate(
   workdir: str,
   writer: metric_writers.MetricWriter,
 ) -> None:
-  
-  
+
+
   # Start a run, tracking hyperparameters
   wandb.init(
       # set the wandb project where this run will be logged
@@ -187,25 +185,21 @@ def knn_evaluate(
       # track hyperparameters and run metadata with wandb.config
       config=config.to_dict()
   )
+  
+  lead_host = jax.process_index() == 0
 
-  rng = random.PRNGKey(config.rng_seed)
-  print(f'RNG {rng}')
-  data_rng, rng = random.split(rng)
-  print(f'RNG {rng}')
-  print(f'Data_rng {data_rng}')
-
+  data_rng, rng = jax.random.split(rng)
   dataset = train_utils.get_dataset(
       config, data_rng, dataset_service_address=FLAGS.dataset_service_address)
   
-  eval(
+  train(
       rng=rng,
       config=config,
       dataset=dataset,
       workdir=workdir,
-      writer=writer
-  )
+      writer=writer)
   
-def eval(
+def train(
     *,
     rng: jnp.ndarray,
     config: ml_collections.ConfigDict,
@@ -226,6 +220,7 @@ def eval(
        input_spec=[(dataset.meta_data['input_shape'],
                     dataset.meta_data.get('input_dtype', jnp.float32))],
        config=config, rngs=init_rng)
+  rng, init_rng = jax.random.split(rng)
 
   # Only one model function but two sets of parameters.
   ema_params = copy.deepcopy(params)
@@ -254,29 +249,22 @@ def eval(
 
   train_dir = config.get('train_dir')
   print(f'{train_dir}')
-  step_type = config.get('steps_checkpoints') #-1 all checkpoints, 1 the last one
+  steps = config.get('steps_checkpoints')
   files_save = config.get('dir_files')
   num_classes = config.get('num_classes')
-  if step_type[0] < 0:
-     steps = get_all_checkpoint(train_dir)
-  elif step_type[0] > 0:
-     steps = get_highest_checkpoint(train_dir)
-  else:
-     steps = ['1']
 
-  for step_name in steps:
+  for step in steps:
 
-    print(f"step: {step_name}")
+    print(f"step: {step}")
     
+
     if not config.preextracted:
-      
-      ckpt_file = step_name
+      ckpt_file = os.path.join(train_dir,'checkpoint_'+str(step))  
       ckpt_info = ckpt_file.split('/')
       ckpt_dir = '/'.join(ckpt_info[:-1])
       ckpt_num = ckpt_info[-1].split('_')[-1]
-      step = int(ckpt_num)
       print(f"file: {ckpt_file}")
-      print(f"ckpt_num / Step: {ckpt_num}")
+      print(f"ckpt_num: {ckpt_num}")
 
       #try:
 
@@ -295,7 +283,6 @@ def eval(
       train_state = jax_utils.replicate(train_state)
 
     else:
-      step = int(step_name)
       '''=============================================='''
       print('Here... trying load')
       from load_params import load_params
@@ -339,33 +326,24 @@ def eval(
     
     if not os.path.exists(dir_save_y):
       os.makedirs(dir_save_y)
-    
     if config.get('extract_train'):
       print('Starting to extract features train')
-      print_result = True
-      print(f'Step per epoch {config.steps_per_epoch}')
-      wandb.log({'extract_steps_per_epoch':config.steps_per_epoch})
       for i in range(config.steps_per_epoch):
         path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
         batch_train = next(dataset.train_iter)
         emb_train = extract_features(batch_train)
-        
-        if print_result:
-          print(f'shape emb_train {emb_train.shape}')
-          #print(f'processing batch {i} shape {emb_train.shape}. Norma 1 {norm_res}')
-          print_result=False
-        #norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
-        #if not norm_res:
-        #  emb_train = normalize(emb_train)
+        print(f'shape emb_train {emb_train.shape}')
+        norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
+        print(f'processing batch {i} shape {emb_train.shape}. Norma 1 {norm_res}')
+        if not norm_res:
+          emb_train = normalize(emb_train)
         label_train = batch_train['label']
         emb_train = emb_train[0]
         bl, bg, emb = emb_train.shape
-        wandb.log({'extract_train_batch':bl*bg, 'batch_train_n':i})
         emb_train = emb_train.reshape((bl*bg, emb))
         label_train = label_train.reshape((bl*bg))
         jnp.savez(path_file, emb=emb_train, label=label_train)
       print('Finishing extract features train')
-      print(f'the last file {path_file}')
     else:
       print('Not extract train')
 
@@ -418,25 +396,22 @@ def eval(
     total_correct_predictions = {k: 0 for k in ks}
     total_samples = 0
     max_k = jnp.array(ks).max()
-    wandb.log({'steps_per_epoch_eval':config.steps_per_epoch_eval})
     for i in range(config.steps_per_epoch_eval):
-      #print(f'processing step eval {i}')
+      print(f'processing step eval {i}')
       batch_eval = next(dataset.valid_iter)
       emb_test = extract_features(batch_eval)[0]
-      print(f'{emb_test.shape}')
       bl, bg, emb = emb_test.shape
       emb_test = emb_test.reshape((bl*bg, emb))
       label_eval = batch_eval['label'].reshape((bl*bg))
-      #norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2))==1
-      #print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
-      #if not norm_res:
-      #  emb_test = normalize(emb_test)
-      wandb.log({'extract_test_batch':bl*bg, 'batch_test_n':i})
-      #print(f'embeeding shape test {emb_test.shape}')
+      norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2))==1
+      print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
+      if not norm_res:
+        emb_test = normalize(emb_test)
+    
+      print(f'embeeding shape test {emb_test.shape}')
       sim_all = []
       labels = []
       len_test += len(batch_eval)
-      wandb.log({'use_steps_per_epoch':config.steps_per_epoch})
       for j in range(config.steps_per_epoch):
         emb_file_save = os.path.join(dir_save_ckp,f'ckp_{step}_b{j}')
         data_load = jnp.load(emb_file_save+'.npz')
@@ -446,15 +421,6 @@ def eval(
         sim = calculate_similarity(emb_train, emb_test)
         sim_all.append(sim)
         labels.append(label_train)
-        if i == 0:
-          wandb.log({'usetrain_batch0':emb_train.shape[0], 
-                     'batch_test_n0':j,
-                     'table_test0':len(sim_all)})
-        
-        if i == config.steps_per_epoch_eval-1:
-          wandb.log({'usetrain_batchlast':emb_train.shape[0], 
-                     'batch_test_nlast':j,
-                     'table_testlast':len(sim_all)})
       
       sim_all = jnp.concatenate(sim_all, axis=1)
       labels = jnp.concatenate(labels)
@@ -468,12 +434,11 @@ def eval(
       labels = labels[topk_indices]#jnp.take_along_axis(labels, topk_indices, axis=-1)
 
       batch_size = labels.shape[0]
-      topk_sims_transform = softmax((topk_sims / T), axis=1)
+      topk_sims_transform = softmax(topk_sims / T, axis=1)
       
       matmul = one_hot(labels, num_classes=num_classes) * topk_sims_transform[:, :, None]
       
       probas_for_k = {k: jnp.sum(matmul[:, :k, :], axis=1) for k in ks}
-      print_result = True
 
       for k in ks:
         correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
@@ -481,9 +446,7 @@ def eval(
         wandb.log({f'batch_size_{k}':batch_size, 
                      f'correct_predictions{k}':correct_predictions,
                      f'acc_rel{k}':correct_predictions/batch_size})
-        if print_result:
-          #print(f'Using k = {k} -- batch {batch_size}/{correct_predictions} certos')
-          print_result = False
+        print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
       total_samples += batch_size
       
 
@@ -491,15 +454,15 @@ def eval(
     total_accuracies = {k: total_correct_predictions[k] / total_samples for k in ks}
 
     # Resultado
-    print(f"number total samples: {total_samples}")
-    print("Total Accuracy:")
+    print(f'total samples used {total_samples}')
+    print("Acurácia total para diferentes valores de K:")
     for k, accuracy in total_accuracies.items():
-        print(f"K:{k} Accuracy: {accuracy:.4f}")
         wandb.log({
           "step": step,
           "K": k,
           "Accuracy": round(accuracy,4)
         })
+        print(f"K-{k} acurácia total: {accuracy:.4f}")
 
   train_utils.barrier_across_hosts()
 
