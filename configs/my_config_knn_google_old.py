@@ -26,7 +26,7 @@ def get_config():
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
   config.dataset_configs.dataset = 'mvimgnetest' #'imagenet2012'
-  config.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
+  config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
   config.dataset_configs.batch_size_train = 256
@@ -76,12 +76,12 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/mnt/disks/dataset/test'#'/home/jesimonbarreto/exp_test_now/'
+  config.train_dir = '/mnt/disks/stg_dataset/test'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = False
   config.write_summary = True
   config.steps_checkpoints = [-1]
   config.ks = [5,10,20]
-  config.dir_files = '/mnt/disks/dataset/eval_files/'
+  config.dir_files = '/mnt/disks/stg_dataset/eval_files/'
 
   config.data_dtype_str = 'float32'
   #config.data_dtype_str = 'bfloat16'

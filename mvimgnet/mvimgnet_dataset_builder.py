@@ -95,7 +95,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     # TODO(MVImgNet): Downloads the data and defines the splits
     #path = dl_manager.download_and_extract('https://todo-data-url')
 
-    path = '/mnt/disks/dataset/mvimgnet/data/'
+    path = '/mnt/disks/stg_dataset/dataset/mvimgnet/data/'
     train_path = os.path.join(path, 'train')
     
 
@@ -246,11 +246,11 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         datapath += '/'
     
     if file_path == 'train':
-        file_path = '/mnt/disks/dataset/mvimgnet/train.npz'
+        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/train_balanceado.npz'
         dist =  5 # 3,5,7,9,10
         n = 3
     else:
-        file_path = '/mnt/disks/dataset/mvimgnet/test.npz'
+        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/test_balanceado.npz'
         dist =  5 # 3,5,7,9,10
         n = 3
 

@@ -111,7 +111,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   def _split_generators(self, dl_manager: tfds.download.DownloadManager):
     """Returns SplitGenerators."""
 
-    path = '/mnt/disks/dataset/mvimgnet/data/'
+    path = '/mnt/disks/stg_dataset/dataset/mvimgnet/data/'
     train_path = os.path.join(path, 'train')
     test_path = os.path.join(path, 'test')  
 
@@ -123,7 +123,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             },
         ),
         tfds.core.SplitGenerator(
-            name=tfds.Split.TEST,
+            name=tfds.Split.VALIDATION,
             gen_kwargs={
                 "datapath": test_path,
             },
@@ -172,9 +172,9 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         datapath += '/'
     
     if file_path == 'train':
-        file_path = '/mnt/disks/dataset/mvimgnet/train.npz'
+        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/train_balanceado.npz'
     else:
-        file_path = '/mnt/disks/dataset/mvimgnet/test.npz'
+        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/test_balanceado.npz'
     
     n = 3
 
