@@ -252,7 +252,10 @@ def train(
   steps = config.get('steps_checkpoints')
   files_save = config.get('dir_files')
   num_classes = config.get('num_classes')
-
+  name_path_step = get_highest_checkpoint(train_dir)
+  part_file = int(name_path_step.split('_')[-1])
+  steps = [part_file]
+  
   for step in steps:
 
     print(f"step: {step}")

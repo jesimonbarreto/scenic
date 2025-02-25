@@ -1,11 +1,19 @@
 ### test if you need sudo rm -rf /mnt/disks/dataset/dataset/imagenet/mvimgnet/
 cd /home/jesimonbarreto/scenic
-# sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/mvimgnet/
+sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/mvimgnet/
 # sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/mvimgnetest/
 
 #  sudo -E python -m knn_main --config=configs/my_config_knn_google_dinos.py --workdir=../test_
 #  sudo rm -rf ../test_
 
-sudo rm -rf /mnt/disks/stg_dataset/test
-sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim.py --workdir=/mnt/disks/stg_dataset/test
-sudo -E python -m knn_main --config=configs/my_config_knn_google_old.py --workdir=../test_
+sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim.py --workdir=/mnt/disks/stg_dataset/test_video
+sudo -E python -m knn_main --config=configs/my_config_knn_google_old_video.py --workdir=../test_
+
+sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_frame.py --workdir=/mnt/disks/stg_dataset/test_frame
+sudo -E python -m knn_main --config=configs/my_config_knn_google_old_frame.py --workdir=../test_
+
+sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_scratch.py --workdir=/mnt/disks/stg_dataset/test_video_scratch
+sudo -E python -m knn_main --config=configs/my_config_knn_google_old_video_scratch.py --workdir=../test_
+
+sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_frame_scratch.py --workdir=/mnt/disks/stg_dataset/test_frame_scratch
+sudo -E python -m knn_main --config=configs/my_config_knn_google_old_frame_scratch.py --workdir=../test_

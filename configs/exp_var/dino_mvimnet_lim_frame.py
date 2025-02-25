@@ -3,7 +3,7 @@
 
 import ml_collections
 
-VARIANT = 'S/14'
+VARIANT = 'S/16'
 _IMAGENET_TRAIN_SIZE = 237402 #40608 #237402 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
 _IMAGENET_TEST_SIZE = 50000
 MEAN_RGB = [0.485, 0.456, 0.406]
@@ -16,8 +16,8 @@ def get_config():
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Experiments_Sel_kmeans'
-  config.experiment_name = 'video_mvimagenet_5f_limclasses_frame'
+  config.project = 'train_dino'
+  config.experiment_name = 'train_dino_v1_frame'
   #config
   config.transfer_learning = False
   config.layer_wise = False
@@ -44,7 +44,7 @@ def get_config():
   config.gama_loss = 1
   config.teta_loss= 0.7
   config.max_grad_norm = 1
-  config.num_training_epochs = 17#400
+  config.num_training_epochs = 25#400
   config.batch_size = 64
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -151,7 +151,7 @@ def get_config():
   #config.dataset_configs.dataset = 'imagenet2012'
   config.dataset_configs.dataset = 'mvimgnet'#'youtube8m'#'mvimgnet'
   config.dataset_configs.train_split = 'train'
-  config.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
+  config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
 
 
   # Model.
@@ -188,7 +188,8 @@ def get_config():
   config.norm_last_layer = True
   config.momentum_teacher = 0.996
   config.use_bn_in_head = False
-  config.load_weights = 'dinov2_vit'+version.lower()+'14'
+  config.load_weight = True
+  config.load_weights = 'dino_vitdeits16'#'dinov2_vit'+version.lower()+'14'
 
 
   # LOCA specific parameters.
@@ -230,9 +231,9 @@ def get_config():
   config.save_state_0 = False
   config.xprof = True  # Profile using xprof.
   config.checkpoint = True  # Do checkpointing.
-  config.checkpoint_steps = 500
+  config.checkpoint_steps = 5000
   config.log_summary_steps = 5
-  config.max_keep_checkpoint = 2
+  config.max_keep_checkpoint = 5
 
   ####### Config val
 

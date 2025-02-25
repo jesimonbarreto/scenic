@@ -299,18 +299,19 @@ def train(
   layer_names = list_layers(params)
   for name in layer_names:
       print(name)'''
+  _load_weight = config.get('load_weight')
+  if _load_weight:
+    '''=============================================='''
+    #print(f'Here... trying load {params.keys()}')
+    from load_params import load_params
 
-  '''=============================================='''
-  #print(f'Here... trying load {params.keys()}')
-  from load_params import load_params
-
-  params = load_params(config.load_weights,'/home/jesimonbarreto/', params,
-                params_key='teacher_weights',
-                force_random_init= None)
+    params = load_params(config.load_weights,'/home/jesimonbarreto/', params,
+                  params_key='teacher_weights',
+                  force_random_init= None)
 
 
-  #print(f'Here... finished load {params.keys()}')
-  '''=============================================='''
+    #print(f'Here... finished load {params.keys()}')
+    '''=============================================='''
 
   # Only one model function but two sets of parameters.
   ema_params = copy.deepcopy(params)

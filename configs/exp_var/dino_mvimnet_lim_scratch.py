@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'train_dino'
-  config.experiment_name = 'train_dino_v1_video'
+  config.experiment_name = 'train_dino_v1_video_scratch'
   #config
   config.transfer_learning = False
   config.layer_wise = False
@@ -166,7 +166,7 @@ def get_config():
   config.norm_last_layer = True
   config.momentum_teacher = 0.996
   config.use_bn_in_head = False
-  config.load_weight = True
+  config.load_weight = False
   config.load_weights = 'dino_vitdeits16'#'dinov2_vit'+version.lower()+'14'
 
 

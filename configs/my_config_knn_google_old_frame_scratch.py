@@ -13,8 +13,8 @@ def get_config():
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Eval_new_mvimagenet'
-  config.experiment_name = 'Eval_Dino_8k2Mhead'
+  config.project = 'Eval_new_mvimagenetest'
+  config.experiment_name = 'eval'
   config.extract_train = True
   # Dataset.
   config.dataset_name = 'eval_dataset'
@@ -76,7 +76,7 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/mnt/disks/stg_dataset/test'#'/home/jesimonbarreto/exp_test_now/'
+  config.train_dir = '/mnt/disks/stg_dataset/test_frame_scratch'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = False
   config.write_summary = True
   config.steps_checkpoints = [-1]
