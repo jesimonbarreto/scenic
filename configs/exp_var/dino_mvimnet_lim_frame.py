@@ -45,7 +45,7 @@ def get_config():
   config.teta_loss= 0.7
   config.max_grad_norm = 1
   config.num_training_epochs = 25#400
-  config.batch_size = 64
+  config.batch_size = 128
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
   total_steps = config.num_training_epochs * config.steps_per_epoch
