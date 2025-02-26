@@ -253,7 +253,7 @@ def train(
   files_save = config.get('dir_files')
   num_classes = config.get('num_classes')
   name_path_step = get_highest_checkpoint(train_dir)
-  part_file = int(name_path_step.split('_')[-1])
+  part_file = int(name_path_step[0].split('_')[-1])
   steps = [part_file]
   
   for step in steps:
