@@ -176,7 +176,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     else:
         file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/test_balanceado.npz'
     
-    n = 3
+    n = 1
 
 
     train_ref = np.load(file_path, allow_pickle=True)
