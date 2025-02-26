@@ -1,8 +1,8 @@
 import ml_collections, os
 
 VARIANT = 'S/16'
-_IMAGENET_TRAIN_SIZE = 1281167 #9469 #1281167
-_IMAGENET_TEST_SIZE = 50000
+_IMAGENET_TRAIN_SIZE = 177559 #9469 #1281167
+_IMAGENET_TEST_SIZE = 55823
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 MEAN = [0.5]
@@ -29,9 +29,9 @@ def get_config():
   config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
-  config.dataset_configs.batch_size_train = 64
+  config.dataset_configs.batch_size_train = 256
   config.dataset_configs.batch_size_test = 64
-  config.num_classes = 1000
+  config.num_classes = 238
   reference_resolution = 224
   crop_size = 224
   config.T = 0.07

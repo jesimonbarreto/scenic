@@ -4,8 +4,8 @@
 import ml_collections
 
 VARIANT = 'S/16'
-_IMAGENET_TRAIN_SIZE = 237402 #40608 #237402 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
-_IMAGENET_TEST_SIZE = 50000
+_IMAGENET_TRAIN_SIZE = 415106 #40608 #237402 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
+_IMAGENET_TEST_SIZE = 55823
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 
@@ -45,7 +45,7 @@ def get_config():
   config.teta_loss= 0.7
   config.max_grad_norm = 1
   config.num_training_epochs = 25#400
-  config.batch_size = 128
+  config.batch_size = 256
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
   total_steps = config.num_training_epochs * config.steps_per_epoch
