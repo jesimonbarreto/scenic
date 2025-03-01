@@ -71,7 +71,7 @@ def get_config():
   #config.preextracted = True
   config.write_summary = True
   config.steps_checkpoints = [0]
-  config.ks = [5,10,20]
+  config.ks = [1,3,5,7,10,20]
   config.dir_files = '/mnt/disks/stg_dataset/eval_files/'
 
   config.data_dtype_str = 'float32'
