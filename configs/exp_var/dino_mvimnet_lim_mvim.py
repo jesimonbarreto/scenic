@@ -135,7 +135,7 @@ def get_config():
   #config.dataset_configs.dataset = 'imagenet2012'
   config.dataset_configs.dataset = 'mvimgnet'#'youtube8m'#'mvimgnet'
   config.dataset_configs.train_split = 'train'
-  config.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
+  config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
 
 
   # Model.
@@ -236,7 +236,7 @@ def get_config():
   #config.val.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
   config.val.dataset_configs.dataset = 'imagenet2012'
-  config.val.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
+  config.val.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
   config.val.dataset_configs.train_split = 'train'
   config.val.dataset_configs.test_split = 'validation'
   config.val.dataset_configs.batch_size_train = 256
@@ -292,7 +292,7 @@ def get_config():
   #finetun_ckp_10778- 1  layerwise_ckp_10778-2  lr00001better_ckp_10778-3  lr0001_ckp_10778-4
   config.val.steps_checkpoints = [1,2,3,4]
   config.val.ks = [5,10,20]
-  config.val.dir_files = '/mnt/disks/dataset/eval_files/'
+  config.val.dir_files = '/mnt/disks/stg_dataset/eval_files/'
   config.val.data_dtype_str = 'float32'
   #config.val.data_dtype_str = 'bfloat16'
   config.val.batch_size = config.val.dataset_configs.batch_size_train #batch size for extracting embeddings
