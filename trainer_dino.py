@@ -345,7 +345,7 @@ def train(
     def create_mask(params, label_fn):
       def _map(params, mask, label_fn):
           for k in params:
-              if not label_fn(k):
+              if label_fn(k):
                   mask[k] = 'zero'
               else:
                   if isinstance(params[k], FrozenDict):
