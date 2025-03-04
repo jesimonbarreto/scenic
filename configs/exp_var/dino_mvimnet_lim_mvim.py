@@ -20,8 +20,8 @@ def get_config():
   config.experiment_name = 'test'
   #config
   config.transfer_learning = True
-  config.list_str_layers = ['projection_head']
-  config.list_str_layers_ver = [True]
+  config.train_layers = ['projection_head']
+  config.train_layers_str = [True]
   config.layer_wise = False
   config.print_lr_infos = False
   # Dataset.
