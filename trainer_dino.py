@@ -371,15 +371,18 @@ def train(
     freeze_encoder_and_token = generate_conditional_freeze_layers(
       list_str_layers, list_str_layers_ver, use_and=False
     )
-    print(list_str_layers)
-    print(list_str_layers_ver)
-    print(lele)
+    mask_t = create_mask(params, freeze_encoder_and_token)
+    print(mask_t)
     tx = optax.multi_transform(
         {'adam': optax.inject_hyperparams(optax.adamw)(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
         'zero': zero_grads()},
-         create_mask(params, freeze_encoder_and_token)
+         mask_t
         )
+    
+    print(list_str_layers)
+    print(list_str_layers_ver)
+    print(lele)
   elif config.layer_wise:
     params = freeze(params)
     
