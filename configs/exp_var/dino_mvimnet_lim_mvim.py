@@ -19,7 +19,9 @@ def get_config():
   config.project = 'Experiments_mvimgnet_video'
   config.experiment_name = 'video_mvimagenet'
   #config
-  config.transfer_learning = False
+  config.transfer_learning = True
+  config.list_str_layers = ['projection_head']
+  config.list_str_layers_ver = [True]
   config.layer_wise = False
   config.print_lr_infos = False
   # Dataset.

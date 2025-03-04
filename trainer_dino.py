@@ -82,6 +82,22 @@ def plot_example(train_batch, number_plot=5, dir_plot='/home/jesimonbarreto/imag
       img = normalize_vector(img)
       plt.imsave(os.path.join(dir_plot,f'crops{vcrop}_{stepe}.jpg'), img)
 
+def generate_conditional_freeze_layers(rules, negate_flags, use_and=True):
+    """
+    Retorna uma função lambda que verifica várias condições de 'in' ou 'not in' em cada elemento da lista.
+
+    Parâmetros:
+        rules (list[str]): Lista de strings para verificar no nome da camada.
+        negate_flags (list[bool]): Lista de booleans para indicar se deve usar 'not in' (True) ou 'in' (False) para cada regra.
+
+    Retorna:
+        function: Função lambda personalizada.
+    """
+    return lambda layer_name: (all if use_and else any)(
+        (rule in layer_name if negate else rule not in layer_name)
+        for rule, negate in zip(rules, negate_flags)
+    )
+
 def dino_train_step(
     train_state: utils.TrainState,
     batch: Batch,
@@ -329,7 +345,7 @@ def train(
     def create_mask(params, label_fn):
       def _map(params, mask, label_fn):
           for k in params:
-              if label_fn(k):
+              if not label_fn(k):
                   mask[k] = 'zero'
               else:
                   if isinstance(params[k], FrozenDict):
@@ -339,6 +355,7 @@ def train(
                       mask[k] = 'adam'
       mask = {}
       _map(params, mask, label_fn)
+      print(mask)
       return frozen_dict.freeze(mask)
 
     def zero_grads():
@@ -348,12 +365,20 @@ def train(
         def update_fn(updates, state, params=None):
             return jax.tree_map(jnp.zeros_like, updates), ()
         return optax.GradientTransformation(init_fn, update_fn)
-
+    
+    list_str_layers = config.get('train_layers') or ["encoder", "ToTokenSequence"]
+    list_str_layers_ver = config.get('train_layers_str') or [True, True]
+    freeze_encoder_and_token = generate_conditional_freeze_layers(
+      list_str_layers, list_str_layers_ver, use_and=False
+    )
+    print(list_str_layers)
+    print(list_str_layers_ver)
+    print(lele)
     tx = optax.multi_transform(
         {'adam': optax.inject_hyperparams(optax.adamw)(
         learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
         'zero': zero_grads()},
-         create_mask(params, lambda s: 'encoder' in s or 'ToTokenSequence' in s)
+         create_mask(params, freeze_encoder_and_token)
         )
   elif config.layer_wise:
     params = freeze(params)

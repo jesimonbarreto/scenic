@@ -22,3 +22,7 @@ sudo -E python -m knn_main --config=configs/my_config_knn_google_old_video_scrat
 
 #sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_frame_scratch.py --workdir=/mnt/disks/stg_dataset/test_frame_scratch
 sudo -E python -m knn_main --config=configs/my_config_knn_google_old_frame_scratch.py --workdir=../test_
+
+
+
+sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_mvim.py --workdir=/mnt/disks/stg_dataset/test_video
