@@ -20,11 +20,12 @@ def get_config():
   config.experiment_name = 'test'
   #config
   config.transfer_learning = True
-  #config.train_layers = ["encoder", "ToTokenSequence"]
-  config.train_layers = ["ToTokenSequence_0", "encoder_norm", "projection_head",
-                        "key", "MlpBlock_0", "out" 
-                         ]
-  config.train_layers_str = [True, True, True, True, True, True]
+  config.train_layers = ["encoder", "ToTokenSequence"]
+  #config.train_layers = ["ToTokenSequence_0", "encoder_norm", "projection_head",
+  #                      "key", "MlpBlock_0", "out" 
+  #                       ]
+  config.train_layer_comp = None #'encoderblock_11' #None
+  config.train_layers_str = [True, True] #, True, True, True, True]
   config.layer_wise = False
   config.print_lr_infos = False
   # Dataset.

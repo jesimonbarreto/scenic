@@ -363,7 +363,7 @@ def train(
                       block[key][subkey] = {"bias": "adam", "kernel": "adam"}
       
       return data
-    def create_mask(params, label_fn):
+    def create_mask(params, label_fn, target_key=None):
       def _map(params, mask, label_fn):
           for k in params:
               if label_fn(k):
@@ -376,9 +376,8 @@ def train(
                       mask[k] = 'adam'
       mask = {}
       _map(params, mask, label_fn)
-      print(mask)
-      mask = modify_encoder_block(mask, target_key='encoderblock_11')
-      print(mask)
+      if target_key:
+        mask = modify_encoder_block(mask, target_key=target_key)
       return frozen_dict.freeze(mask)
 
     def zero_grads():
@@ -391,10 +390,11 @@ def train(
     
     list_str_layers = config.get('train_layers') or ["encoder", "ToTokenSequence"]
     list_str_layers_ver = config.get('train_layers_str') or [True, True]
+    last_layer_train = config.get('train_layer_comp')
     freeze_encoder_and_token = generate_conditional_freeze_layers(
       list_str_layers, list_str_layers_ver, use_and=False
     )
-    mask_t = create_mask(params, freeze_encoder_and_token)
+    mask_t = create_mask(params, freeze_encoder_and_token, last_layer_train)
     print(mask_t)
     tx = optax.multi_transform(
         {'adam': optax.inject_hyperparams(optax.adamw)(
@@ -403,9 +403,6 @@ def train(
          mask_t
         )
     
-    print(list_str_layers)
-    print(list_str_layers_ver)
-    print(lele)
   elif config.layer_wise:
     params = freeze(params)
     
