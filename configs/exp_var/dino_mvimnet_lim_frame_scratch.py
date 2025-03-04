@@ -16,10 +16,16 @@ def get_config():
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'train_dino'
-  config.experiment_name = 'train_dino_v1_frame_scratch'
+  config.project = 'test_transferlearning'
+  config.experiment_name = 'test'
   #config
-  config.transfer_learning = False
+  config.transfer_learning = True
+  config.train_layers = ["encoder", "ToTokenSequence"]
+  #config.train_layers = ["ToTokenSequence_0", "encoder_norm", "projection_head",
+  #                      "key", "MlpBlock_0", "out" 
+  #                       ]
+  config.train_layer_comp = None #'encoderblock_11' #None
+  config.train_layers_str = [True, True] #, True, True, True, True]
   config.layer_wise = False
   config.print_lr_infos = False
   # Dataset.
@@ -30,7 +36,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'frame' # video or frame
+  config.mode = 'video' # video or frame
   
   #plot
   config.plot_ex = False
@@ -44,7 +50,7 @@ def get_config():
   config.gama_loss = 1
   config.teta_loss= 0.7
   config.max_grad_norm = 1
-  config.num_training_epochs = 25#400
+  config.num_training_epochs = 50#400
   config.batch_size = 256
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -231,9 +237,9 @@ def get_config():
   config.save_state_0 = False
   config.xprof = True  # Profile using xprof.
   config.checkpoint = True  # Do checkpointing.
-  config.checkpoint_steps = 5000
+  config.checkpoint_steps = 10000
   config.log_summary_steps = 5
-  config.max_keep_checkpoint = 2
+  config.max_keep_checkpoint = 4
 
   ####### Config val
 
