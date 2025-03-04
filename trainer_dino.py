@@ -341,7 +341,17 @@ def train(
   # Create optimizer.
   if config.transfer_learning:
     params = freeze(params)
-    
+    def modify_encoder_block(data, target_key):
+      if target_key in data and isinstance(data[target_key], dict):
+          for key, value in data[target_key].items():
+              if isinstance(value, dict):
+                  # Adiciona 'bias' e 'kernel' a todos os dicionários internos
+                  value["bias"] = "adam"
+                  value["kernel"] = "adam"
+              else:
+                  # Substitui valores simples por um dicionário contendo 'bias' e 'kernel'
+                  data[target_key][key] = {"bias": "adam", "kernel": "adam"}
+      return data
     def create_mask(params, label_fn):
       def _map(params, mask, label_fn):
           for k in params:
@@ -355,6 +365,7 @@ def train(
                       mask[k] = 'adam'
       mask = {}
       _map(params, mask, label_fn)
+      mask = modify_encoder_block(mask, target_key='encoderblock_11')
       print(mask)
       return frozen_dict.freeze(mask)
 
