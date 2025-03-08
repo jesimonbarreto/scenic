@@ -353,8 +353,8 @@ def train(
               # Se for 'MlpBlock_*', transforma em {'dense_0': {...}, 'dense_1': {...}}
               if key.startswith("MlpBlock"):
                   block[key] = {
-                      "dense_0": {"bias": "adam", "kernel": "adam"},
-                      "dense_1": {"bias": "adam", "kernel": "adam"},
+                      "Dense_0": {"bias": "adam", "kernel": "adam"},
+                      "Dense_1": {"bias": "adam", "kernel": "adam"},
                   }
               
               # Se for 'MultiHeadDotProductAttention_*', cada subitem recebe 'bias' e 'kernel'
