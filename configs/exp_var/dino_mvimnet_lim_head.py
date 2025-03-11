@@ -17,7 +17,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'test_transferlearning'
-  config.experiment_name = 'train_dino_v1_video'
+  config.experiment_name = 'head'
   #config
   config.transfer_learning = True
   config.train_layers = ["encoder", "ToTokenSequence"]
