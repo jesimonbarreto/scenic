@@ -28,5 +28,5 @@ cd /home/jesimonbarreto/scenic
 #sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_frame_scratch.py --workdir=/mnt/disks/stg_dataset/test_test_
 #sudo -E python -m knn_main --config=configs/my_config_knn_google_old_frame_scratch.py --workdir=../test_
 
-
+sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_head.py --workdir=/mnt/disks/stg_dataset/test_test
 sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_contlearn.py --workdir=/mnt/disks/stg_dataset/test_test2
