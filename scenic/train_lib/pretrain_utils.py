@@ -177,6 +177,7 @@ def restore_pretrained_checkpoint(
       restored_params = dict(checkpoints.convert_pre_linen(restored_params))
     restored_params = flax.core.freeze(restored_params)
 
+  print(restored_train_state.keys())  # Lista todas as chaves disponíveis
   restored_model_state = flax.core.freeze(restored_train_state['model_state'])
 
   if not train_state:
