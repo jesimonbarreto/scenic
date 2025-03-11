@@ -227,6 +227,150 @@ def compare_params(lhs, rhs, depth):
         else:
             print('  ' * depth, k, jnp.mean(jnp.abs(lhs[k] - rhs[k])))
 
+from typing import Any, Dict, Mapping, List, Optional, Union
+
+# JAX team is working on type annotation for pytree:
+# https://github.com/google/jax/issues/1555
+PyTree = Union[Mapping[str, Mapping], Any]
+
+def restore_pretrained_checkpoint(
+    checkpoint_path: str,
+    train_state: Optional[TrainState] = None,
+    assert_exist: bool = False,
+    step: Optional[int] = None) -> TrainState:
+  """Restores the last checkpoint.
+
+  First restores the checkpoint, which is an instance of TrainState that holds
+  the state of training. This function also take care converting pre-Linen
+  checkpoints.
+
+  Args:
+    checkpoint_path: Directory for saving the checkpoint.
+    train_state: An instance of TrainState that holds the state of training.
+    assert_exist: Assert that there is at least one checkpoint exists in the
+      given path.
+    step: Step number to load or None to load latest. If specified,
+      checkpoint_path must be a directory.
+
+  Returns:
+    Training state and an int which is the current step.
+  """
+  if assert_exist:
+    glob_path = os.path.join(checkpoint_path, 'checkpoint_*')
+    if not gfile.glob(glob_path):
+      raise ValueError('No checkpoint for the pretrained model is found in: '
+                       f'{checkpoint_path}')
+  restored_train_state = checkpoints.restore_checkpoint(checkpoint_path, None,
+                                                        step)
+  if restored_train_state is None:
+    raise ValueError('No checkpoint for the pretrained model is found in: '
+                     f'{checkpoint_path}')
+  if 'params' in restored_train_state:
+    # restored_train_state was trained using optax
+    restored_params = flax.core.freeze(restored_train_state['params'])
+  else:
+    # restored_train_state was trained using flax.optim. Note that this does
+    # not convert the naming of pre-Linen checkpoints.
+    restored_params = restored_train_state['optimizer']['target']
+    if 'params' in restored_params:  # Backward compatibility.
+      restored_params = restored_params['params']
+      restored_params = dict(checkpoints.convert_pre_linen(restored_params))
+    restored_params = flax.core.freeze(restored_params)
+
+  print(restored_train_state.keys())  # Lista todas as chaves disponíveis
+  restored_model_state = flax.core.freeze(restored_train_state['state'])
+
+  if not train_state:
+    train_state = TrainState()
+    params = restored_params
+  else:
+    # Inspect and compare the parameters of the model with the init-model.
+    params = inspect_params(
+        expected_params=train_state.params,
+        restored_params=restored_params,
+        fail_if_extra=False,
+        fail_if_missing=False,
+        fail_if_shapes_mismatch=False)
+  train_state = train_state.replace(
+      # Inspect and compare the parameters of the model with the init-model.
+      params=params,
+      model_state=restored_model_state,
+      global_step=int(restored_train_state['global_step']),
+      rng=restored_train_state['rng'],
+      metadata=restored_train_state.get('metadata', None))
+  return train_state
+
+
+def inspect_params(*,
+                   expected_params: PyTree,
+                   restored_params: PyTree,
+                   fail_if_extra: bool = True,
+                   fail_if_missing: bool = True,
+                   fail_if_shapes_mismatch: bool = False) -> PyTree:
+  """Inspects whether the params are consistent with the expected keys."""
+
+  def _flatten_params(d, parent_key='', sep='/'):
+    """Flattens a dictionary, keeping empty leaves."""
+    items = []
+    for k, v in d.items():
+      path = parent_key + sep + k if parent_key else k
+      if isinstance(v, abc.MutableMapping):
+        items.extend(_flatten_params(v, path, sep=sep).items())
+      else:
+        items.append((path, v))
+    # Keeps the empty dict if it was set explicitly.
+    if parent_key and not d:
+      items.append((parent_key, {}))
+    return dict(items)
+
+  expected_flat = _flatten_params(flax.core.unfreeze(expected_params))
+  restored_flat = _flatten_params(flax.core.unfreeze(restored_params))
+  missing_keys = expected_flat.keys() - restored_flat.keys()
+  extra_keys = restored_flat.keys() - expected_flat.keys()
+
+  is_shape_mismatch = False
+  for key in restored_flat:
+    if key in expected_flat:
+      restored_shape = None
+      expected_shape = None
+      # Handle empty nodes (without trainable params)
+      if not isinstance(restored_flat[key], dict):
+        restored_shape = restored_flat[key].shape
+      if not isinstance(expected_flat[key], dict):
+        expected_shape = expected_flat[key].shape
+
+      if restored_shape != expected_shape:
+        is_shape_mismatch = True
+        print('Key: %s. Expected shape: %s. Restored shape: %s', key,
+                        expected_flat[key].shape, restored_flat[key].shape)
+
+  # Adds back empty dict explicitly, to support layers without weights.
+  # Context: FLAX ignores empty dict during serialization.
+  empty_keys = set()
+  for k in missing_keys:
+    if isinstance(expected_flat[k], dict) and not expected_flat[k]:
+      restored_params[k] = {}  # pytype: disable=unsupported-operands
+      empty_keys.add(k)
+  missing_keys -= empty_keys
+
+  if empty_keys:
+    print('Inspect recovered empty keys:\n%s', empty_keys)
+
+  print('Inspect missing keys:\n%s', missing_keys)
+  print('Inspect extra keys:\n%s', extra_keys)
+
+  if fail_if_shapes_mismatch and is_shape_mismatch:
+    raise ValueError('Shape mismatch between restored and target model')
+
+  if (missing_keys and fail_if_missing) or (extra_keys and fail_if_extra):
+    raise ValueError(
+        f'Missing params from checkpoint: {missing_keys}.\n'
+        f'Extra params in checkpoint: {extra_keys}.\n'
+        f'Restored params from checkpoint: {restored_flat.keys()}.\n'
+        f'Expected params from code: {expected_flat.keys()}.')
+  return restored_params
+
+
 ########################## IN GITHUB DINO ######################
 '''
 class GaussianBlur(object):

@@ -49,6 +49,7 @@ from jax.lax import map as map_
 from flax.core import freeze, unfreeze
 from flax.core import frozen_dict
 from flax.core.frozen_dict import FrozenDict
+import utils_dino as utils
 
 from functools import partial
 from jax import jit
@@ -367,7 +368,7 @@ def train(
           step=int(ckpt_num),
         )'''
       
-      train_state, _ = pretrain_utils.restore_pretrained_checkpoint(
+      train_state, _ = utils.restore_pretrained_checkpoint(
           ckpt_dir, 
           #train_state, 
           assert_exist=True, 
