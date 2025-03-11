@@ -291,7 +291,7 @@ def train(
   
   # Randomly initialize model parameters.
   rng, init_rng = jax.random.split(rng)
-  (params, _, num_trainable_params,
+  (params, model_state, num_trainable_params,
    gflops) = train_utils.initialize_model(
        model_def=model.flax_model,
        input_spec=[(dataset.meta_data['input_shape'],
@@ -476,7 +476,7 @@ def train(
   
   # Create the TrainState to track training state (i.e. params and optimizer).
   train_state = utils.TrainState(
-    global_step=0, opt_state=opt_state, tx=tx, params=params,
+    global_step=0, opt_state=opt_state, tx=tx, params=params, model_state=model_state,
       ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
   
   if config.save_state_0:

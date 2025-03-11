@@ -43,6 +43,7 @@ class TrainState:
 
   tx: Optional[optax.GradientTransformation] = struct.field(pytree_node=False)
   opt_state: Optional[optax.OptState] = None
+  model_state: Optional[Any] = None
   ema_params: Optional[Any] = None
   params: Optional[Any] = None
   old_params: Optional[Any] = None

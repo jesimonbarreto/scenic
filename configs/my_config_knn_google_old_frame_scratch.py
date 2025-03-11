@@ -77,7 +77,7 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/mnt/disks/stg_dataset/test_test2'#'/home/jesimonbarreto/exp_test_now/'
+  config.train_dir = '/mnt/disks/stg_dataset/test_test_'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = False
   config.write_summary = True
   config.steps_checkpoints = [-1]
