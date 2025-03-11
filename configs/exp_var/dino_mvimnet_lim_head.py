@@ -17,15 +17,17 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'test_transferlearning'
-  config.experiment_name = 'test'
+  config.experiment_name = 'train_dino_v1_video'
   #config
   config.transfer_learning = True
-  #config.train_layers = ["encoder", "ToTokenSequence"]
-  config.train_layers = ["ToTokenSequence_0", "encoder_norm", "projection_head",
-                        "key", "MlpBlock_0", "out" 
-                         ]
-  config.train_layer_comp = 'encoderblock_11' #None
-  config.train_layers_str = [True, True, True, True, True, True]
+  config.train_layers = ["encoder", "ToTokenSequence"]
+  #config.train_layers = ["ToTokenSequence_0", "encoder_norm", "projection_head",
+  #                      "key", "MlpBlock_0", "out" 
+  #                       ]
+  config.train_layer_comp = None #'encoderblock_11'
+  config.train_layers_str = [True, True] #, True, True, True, True]
+  config.use_checkpoint = False #True #use checkpoint basewith other training 
+  config.use_ckpt_dir = '/mnt/disks/stg_dataset/test_test/'
   config.layer_wise = False
   config.print_lr_infos = False
   # Dataset.
@@ -36,7 +38,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'frame' # video or frame
+  config.mode = 'video' # video or random
   
   #plot
   config.plot_ex = False
@@ -50,7 +52,7 @@ def get_config():
   config.gama_loss = 1
   config.teta_loss= 0.7
   config.max_grad_norm = 1
-  config.num_training_epochs = 5#400
+  config.num_training_epochs = 10#400
   config.batch_size = 256
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -75,28 +77,6 @@ def get_config():
         #'|decode(inkey=("image2"), outkey=("image2"))' +
         f'copy("image1", "x1")'+
         f'|copy("image2", "x2")'+
-        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
-        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
-        '|value_range(0, 1, data_key="x1")' +
-        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
-        '|random_grayscale(0.2, data_key="x1")' +
-        '|random_blur(1.0, data_key="x1")' +
-        f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
-
-        '|value_range(0, 1, data_key="x2")' +
-        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
-        '|random_grayscale(0.2, data_key="x2")' +
-        '|random_blur(0.1, data_key="x2")' +
-        '|random_solarize(0.2, data_key="x2")' +
-        f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
-        '|keep("x1", "x2")'
-    )
-  elif config.mode == 'frame':
-    config.dataset_configs.pp_train = (
-        #'decode(inkey=("image1"), outkey=("image1"))' +
-        #'|decode(inkey=("image2"), outkey=("image2"))' +
-        f'copy("image1", "x1")'+
-        f'|copy("image1", "x2")'+
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
         '|value_range(0, 1, data_key="x1")' +
@@ -194,7 +174,7 @@ def get_config():
   config.norm_last_layer = True
   config.momentum_teacher = 0.996
   config.use_bn_in_head = False
-  config.load_weight = False
+  config.load_weight = True
   config.load_weights = 'dino_vitdeits16'#'dinov2_vit'+version.lower()+'14'
 
 
@@ -237,7 +217,7 @@ def get_config():
   config.save_state_0 = False
   config.xprof = True  # Profile using xprof.
   config.checkpoint = True  # Do checkpointing.
-  config.checkpoint_steps = 10000
+  config.checkpoint_steps = 5000
   config.log_summary_steps = 5
   config.max_keep_checkpoint = 2
 
@@ -246,7 +226,7 @@ def get_config():
   """Returns the ViT experiment configuration."""
   config.val = ml_collections.ConfigDict()
   #WANDB
-  config.val.project = 'Eval_report'
+  config.val.project = 'train'
   config.val.experiment_name = 'Eval_Dino_8k2Mhead_all'
   config.val.extract_train = True
   # Dataset.
@@ -259,7 +239,7 @@ def get_config():
   #config.val.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
   config.val.dataset_configs.dataset = 'imagenet2012'
-  config.val.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
+  config.val.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
   config.val.dataset_configs.train_split = 'train'
   config.val.dataset_configs.test_split = 'validation'
   config.val.dataset_configs.batch_size_train = 256
@@ -315,7 +295,7 @@ def get_config():
   #finetun_ckp_10778- 1  layerwise_ckp_10778-2  lr00001better_ckp_10778-3  lr0001_ckp_10778-4
   config.val.steps_checkpoints = [1,2,3,4]
   config.val.ks = [5,10,20]
-  config.val.dir_files = '/mnt/disks/dataset/eval_files/'
+  config.val.dir_files = '/mnt/disks/stg_dataset/eval_files/'
   config.val.data_dtype_str = 'float32'
   #config.val.data_dtype_str = 'bfloat16'
   config.val.batch_size = config.val.dataset_configs.batch_size_train #batch size for extracting embeddings

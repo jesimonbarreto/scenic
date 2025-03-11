@@ -253,72 +253,8 @@ def train(
 
   # Create optimizer.
   weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
-  if config.transfer_learning:
-    params = freeze(params)
-    def modify_encoder_block(data, target_key):
-      if target_key in data and isinstance(data[target_key], dict):
-          block = data[target_key]
-          
-          # Mantém LayerNorm_* inalterado (já está no formato correto)
-          for key in block:
-              if key.startswith("LayerNorm"):
-                  continue
-              
-              # Se for 'MlpBlock_*', transforma em {'dense_0': {...}, 'dense_1': {...}}
-              if key.startswith("MlpBlock"):
-                  block[key] = {
-                      "Dense_0": {"bias": "adam", "kernel": "adam"},
-                      "Dense_1": {"bias": "adam", "kernel": "adam"},
-                  }
-              
-              # Se for 'MultiHeadDotProductAttention_*', cada subitem recebe 'bias' e 'kernel'
-              elif key.startswith("MultiHeadDotProductAttention"):
-                  for subkey in ["key", "out", "query", "value"]:
-                      block[key][subkey] = {"bias": "adam", "kernel": "adam"}
-      
-      return data
-    def create_mask(params, label_fn, target_key=None):
-      def _map(params, mask, label_fn):
-          for k in params:
-              if label_fn(k):
-                  mask[k] = 'zero'
-              else:
-                  if isinstance(params[k], FrozenDict):
-                      mask[k] = {}
-                      _map(params[k], mask[k], label_fn)
-                  else:
-                      mask[k] = 'adam'
-      mask = {}
-      _map(params, mask, label_fn)
-      if target_key:
-        mask = modify_encoder_block(mask, target_key=target_key)
-      return frozen_dict.freeze(mask)
-
-    def zero_grads():
-        # from https://github.com/deepmind/optax/issues/159#issuecomment-896459491
-        def init_fn(_):
-            return ()
-        def update_fn(updates, state, params=None):
-            return jax.tree_map(jnp.zeros_like, updates), ()
-        return optax.GradientTransformation(init_fn, update_fn)
-    
-    list_str_layers = config.get('train_layers') or ["encoder", "ToTokenSequence"]
-    list_str_layers_ver = config.get('train_layers_str') or [True, True]
-    last_layer_train = config.get('train_layer_comp')
-    freeze_encoder_and_token = generate_conditional_freeze_layers(
-      list_str_layers, list_str_layers_ver, use_and=False
-    )
-    mask_t = create_mask(params, freeze_encoder_and_token, last_layer_train)
-    print(mask_t)
-    tx = optax.multi_transform(
-        {'adam': optax.inject_hyperparams(optax.adamw)(
-        learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
-        'zero': zero_grads()},
-         mask_t
-        )
   
-  else:
-    tx = optax.inject_hyperparams(optax.adamw)(
+  tx = optax.inject_hyperparams(optax.adamw)(
       learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
       mask=weight_decay_mask,)
   

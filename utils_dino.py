@@ -294,6 +294,7 @@ def restore_pretrained_checkpoint(
   restored_model_state = flax.core.freeze(restored_train_state['model_state'])
 
   if not train_state:
+    return restored_train_state
     train_state = TrainState()
     params = restored_params
   else:

@@ -470,10 +470,23 @@ def train(
     
   opt_state = jax.jit(tx.init, backend='cpu')(params)
 
-  
+  #config precisa adicionar
+  #use_checkpoint
+  #use_ckpt_dir
+  #
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
-  
+
+  if config.use_checkpoint:
+     tbs = utils.restore_pretrained_checkpoint(
+          config.use_ckpt_dir, 
+          #train_state, 
+          assert_exist=True, 
+        )
+     params = tbs['params']
+     model_state=tbs['model_state']
+     ema_params=tbs['ema_params']
+
   # Create the TrainState to track training state (i.e. params and optimizer).
   train_state = utils.TrainState(
     global_step=0, opt_state=opt_state, tx=tx, params=params, model_state=model_state,
