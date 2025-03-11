@@ -370,7 +370,7 @@ def train(
       
       train_state, _ = utils.restore_pretrained_checkpoint(
           ckpt_dir, 
-          #train_state, 
+          train_state, 
           assert_exist=True, 
           step=int(ckpt_num),
         )
