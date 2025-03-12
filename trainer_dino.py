@@ -477,21 +477,20 @@ def train(
   # Create chrono class to track and store training statistics and metadata.
   chrono = train_utils.Chrono()
 
-  if config.use_checkpoint:
-     tbs = utils.restore_pretrained_checkpoint(
-          config.use_ckpt_dir, 
-          #train_state, 
-          assert_exist=True, 
-        )
-     params = tbs['params']
-     model_state=tbs['model_state']
-     ema_params=tbs['ema_params']
-     print('\n\nload here\n\n')
-
   # Create the TrainState to track training state (i.e. params and optimizer).
   train_state = utils.TrainState(
     global_step=0, opt_state=opt_state, tx=tx, params=params, model_state=model_state,
       ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
+
+  if config.use_checkpoint:
+     restored_train_state = utils.restore_pretrained_checkpoint(
+          config.use_ckpt_dir, train_state, assert_exist=True)
+     restored_model_cfg = config.model
+      # Load params from the init_model.
+     train_state = model.init_from_train_state(  # pytype: disable=attribute-error
+          train_state, restored_train_state, restored_model_cfg)
+     del restored_train_state
+     print('\n\nload here\n\n')
   
   if config.save_state_0:
     unrep_train_state = train_state
