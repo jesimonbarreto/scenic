@@ -363,6 +363,26 @@ def train(
                       block[key][subkey] = {"bias": "adam", "kernel": "adam"}
       
       return data
+    
+    def modify_encoder_block_total(data, target_key):
+      if target_key in data and data[target_key] == "zero":
+          data[target_key] = {
+              "LayerNorm_0": {"bias": "adam", "scale": "adam"},
+              "LayerNorm_1": {"bias": "adam", "scale": "adam"},
+              "MlpBlock_0": {
+                  "Dense_0": {"bias": "adam", "kernel": "adam"},
+                  "Dense_1": {"bias": "adam", "kernel": "adam"},
+              },
+              "MultiHeadDotProductAttention_0": {
+                  "key": {"bias": "adam", "kernel": "adam"},
+                  "out": {"bias": "adam", "kernel": "adam"},
+                  "query": {"bias": "adam", "kernel": "adam"},
+                  "value": {"bias": "adam", "kernel": "adam"},
+              },
+          }
+      
+      return data
+    
     def create_mask(params, label_fn, target_key=None):
       def _map(params, mask, label_fn):
           for k in params:
@@ -377,7 +397,7 @@ def train(
       mask = {}
       _map(params, mask, label_fn)
       if target_key:
-        mask = modify_encoder_block(mask, target_key=target_key)
+        mask = modify_encoder_block_total(mask, target_key=target_key)
       return frozen_dict.freeze(mask)
 
     def zero_grads():

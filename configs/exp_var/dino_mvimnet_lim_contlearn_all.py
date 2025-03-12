@@ -19,13 +19,13 @@ def get_config():
   config.project = 'test_transferlearning'
   config.experiment_name = 'continue_learning'
   #config
-  config.transfer_learning = False
-  #config.train_layers = ["encoder", "ToTokenSequence"]
-  config.train_layers = ["ToTokenSequence_0", "encoder_norm",
-                        "key", "MlpBlock_0", "out" 
-                         ]
+  config.transfer_learning = True
+  config.train_layers = ["encoder", "ToTokenSequence"]
+  #config.train_layers = ["ToTokenSequence_0", "encoder_norm",
+  #                      "key", "MlpBlock_0", "out" 
+  #                       ]
   config.train_layer_comp = 'encoderblock_11' #None
-  config.train_layers_str = [True, True, True, True, True, True]
+  config.train_layers_str = [True, True]#, True, True, True, True]
   config.use_checkpoint = True #use checkpoint basewith other training 
   config.use_ckpt_dir = '/mnt/disks/stg_dataset/test_test/'
   config.layer_wise = False
