@@ -16,6 +16,7 @@ def get_config():
   config.project = 'Eval_Dino'
   config.experiment_name = 'Eval_Dino_v1_S'
   config.extract_train = True
+  config.transfer_learning = False
   # Dataset.
   config.dataset_name = 'eval_dataset'
   config.data_dtype_str = 'float32'
