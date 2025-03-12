@@ -21,7 +21,7 @@ def get_config():
   #config
   config.transfer_learning = True
   #config.train_layers = ["encoder", "ToTokenSequence"]
-  config.train_layers = ["ToTokenSequence_0", "encoder_norm", "projection_head",
+  config.train_layers = ["ToTokenSequence_0", "encoder_norm",
                         "key", "MlpBlock_0", "out" 
                          ]
   config.train_layer_comp = 'encoderblock_11' #None
