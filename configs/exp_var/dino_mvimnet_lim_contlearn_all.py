@@ -19,7 +19,7 @@ def get_config():
   config.project = 'test_transferlearning'
   config.experiment_name = 'continue_learning'
   #config
-  config.transfer_learning = True
+  config.transfer_learning = False
   #config.train_layers = ["encoder", "ToTokenSequence"]
   config.train_layers = ["ToTokenSequence_0", "encoder_norm",
                         "key", "MlpBlock_0", "out" 
