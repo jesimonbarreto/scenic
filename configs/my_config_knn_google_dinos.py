@@ -14,7 +14,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Eval_Dino'
-  config.experiment_name = 'Eval_Dino_S'
+  config.experiment_name = 'Eval_Dino_v1_S'
   config.extract_train = True
   # Dataset.
   config.dataset_name = 'eval_dataset'
