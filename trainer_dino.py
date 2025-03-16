@@ -367,11 +367,11 @@ def train(
     def modify_encoder_block_total(data, target_key):
       if target_key in data and data[target_key] == "zero":
           data[target_key] = {
-              "LayerNorm_0": {"bias": "adam", "scale": "adam"},
-              "LayerNorm_1": {"bias": "adam", "scale": "adam"},
+              "LayerNorm_0": {"bias": "zero", "scale": "zero"},
+              "LayerNorm_1": {"bias": "zero", "scale": "zero"},
               "MlpBlock_0": {
-                  "Dense_0": {"bias": "adam", "kernel": "adam"},
-                  "Dense_1": {"bias": "adam", "kernel": "adam"},
+                  "Dense_0": {"bias": "zero", "kernel": "zero"},
+                  "Dense_1": {"bias": "zero", "kernel": "zero"},
               },
               "MultiHeadDotProductAttention_0": {
                   "key": {"bias": "adam", "kernel": "adam"},
