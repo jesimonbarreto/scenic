@@ -364,26 +364,33 @@ def train(
       
       return data
     
-    def modify_encoder_block_total(data, target_key):
-      if target_key in data and data[target_key] == "zero":
-          data[target_key] = {
-              "LayerNorm_0": {"bias": "zero", "scale": "zero"},
-              "LayerNorm_1": {"bias": "zero", "scale": "zero"},
-              "MlpBlock_0": {
-                  "Dense_0": {"bias": "zero", "kernel": "zero"},
-                  "Dense_1": {"bias": "zero", "kernel": "zero"},
-              },
-              "MultiHeadDotProductAttention_0": {
-                  "key": {"bias": "adam", "kernel": "adam"},
-                  "out": {"bias": "adam", "kernel": "adam"},
-                  "query": {"bias": "adam", "kernel": "adam"},
-                  "value": {"bias": "adam", "kernel": "adam"},
-              },
-          }
+    def modify_encoder_block_total(data, target_keys):
+      for target_key in target_keys:
+        if target_key in data and data[target_key] == "zero":
+            data[target_key] = {
+                "LayerNorm_0": {"bias": config.lnorm_0, "scale": config.lnorm_0},
+                "LayerNorm_1": {"bias": config.lnorm_1, "scale": config.lnorm_1},
+                "MlpBlock_0": {
+                    "Dense_0": {"bias": config.mlpblock_dense_0,
+                                "kernel": config.mlpblock_dense_0},
+                    "Dense_1": {"bias": config.mlpblock_dense_1,
+                                "kernel": config.mlpblock_dense_1},
+                },
+                "MultiHeadDotProductAttention_0": {
+                    "key": {"bias": config.multi_key,
+                            "kernel": config.multi_key},
+                    "out": {"bias": config.multi_out,
+                            "kernel": config.multi_out},
+                    "query": {"bias": config.multi_query,
+                              "kernel": config.multi_query},
+                    "value": {"bias": config.multi_value,
+                              "kernel": config.multi_value},
+                },
+            }
       
       return data
     
-    def create_mask(params, label_fn, target_key=None):
+    def create_mask(params, label_fn, target_keys=None):
       def _map(params, mask, label_fn):
           for k in params:
               if label_fn(k):
@@ -396,8 +403,8 @@ def train(
                       mask[k] = 'adam'
       mask = {}
       _map(params, mask, label_fn)
-      if target_key:
-        mask = modify_encoder_block_total(mask, target_key=target_key)
+      if len(target_keys)>0:
+        mask = modify_encoder_block_total(mask, target_keys=target_keys)
       return frozen_dict.freeze(mask)
 
     def zero_grads():
