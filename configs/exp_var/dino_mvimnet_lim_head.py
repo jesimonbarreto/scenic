@@ -52,7 +52,7 @@ def get_config():
   config.gama_loss = 1
   config.teta_loss= 0.7
   config.max_grad_norm = 1
-  config.num_training_epochs = 30#400
+  config.num_training_epochs = 15#400
   config.batch_size = 256
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -163,12 +163,12 @@ def get_config():
                              'B': 12,
                              'L': 24,
                              'H': 32}[version]
-  config.model.head_output_dim = 65536 #8192 #4096
+  config.model.head_output_dim = 16384 #65536 #8192 #4096
   #head
   config.model.attention_dropout_rate = 0.0
-  config.model.n_layers = 1
+  config.model.n_layers = 2
   config.model.head_hidden_dim = 512
-  config.model.head_bottleneck_dim = 256
+  config.model.head_bottleneck_dim = 64 #256
   ##
   config.model.dropout_rate = 0.0
   config.model.stochastic_depth = 0.1
