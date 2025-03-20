@@ -143,6 +143,7 @@ class ViTDINO(nn.Module):
 
   mlp_dim: int
   num_layers: int
+  n_layers: int
   num_heads: int
   patches: ml_collections.ConfigDict
   hidden_size: int
@@ -205,6 +206,7 @@ class ViTDINO(nn.Module):
           hidden_dim=self.head_hidden_dim,
           bottleneck_dim=self.head_bottleneck_dim,
           output_dim=self.head_output_dim,
+          n_layers=self.n_layers,
           name='projection_head')(
               x_cls, train)#.reshape((-1, self.head_output_dim))'''
 
@@ -348,12 +350,13 @@ class ViTDinoModel(base_model.BaseModel):
     return ViTDINO(
         mlp_dim=self.config.model.mlp_dim,
         num_layers=self.config.model.num_layers,
+        n_layers=self.config.model.get('n_layers', 1),
         num_heads=self.config.model.num_heads,
         patches=self.config.model.patches,
         hidden_size=self.config.model.hidden_size,
         n_ref_positions=self.config.n_ref_positions,
         apply_cluster_loss=self.config.apply_cluster_loss,
-        head_hidden_dim=self.config.model.get('head_hidden_dim', 2048),
+        head_hidden_dim=self.config.model.get('head_hidden_dim', 512),
         head_bottleneck_dim=self.config.model.get('head_bottleneck_dim', 256),
         head_output_dim=self.config.model.get('head_output_dim', 1024),
         dropout_rate=self.config.model.get('dropout_rate', 0.0),
