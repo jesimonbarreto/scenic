@@ -403,7 +403,7 @@ def train(
                       mask[k] = 'adam'
       mask = {}
       _map(params, mask, label_fn)
-      if len(target_keys)>0:
+      if target_keys:
         mask = modify_encoder_block_total(mask, target_keys=target_keys)
       return frozen_dict.freeze(mask)
 
@@ -417,7 +417,7 @@ def train(
     
     list_str_layers = config.get('train_layers') or ["encoder", "ToTokenSequence"]
     list_str_layers_ver = config.get('train_layers_str') or [True, True]
-    last_layer_train = config.get('train_layer_comp')
+    last_layer_train = config.get('train_layer_comp') or None
     freeze_encoder_and_token = generate_conditional_freeze_layers(
       list_str_layers, list_str_layers_ver, use_and=False
     )
