@@ -137,7 +137,12 @@ def get_config():
                              'B': 12,
                              'L': 24,
                              'H': 32}[version]
-  config.model.head_output_dim = 65536 #4096 #65536 
+  config.model.head_output_dim = 16384 #4096 #65536
+  #head
+  config.model.n_layers = 1
+  config.model.head_hidden_dim = 512
+  config.model.head_bottleneck_dim = 64 #256
+  ##
   config.model.attention_dropout_rate = 0.0
   config.model.dropout_rate = 0.0
   config.model.stochastic_depth = 0.1
