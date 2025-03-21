@@ -70,12 +70,12 @@ def get_config():
   config.global_crops_scale = (0.14, 1.0) 
   config.local_crops_number = 0 #if 0, global scale = 0.14,1.0
   config.local_crops_scale = (0.05,0.25)
-  config.student_temp = 0.1
+  config.student_temp = 0.3
   config.center_momentum = 0.9
   config.ncrops = 0 #change other parameters
   config.warmup_teacher_temp = 0.04
-  config.teacher_temp = 0.07
-  config.warmup_teacher_temp_epochs = 0
+  config.teacher_temp = 0.05
+  config.warmup_teacher_temp_epochs = 3
   
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
@@ -88,16 +88,17 @@ def get_config():
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
         '|value_range(0, 1, data_key="x1")' +
-        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
-        '|random_grayscale(0.2, data_key="x1")' +
-        '|random_blur(1.0, data_key="x1")' +
+        #'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
+        '|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
+        '|random_grayscale(0.1, data_key="x1")' +
+        '|random_blur(0.5, data_key="x1")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
-        '|random_grayscale(0.2, data_key="x2")' +
+        '|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x2")' +
+        '|random_grayscale(0.1, data_key="x2")' +
         '|random_blur(0.1, data_key="x2")' +
-        '|random_solarize(0.2, data_key="x2")' +
+        '|random_solarize(0.1, data_key="x2")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
         '|keep("x1", "x2")'
     )
