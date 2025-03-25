@@ -170,7 +170,7 @@ def dino_train_step(
         train=True,
         rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
     
-    '''cc = flax_model.apply(
+    cc = flax_model.apply(
         {'params': params},
         batch['sample'][1],
         seqlen=config.reference_seqlen,
@@ -178,36 +178,13 @@ def dino_train_step(
         drop_moment=drop_moment,
         backbone = True,
         train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})'''
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
-    #student_out = jnp.concatenate([st,cc])
-    student_out = st
+    student_out = jnp.concatenate([st,cc])
+    #student_out = st
     loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
     total_loss = loss_dino
-    if config.mode == 'random':
-      teacher_out = flax_model.apply(
-        {'params': train_state.ema_params if use_ema else params},
-        batch['sample'][1],
-        seqlen=config.reference_seqlen,
-        seqlen_selection=config.reference_seqlen_selection,
-        drop_moment=drop_moment,
-        backbone = True,
-        train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
     
-      st = flax_model.apply(
-          {'params': params},
-          batch['sample'][1],
-          seqlen=config.reference_seqlen,
-          seqlen_selection=config.reference_seqlen_selection,
-          drop_moment=drop_moment,
-          backbone = True,
-          train=True,
-          rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
-      student_out = st
-      loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
-      total_loss += loss_dino
-      total_loss /=2
     return total_loss, (loss_dino, center)
   
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
