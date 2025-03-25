@@ -72,7 +72,7 @@ def get_config():
   config.local_crops_scale = (0.05,0.25)
   config.student_temp = 0.3
   config.center_momentum = 0.9
-  config.ncrops = 4 #change other parameters
+  config.ncrops = 6 #change other parameters
   config.warmup_teacher_temp = 0.04
   config.teacher_temp = 0.05
   config.warmup_teacher_temp_epochs = 3
