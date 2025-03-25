@@ -76,4 +76,4 @@ cd /home/jesimonbarreto/scenic
 
 sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_contlearn_two_h2.py --workdir=/mnt/disks/stg_dataset/test_test2
-#sudo -E python -m knn_main --config=configs/my_config_knn_google_old_contiLearn.py --workdir=../test_
+sudo -E python -m knn_main --config=configs/my_config_knn_google_old_contiLearn.py --workdir=../test_
