@@ -176,7 +176,7 @@ def get_config():
   config.model.attention_dropout_rate = 0.0
   
   #head
-  config.model.n_layers = 4
+  config.model.n_layers = 3
   config.model.head_hidden_dim = 512
   config.model.head_bottleneck_dim = 256#64 #256
   
