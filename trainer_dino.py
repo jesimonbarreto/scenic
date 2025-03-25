@@ -179,7 +179,7 @@ def dino_train_step(
           drop_moment=drop_moment,
           backbone = True,
           train=True,
-          rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+          rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
       
       student_out = jnp.concatenate([st,cc])
     else:
