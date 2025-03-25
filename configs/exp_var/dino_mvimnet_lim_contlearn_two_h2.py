@@ -102,7 +102,7 @@ def get_config():
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
         '|keep("x1", "x2")'
     )
-  if config.mode == 'video_crops':
+  elif config.mode == 'video_crops':
     config.dataset_configs.pp_train = (
         #'decode(inkey=("image1"), outkey=("image1"))' +
         #'|decode(inkey=("image2"), outkey=("image2"))' +
@@ -113,14 +113,14 @@ def get_config():
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
         '|value_range(0, 1, data_key="x1")' +
-        #'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
+        #'|random_color_jitter(0.8, 0.8, 0.8, 0.4, 0.2, data_key="x1")' +
         '|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
         '|random_grayscale(0.1, data_key="x1")' +
         '|random_blur(0.5, data_key="x1")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        '|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x2")' +
+        '|random_color_jitter(0.8, 0.6, 0.6, 0.4, 0.2, data_key="x2")' +
         '|random_grayscale(0.1, data_key="x2")' +
         '|random_blur(0.1, data_key="x2")' +
         '|random_solarize(0.1, data_key="x2")' +
