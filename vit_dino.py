@@ -4,7 +4,10 @@ import copy
 import functools
 from typing import Any, Optional, Tuple
 
+from collections.abc import Callable
+
 import flax.linen as nn
+from flax.linen import initializers, Module, compact
 import jax
 from jax import lax
 from jax import nn as opr
@@ -101,7 +104,7 @@ class ToTokenSequence(nn.Module):
 
     return x, posemb
 
-class LoRA(nn.Module):
+"""class LoRA(nn.Module):
   input_dim: int
   rank: int  # Dimensão reduzida de projeção (ex: 4 ou 8)
 
@@ -111,6 +114,21 @@ class LoRA(nn.Module):
 
   def __call__(self, x):
       return x + (x @ self.A) @ self.B
+"""
+
+class LoRA(Module):
+  """LoRA (Low-Rank Adaptation) usando a estrutura de Dense."""
+  input_dim: int
+  rank: int  # Dimensão reduzida de projeção
+  lora_A_init: Callable = initializers.lecun_normal()
+  lora_B_init: Callable = initializers.zeros_init()
+
+  @compact
+  def __call__(self, x):
+      A = self.param('lora_A', self.lora_A_init, (self.input_dim, self.rank))
+      B = self.param('lora_B', self.lora_B_init, (self.rank, self.input_dim))
+      return x + lax.dot_general(lax.dot_general(x, A, (((x.ndim - 1,), (0,)), ((), ()))), 
+                                  B, (((x.ndim - 1,), (0,)), ((), ())))
 
 class Encoder1DBlockLORA(nn.Module):
   """Transformer encoder layer com LoRA."""
@@ -144,7 +162,7 @@ class Encoder1DBlockLORA(nn.Module):
         broadcast_dropout=False,
         deterministic=deterministic,
         dropout_rate=self.attention_dropout_rate
-    )(lora_q, lora_v)
+    )(lora_q, x, lora_v)
 
     # Dropout e Stochastic Depth
     x = nn.Dropout(rate=self.dropout_rate)(x, deterministic)
