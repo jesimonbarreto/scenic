@@ -348,7 +348,8 @@ def train(
       for target_key in target_keys:
         if target_key in data and data[target_key] == "zero":
             data[target_key] = {
-                "LoRA": {"lora_A": "adam", "lora_B": "adam"},
+                "LoRA_0": {"lora_A": "adam", "lora_B": "adam"},
+                "LoRA_1": {"lora_A": "adam", "lora_B": "adam"},
                 "LayerNorm_0": {"bias": config.lnorm_0, "scale": config.lnorm_0},
                 "LayerNorm_1": {"bias": config.lnorm_1, "scale": config.lnorm_1},
                 "MlpBlock_0": {
