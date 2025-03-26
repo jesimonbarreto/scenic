@@ -76,7 +76,7 @@ def get_config():
   
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
-  if config.mode == 'video':
+  if config.mode == 'video' and config.ncrops == 0:
     config.dataset_configs.pp_train = (
         #'decode(inkey=("image1"), outkey=("image1"))' +
         #'|decode(inkey=("image2"), outkey=("image2"))' +
@@ -99,7 +99,7 @@ def get_config():
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
         '|keep("x1", "x2")'
     )
-  elif config.mode == 'video_crops':
+  elif config.mode == 'video' and config.ncrops > 0:
     config.dataset_configs.pp_train = (
         #'decode(inkey=("image1"), outkey=("image1"))' +
         #'|decode(inkey=("image2"), outkey=("image2"))' +
