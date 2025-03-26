@@ -160,11 +160,32 @@ class Encoder1DBlockLORA(nn.Module):
     x = nn.LayerNorm(dtype=self.dtype)(inputs)
 
     # Aplicar LoRA nas projeções query e value
-    A_q = self.param('A_q', self.A_q_init, (d_model, self.rank))
-    B_q = self.param('B_q', self.B_q_init, (self.rank, d_model))
+    is_initialized = self.has_variable('params','A_q')
+    if not is_initialized:
+      print('aqui1')
+      A_q = self.param('A_q', self.A_q_init, (d_model, self.rank))
+    else:
+      print('aqui2')
+      A_q = self.get_variable('params','A_q')
 
-    A_v = self.param('A_v', self.A_v_init, (d_model, self.rank))
-    B_v = self.param('B_v', self.B_v_init, (self.rank, d_model))
+    is_initialized = self.has_variable('params','B_q')
+    if not is_initialized:
+      B_q = self.param('B_q', self.B_q_init, (self.rank, d_model))
+    else:
+      B_q = self.get_variable('params','B_q')
+    
+    is_initialized = self.has_variable('params','A_v')
+    if not is_initialized:
+      A_v = self.param('A_v', self.A_v_init, (d_model, self.rank))
+    else:
+      A_v = self.get_variable('params','A_v')
+    
+    is_initialized = self.has_variable('params','B_v')
+    if not is_initialized:
+      B_v = self.param('B_v', self.B_v_init, (self.rank, d_model))
+    else:
+      B_v = self.get_variable('params','B_v')
+    
     
     x_proj = lax.dot_general(x, A_q, (((x.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, r)
     lora_q = lax.dot_general(x_proj, B_q, (((x_proj.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, 197)
