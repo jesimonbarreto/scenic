@@ -326,10 +326,8 @@ def train(
         target_key = f"encoderblock_{idx_layer}"
         if target_key in data and data[target_key] == "zero":
             data[target_key] = {
-                "A_q": "adam",
-                "B_q": "adam",
-                "A_v": "adam",
-                "B_v": "adam",
+                "LoRA_0": {"lora_A": "adam", "lora_B": "adam"},
+                "LoRA_1": {"lora_A": "adam", "lora_B": "adam"},
                 "LayerNorm_0": {"bias": "adam", "scale": "adam"},
                 "LayerNorm_1": {"bias": "adam", "scale": "adam"},
                 "MlpBlock_0": {

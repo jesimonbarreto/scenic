@@ -144,11 +144,7 @@ class Encoder1DBlockLORA(nn.Module):
   attention_dropout_rate: float = 0.1
   stochastic_depth: float = 0.0
   lora_use: bool = False
-  rank: int = 4  # Parâmetro do LoRA
-  A_q_init: Callable = initializers.lecun_normal()
-  B_q_init: Callable = initializers.zeros_init()
-  A_v_init: Callable = initializers.lecun_normal()
-  B_v_init: Callable = initializers.zeros_init()
+  rank: int = 64  # Parâmetro do LoRA
 
   @nn.compact
   def __call__(self, inputs: jnp.ndarray, deterministic: bool) -> jnp.ndarray:
@@ -160,41 +156,9 @@ class Encoder1DBlockLORA(nn.Module):
     x = nn.LayerNorm(dtype=self.dtype)(inputs)
 
     # Aplicar LoRA nas projeções query e value
-    is_initialized = self.has_variable('params','A_q')
-    if not is_initialized:
-      print('aqui1')
-      A_q = self.param('A_q', self.A_q_init, (d_model, self.rank))
-    else:
-      print('aqui2')
-      A_q = self.get_variable('params','A_q')
-
-    is_initialized = self.has_variable('params','B_q')
-    if not is_initialized:
-      B_q = self.param('B_q', self.B_q_init, (self.rank, d_model))
-    else:
-      B_q = self.get_variable('params','B_q')
     
-    is_initialized = self.has_variable('params','A_v')
-    if not is_initialized:
-      A_v = self.param('A_v', self.A_v_init, (d_model, self.rank))
-    else:
-      A_v = self.get_variable('params','A_v')
-    
-    is_initialized = self.has_variable('params','B_v')
-    if not is_initialized:
-      B_v = self.param('B_v', self.B_v_init, (self.rank, d_model))
-    else:
-      B_v = self.get_variable('params','B_v')
-    
-    
-    x_proj = lax.dot_general(x, A_q, (((x.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, r)
-    lora_q = lax.dot_general(x_proj, B_q, (((x_proj.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, 197)
-
-    x_proj = lax.dot_general(x, A_v, (((x.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, r)
-    lora_v = lax.dot_general(x_proj, B_v, (((x_proj.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, 197)
-
-    #lora_q = LoRA(d_model, self.rank, name=f'LoRA_0')(x)
-    #lora_v = LoRA(d_model, self.rank, name=f'LoRA_1')(x)
+    lora_q = LoRA(d_model, self.rank)(x)
+    lora_v = LoRA(d_model, self.rank)(x)
 
     # Atenção modificada com LoRA
     x = nn.MultiHeadDotProductAttention(
@@ -204,7 +168,7 @@ class Encoder1DBlockLORA(nn.Module):
         broadcast_dropout=False,
         deterministic=deterministic,
         dropout_rate=self.attention_dropout_rate
-    )(lora_q, lora_v)
+    )(lora_q, x, lora_v)
 
     # Dropout e Stochastic Depth
     x = nn.Dropout(rate=self.dropout_rate)(x, deterministic)

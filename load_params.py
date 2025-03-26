@@ -357,7 +357,7 @@ def restore_params(checkpoint_name: str, checkpoint_path: str, params: Any,
           k, v) in pt_weights.items() if k.startswith('encoder.')}
     def dontload(key):
       #Adding Lora
-      if 'A_q' in key or 'B_q' in key or 'A_v' in key or 'B_v' in key:
+      if 'LoRA' in key or 'lora' in key:
         return True
       if 'projecti' in key or 'UperNet' in key or 'fpn' in key:
         return True
