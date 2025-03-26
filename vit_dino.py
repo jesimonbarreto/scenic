@@ -126,11 +126,11 @@ class LoRA(nn.Module):
     @nn.compact
     def __call__(self, x):
         """Aplica LoRA na última dimensão de x."""
-        A = self.param('lora_A', self.lora_A_init, (self.input_dim, self.rank))
-        B = self.param('lora_B', self.lora_B_init, (self.rank, self.input_dim))
+        lora_A = self.param('lora_A', self.lora_A_init, (self.input_dim, self.rank))
+        lora_B = self.param('lora_B', self.lora_B_init, (self.rank, self.input_dim))
 
         # Multiplicação na última dimensão (feature_dim)
-        x_proj = lax.dot_general(x, A, (((x.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, r)
+        x_proj = lax.dot_general(x, lora_A, (((x.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, r)
         x_proj = lax.dot_general(x_proj, B, (((x_proj.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, 197)
 
         return x + x_proj  # Aplica adaptação de LoRA
