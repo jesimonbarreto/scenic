@@ -43,7 +43,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'video_crops' # video or random
+  config.mode = 'video' #'video_crops' # video or frame
   
   #plot
   config.plot_ex = False
