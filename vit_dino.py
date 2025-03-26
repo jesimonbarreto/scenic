@@ -167,7 +167,7 @@ class Encoder1DBlockLORA(nn.Module):
         broadcast_dropout=False,
         deterministic=deterministic,
         dropout_rate=self.attention_dropout_rate
-    )(lora_q, x, lora_v)
+    )(lora_q, lora_v)
 
     # Dropout e Stochastic Depth
     x = nn.Dropout(rate=self.dropout_rate)(x, deterministic)
