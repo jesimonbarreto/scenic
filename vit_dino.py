@@ -101,6 +101,70 @@ class ToTokenSequence(nn.Module):
 
     return x, posemb
 
+class LoRA(nn.Module):
+  input_dim: int
+  rank: int  # Dimensão reduzida de projeção (ex: 4 ou 8)
+
+  def setup(self):
+      self.A = self.param('lora_A', nn.initializers.xavier_uniform(), (self.input_dim, self.rank))
+      self.B = self.param('lora_B', nn.initializers.zeros, (self.rank, self.input_dim))
+
+  def __call__(self, x):
+      return x + (x @ self.A) @ self.B
+
+class Encoder1DBlockLORA(nn.Module):
+  """Transformer encoder layer com LoRA."""
+  mlp_dim: int
+  num_heads: int
+  dtype: Any = jnp.float32
+  dropout_rate: float = 0.1
+  attention_dropout_rate: float = 0.1
+  stochastic_depth: float = 0.0
+  rank: int = 4  # Parâmetro do LoRA
+
+  @nn.compact
+  def __call__(self, inputs: jnp.ndarray, deterministic: bool) -> jnp.ndarray:
+    """Aplica o bloco Encoder1DBlockLORA."""
+    assert inputs.ndim == 3
+    d_model = inputs.shape[-1]  # Dimensão do embedding
+
+    # Normalização antes da atenção
+    x = nn.LayerNorm(dtype=self.dtype)(inputs)
+
+    # Aplicar LoRA nas projeções query e value
+    lora_q = LoRA(d_model, self.rank)(x)
+    lora_v = LoRA(d_model, self.rank)(x)
+
+    # Atenção modificada com LoRA
+    x = nn.MultiHeadDotProductAttention(
+        num_heads=self.num_heads,
+        dtype=self.dtype,
+        kernel_init=nn.initializers.xavier_uniform(),
+        broadcast_dropout=False,
+        deterministic=deterministic,
+        dropout_rate=self.attention_dropout_rate
+    )(lora_q, lora_v)
+
+    # Dropout e Stochastic Depth
+    x = nn.Dropout(rate=self.dropout_rate)(x, deterministic)
+    x = nn_layers.StochasticDepth(rate=self.stochastic_depth)(x, deterministic)
+    x = x + inputs  # Residual Connection
+
+    # MLP block
+    y = nn.LayerNorm(dtype=self.dtype)(x)
+    y = attention_layers.MlpBlock(
+        mlp_dim=self.mlp_dim,
+        dtype=self.dtype,
+        dropout_rate=self.dropout_rate,
+        activation_fn=nn.gelu,
+        kernel_init=nn.initializers.xavier_uniform(),
+        bias_init=nn.initializers.normal(stddev=1e-6)
+    )(y, deterministic=deterministic)
+
+    # Stochastic Depth e Residual Connection
+    y = nn_layers.StochasticDepth(rate=self.stochastic_depth)(y, deterministic)
+    return y + x
+
 
 def token_indexes_not_to_drop(seqlen, n_tokens, seqlen_selection, rng):
   """Returns only the token indexes to keep in a sequence of tokens."""
@@ -147,6 +211,8 @@ class ViTDINO(nn.Module):
   num_heads: int
   patches: ml_collections.ConfigDict
   hidden_size: int
+  lora_use: bool
+  lora_rank: int
   apply_cluster_loss: bool
   head_hidden_dim: int
   n_ref_positions: int
@@ -183,7 +249,8 @@ class ViTDINO(nn.Module):
     #x_pre = x.copy()
     # ViT Encoder.
     for lyr in range(self.num_layers):
-      x = vit.Encoder1DBlock(
+      if self.lora_use:
+         x = Encoder1DBlockLORA(
           mlp_dim=self.mlp_dim,
           num_heads=self.num_heads,
           dropout_rate=self.dropout_rate,
@@ -191,8 +258,20 @@ class ViTDINO(nn.Module):
           stochastic_depth=(lyr / max(self.num_layers - 1, 1)) *
           self.stochastic_depth,
           name=f'encoderblock_{lyr}',
-          dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
-              x, deterministic=not train)
+          rank=self.lora_rank, 
+          dtype=jax.dtypes.canonicalize_dtype(self.dtype)
+          )(x, deterministic=not train)
+      else:   
+        x = vit.Encoder1DBlock(
+            mlp_dim=self.mlp_dim,
+            num_heads=self.num_heads,
+            dropout_rate=self.dropout_rate,
+            attention_dropout_rate=self.attention_dropout_rate,
+            stochastic_depth=(lyr / max(self.num_layers - 1, 1)) *
+            self.stochastic_depth,
+            name=f'encoderblock_{lyr}',
+            dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
+                x, deterministic=not train)
     x_norm = nn.LayerNorm(name='encoder_norm')(x)
     x_cls = x_norm[:, 0]
     '''x_out = ProjectionModule(
@@ -354,6 +433,8 @@ class ViTDinoModel(base_model.BaseModel):
         num_heads=self.config.model.num_heads,
         patches=self.config.model.patches,
         hidden_size=self.config.model.hidden_size,
+        lora_use=self.config.lora_use,
+        lora_rank=self.config.lora_rank,
         n_ref_positions=self.config.n_ref_positions,
         apply_cluster_loss=self.config.apply_cluster_loss,
         head_hidden_dim=self.config.model.get('head_hidden_dim', 512),
@@ -453,6 +534,52 @@ class ViTDinoModel(base_model.BaseModel):
     #jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
     return total_loss, center
   
+  def loss_function_uncertainty(self,
+                  teacher_output: jnp.ndarray,
+                  student_output: jnp.ndarray,
+                  center: jnp.ndarray,
+                  epoch: int,
+                  weights: Optional[jnp.ndarray] = None) -> float:
+    """Loss do DINO modificada para melhorar discriminação com ponderação por incerteza."""
+
+    # Normaliza saída do estudante
+    student_out = student_output / self.student_temp
+    student_out = jnp.split(student_out, self.ncrops)
+
+    # Ajusta a temperatura do professor
+    temp = self.teacher_temp_schedule[epoch]
+    teacher_out = opr.softmax((teacher_output - center) / temp, axis=-1)
+    teacher_out = jnp.split(lax.stop_gradient(teacher_out), 2)
+
+    # Inicializa loss e contagem de termos
+    total_loss = 0
+    n_loss_terms = 0
+
+    for iq, q in enumerate(teacher_out):
+        for v in range(len(student_out)):
+            if v == iq:
+                continue  # Pula casos onde estudante e professor usam a mesma view
+            
+            # 🔹 Calcula a Loss Original do DINO 🔹
+            loss = jnp.sum(-q * opr.log_softmax(student_out[v], axis=-1), axis=-1)
+
+            # 🔥 **Ponderação por Incerteza** 🔥
+            entropy = -jnp.sum(q * jnp.log(q + 1e-6), axis=-1)  # Entropia do professor
+            gamma = 2.0  # Ajuste da ponderação
+            loss = (1 + gamma * entropy) * loss  # Maior peso para exemplos de alta incerteza
+
+            total_loss += jnp.mean(loss)
+            n_loss_terms += 1
+
+    # Normaliza a loss final
+    total_loss /= n_loss_terms
+
+    # Atualiza o centro do professor
+    center = self.update_center(teacher_output, center)
+
+    return total_loss, center
+
+
   def cosine_similarity(self, A, B):
     dot_product = jnp.dot(A, B)
     norm_A = jnp.linalg.norm(A)

@@ -30,6 +30,11 @@ def get_config():
   config.use_ckpt_dir = '/mnt/disks/stg_dataset/test_test/'
   config.layer_wise = False
   config.print_lr_infos = False
+
+  #LORA
+  config.lora_use = True
+  config.lora_rank = 64
+
   # Dataset.
   config.dataset_name = 'dino_dataset'
   config.data_dtype_str = 'float32'

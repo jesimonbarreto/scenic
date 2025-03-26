@@ -29,15 +29,18 @@ def get_config():
   config.lnorm_1 = "adam"
   config.mlpblock_dense_0 = "adam"
   config.mlpblock_dense_1 = "adam"
-  config.multi_key = "adam"
-  config.multi_out = "adam"
-  config.multi_query = "adam"
-  config.multi_value = "adam"
+  config.multi_key = "zero"
+  config.multi_out = "zero"
+  config.multi_query = "zero"
+  config.multi_value = "zero"
   config.train_layers_str = [True, True]#, True, True, True, True]
   config.use_checkpoint = True #use checkpoint basewith other training 
   config.use_ckpt_dir = '/mnt/disks/stg_dataset/head_2/'
   config.layer_wise = False
   config.print_lr_infos = False
+  #LORA
+  config.lora_use = True
+  config.lora_rank = 64
   # Dataset.
   config.dataset_name = 'dino_dataset'
   config.data_dtype_str = 'float32'
