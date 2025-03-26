@@ -356,12 +356,8 @@ def restore_params(checkpoint_name: str, checkpoint_path: str, params: Any,
       pt_weights = {k.replace('encoder.', ''): v for (
           k, v) in pt_weights.items() if k.startswith('encoder.')}
     def dontload(key):
-      #adicionado Lora
-      print(key)
-      print('LoRA' in key)
-      print('lora' in key)
-      if 'LoRA' in key or 'Lora' in key:
-        print('Aqui')
+      #Adding Lora
+      if 'LoRA' in key or 'lora' in key:
         return True
       if 'projecti' in key or 'UperNet' in key or 'fpn' in key:
         return True
@@ -371,7 +367,6 @@ def restore_params(checkpoint_name: str, checkpoint_path: str, params: Any,
     restored_params = tree_map_with_names(
         lambda k, v: None if dontload(k) else get_param(pt_weights, k, nh),
         params)
-    print(casa)
 
   # In the remaining of this function we do param surgery.
   restored_params = flax.core.unfreeze(restored_params)
