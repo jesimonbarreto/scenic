@@ -34,7 +34,7 @@ def get_config():
   config.multi_query = "zero"
   config.multi_value = "zero"
   config.train_layers_str = [True, True]#, True, True, True, True]
-  config.use_checkpoint = True #use checkpoint basewith other training 
+  config.use_checkpoint = False #use checkpoint basewith other training 
   config.use_ckpt_dir = '/mnt/disks/stg_dataset/head_2/'
   config.layer_wise = False
   config.print_lr_infos = False
