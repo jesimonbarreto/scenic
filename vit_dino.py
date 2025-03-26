@@ -122,6 +122,8 @@ class LoRA(nn.Module):
     rank: int  # Dimensão reduzida de projeção
     lora_A_init: Callable = initializers.lecun_normal()
     lora_B_init: Callable = initializers.zeros_init()
+    lora_A:Any
+    lora_B:Any
 
     @nn.compact
     def __call__(self, x):
