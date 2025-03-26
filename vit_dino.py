@@ -145,6 +145,10 @@ class Encoder1DBlockLORA(nn.Module):
   stochastic_depth: float = 0.0
   lora_use: bool = False
   rank: int = 4  # Parâmetro do LoRA
+  A_q_init: Callable = initializers.lecun_normal()
+  B_q_init: Callable = initializers.zeros_init()
+  A_v_init: Callable = initializers.lecun_normal()
+  B_v_init: Callable = initializers.zeros_init()
 
   @nn.compact
   def __call__(self, inputs: jnp.ndarray, deterministic: bool) -> jnp.ndarray:
@@ -156,11 +160,11 @@ class Encoder1DBlockLORA(nn.Module):
     x = nn.LayerNorm(dtype=self.dtype)(inputs)
 
     # Aplicar LoRA nas projeções query e value
-    A_q = self.param('A_q', self.lora_A_init, (d_model, self.rank))
-    B_q = self.param('B_q', self.lora_B_init, (self.rank, d_model))
+    A_q = self.param('A_q', self.A_q_init, (d_model, self.rank))
+    B_q = self.param('B_q', self.B_q_init, (self.rank, d_model))
 
-    A_v = self.param('A_v', self.lora_A_init, (d_model, self.rank))
-    B_v = self.param('B_v', self.lora_B_init, (self.rank, d_model))
+    A_v = self.param('A_v', self.A_v_init, (d_model, self.rank))
+    B_v = self.param('B_v', self.B_v_init, (self.rank, d_model))
     
     x_proj = lax.dot_general(x, A_q, (((x.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, r)
     lora_q = lax.dot_general(x_proj, B_q, (((x_proj.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, 197)
