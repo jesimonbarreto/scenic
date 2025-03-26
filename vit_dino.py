@@ -116,19 +116,24 @@ class ToTokenSequence(nn.Module):
       return x + (x @ self.A) @ self.B
 """
 
-class LoRA(Module):
-  """LoRA (Low-Rank Adaptation) usando a estrutura de Dense."""
-  input_dim: int
-  rank: int  # Dimensão reduzida de projeção
-  lora_A_init: Callable = initializers.lecun_normal()
-  lora_B_init: Callable = initializers.zeros_init()
+class LoRA(nn.Module):
+    """LoRA (Low-Rank Adaptation) usando a estrutura de Dense."""
+    input_dim: int  # Última dimensão da entrada (feature_dim)
+    rank: int  # Dimensão reduzida de projeção
+    lora_A_init: Callable = initializers.lecun_normal()
+    lora_B_init: Callable = initializers.zeros_init()
 
-  @compact
-  def __call__(self, x):
-      A = self.param('lora_A', self.lora_A_init, (self.input_dim, self.rank))
-      B = self.param('lora_B', self.lora_B_init, (self.rank, self.input_dim))
-      return x + lax.dot_general(lax.dot_general(x, A, (((x.ndim - 1,), (0,)), ((), ()))), 
-                                  B, (((x.ndim - 1,), (0,)), ((), ())))
+    @nn.compact
+    def __call__(self, x):
+        """Aplica LoRA na última dimensão de x."""
+        A = self.param('lora_A', self.lora_A_init, (self.input_dim, self.rank))
+        B = self.param('lora_B', self.lora_B_init, (self.rank, self.input_dim))
+
+        # Multiplicação na última dimensão (feature_dim)
+        x_proj = lax.dot_general(x, A, (((x.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, r)
+        x_proj = lax.dot_general(x_proj, B, (((x_proj.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, 197)
+
+        return x + x_proj  # Aplica adaptação de LoRA
 
 class Encoder1DBlockLORA(nn.Module):
   """Transformer encoder layer com LoRA."""
