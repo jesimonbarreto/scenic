@@ -251,17 +251,29 @@ class ViTDINO(nn.Module):
     # ViT Encoder.
     for lyr in range(self.num_layers):
       if self.lora_use:
-         x = Encoder1DBlockLORA(
-          mlp_dim=self.mlp_dim,
-          num_heads=self.num_heads,
-          dropout_rate=self.dropout_rate,
-          attention_dropout_rate=self.attention_dropout_rate,
-          stochastic_depth=(lyr / max(self.num_layers - 1, 1)) *
-          self.stochastic_depth,
-          name=f'encoderblock_{lyr}',
-          rank=self.lora_rank, 
-          dtype=jax.dtypes.canonicalize_dtype(self.dtype)
-          )(x, deterministic=not train)
+         if lyr < self.num_layers - 1:
+            x = Encoder1DBlockLORA(
+              mlp_dim=self.mlp_dim,
+              num_heads=self.num_heads,
+              dropout_rate=self.dropout_rate,
+              attention_dropout_rate=self.attention_dropout_rate,
+              stochastic_depth=(lyr / max(self.num_layers - 1, 1)) *
+              self.stochastic_depth,
+              name=f'encoderblock_{lyr}',
+              rank=self.lora_rank, 
+              dtype=jax.dtypes.canonicalize_dtype(self.dtype)
+              )(x, deterministic=not train)
+         else:
+            x = vit.Encoder1DBlock(
+              mlp_dim=self.mlp_dim,
+              num_heads=self.num_heads,
+              dropout_rate=self.dropout_rate,
+              attention_dropout_rate=self.attention_dropout_rate,
+              stochastic_depth=(lyr / max(self.num_layers - 1, 1)) *
+              self.stochastic_depth,
+              name=f'encoderblock_{lyr}',
+              dtype=jax.dtypes.canonicalize_dtype(self.dtype))(
+                  x, deterministic=not train)
       else:   
         x = vit.Encoder1DBlock(
             mlp_dim=self.mlp_dim,

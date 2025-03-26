@@ -321,26 +321,32 @@ def train(
   # Create optimizer.
   if config.transfer_learning:
     params = freeze(params)
-    def modify_encoder_block(data, target_key):
-      if target_key in data and isinstance(data[target_key], dict):
-          block = data[target_key]
-          
-          # Mantém LayerNorm_* inalterado (já está no formato correto)
-          for key in block:
-              if key.startswith("LayerNorm"):
-                  continue
-              
-              # Se for 'MlpBlock_*', transforma em {'dense_0': {...}, 'dense_1': {...}}
-              if key.startswith("MlpBlock"):
-                  block[key] = {
-                      "Dense_0": {"bias": "adam", "kernel": "adam"},
-                      "Dense_1": {"bias": "adam", "kernel": "adam"},
-                  }
-              
-              # Se for 'MultiHeadDotProductAttention_*', cada subitem recebe 'bias' e 'kernel'
-              elif key.startswith("MultiHeadDotProductAttention"):
-                  for subkey in ["key", "out", "query", "value"]:
-                      block[key][subkey] = {"bias": "adam", "kernel": "adam"}
+    def modify_encoder_block(data, number_layers=11):
+      for idx_layer in range(number_layers):
+        target_key = f"encoderblock_{idx_layer}"
+        if target_key in data and data[target_key] == "zero":
+            data[target_key] = {
+                "LoRA_0": {"lora_A": "adam", "lora_B": "adam"},
+                "LoRA_1": {"lora_A": "adam", "lora_B": "adam"},
+                "LayerNorm_0": {"bias": "adam", "scale": "adam"},
+                "LayerNorm_1": {"bias": "adam", "scale": "adam"},
+                "MlpBlock_0": {
+                    "Dense_0": {"bias": "zero",
+                                "kernel": "zero"},
+                    "Dense_1": {"bias": "zero",
+                                "kernel": "zero"},
+                },
+                "MultiHeadDotProductAttention_0": {
+                    "key": {"bias": "zero",
+                            "kernel": "zero"},
+                    "out": {"bias": "zero",
+                            "kernel": "zero"},
+                    "query": {"bias": "zero",
+                              "kernel": "zero"},
+                    "value": {"bias": "zero",
+                              "kernel": "zero"},
+                },
+            }
       
       return data
     
@@ -348,8 +354,6 @@ def train(
       for target_key in target_keys:
         if target_key in data and data[target_key] == "zero":
             data[target_key] = {
-                "LoRA_0": {"lora_A": "adam", "lora_B": "adam"},
-                "LoRA_1": {"lora_A": "adam", "lora_B": "adam"},
                 "LayerNorm_0": {"bias": config.lnorm_0, "scale": config.lnorm_0},
                 "LayerNorm_1": {"bias": config.lnorm_1, "scale": config.lnorm_1},
                 "MlpBlock_0": {
@@ -386,7 +390,9 @@ def train(
       mask = {}
       _map(params, mask, label_fn)
       if target_keys:
+        mask = modify_encoder_block(mask, number_layers=11)
         mask = modify_encoder_block_total(mask, target_keys=target_keys)
+      print(mask)
       return frozen_dict.freeze(mask)
 
     def zero_grads():

@@ -24,7 +24,7 @@ def get_config():
   #config.train_layers = ["ToTokenSequence_0", "encoder_norm",
   #                      "key", "MlpBlock_0", "out" 
   #                       ]
-  config.train_layer_comp = ['encoderblock_10','encoderblock_11'] #None
+  config.train_layer_comp = ['encoderblock_11'] #None
   config.lnorm_0 = "adam"
   config.lnorm_1 = "adam"
   config.mlpblock_dense_0 = "adam"
