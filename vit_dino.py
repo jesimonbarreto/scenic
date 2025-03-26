@@ -156,8 +156,8 @@ class Encoder1DBlockLORA(nn.Module):
     x = nn.LayerNorm(dtype=self.dtype)(inputs)
 
     # Aplicar LoRA nas projeções query e value
-    lora_q = LoRA(d_model, self.rank)(x)
-    lora_v = LoRA(d_model, self.rank)(x)
+    lora_q = LoRA(d_model, self.rank, name=f'LoRA_0')(x)
+    lora_v = LoRA(d_model, self.rank, name=f'LoRA_1')(x)
 
     # Atenção modificada com LoRA
     x = nn.MultiHeadDotProductAttention(
