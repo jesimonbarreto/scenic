@@ -392,7 +392,6 @@ def train(
       if target_keys:
         mask = modify_encoder_block(mask, number_layers=11)
         mask = modify_encoder_block_total(mask, target_keys=target_keys)
-      print(mask)
       return frozen_dict.freeze(mask)
 
     def zero_grads():
