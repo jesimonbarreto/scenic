@@ -131,7 +131,7 @@ class LoRA(nn.Module):
 
         # Multiplicação na última dimensão (feature_dim)
         x_proj = lax.dot_general(x, lora_A, (((x.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, r)
-        x_proj = lax.dot_general(x_proj, B, (((x_proj.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, 197)
+        x_proj = lax.dot_general(x_proj, lora_B, (((x_proj.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, 197)
 
         return x + x_proj  # Aplica adaptação de LoRA
 
