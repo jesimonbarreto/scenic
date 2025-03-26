@@ -356,7 +356,8 @@ def restore_params(checkpoint_name: str, checkpoint_path: str, params: Any,
       pt_weights = {k.replace('encoder.', ''): v for (
           k, v) in pt_weights.items() if k.startswith('encoder.')}
     def dontload(key):
-      if 'projecti' in key or 'UperNet' in key or 'fpn' in key:
+      #adicionado Lora
+      if 'projecti' in key or 'UperNet' in key or 'fpn' in key or 'LoRa' in key or 'Lora' in key:
         return True
       if key.startswith('pixel_') or key.startswith('Dense_0'):
         return True

@@ -120,6 +120,7 @@ class Encoder1DBlockLORA(nn.Module):
   dropout_rate: float = 0.1
   attention_dropout_rate: float = 0.1
   stochastic_depth: float = 0.0
+  lora_use: bool = False
   rank: int = 4  # Parâmetro do LoRA
 
   @nn.compact
