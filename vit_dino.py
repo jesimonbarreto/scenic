@@ -156,8 +156,20 @@ class Encoder1DBlockLORA(nn.Module):
     x = nn.LayerNorm(dtype=self.dtype)(inputs)
 
     # Aplicar LoRA nas projeções query e value
-    lora_q = LoRA(d_model, self.rank, name=f'LoRA_0')(x)
-    lora_v = LoRA(d_model, self.rank, name=f'LoRA_1')(x)
+    A_q = self.param('A_q', self.lora_A_init, (d_model, self.rank))
+    B_q = self.param('B_q', self.lora_B_init, (self.rank, d_model))
+
+    A_v = self.param('A_v', self.lora_A_init, (d_model, self.rank))
+    B_v = self.param('B_v', self.lora_B_init, (self.rank, d_model))
+    
+    x_proj = lax.dot_general(x, A_q, (((x.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, r)
+    lora_q = lax.dot_general(x_proj, B_q, (((x_proj.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, 197)
+
+    x_proj = lax.dot_general(x, A_v, (((x.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, r)
+    lora_v = lax.dot_general(x_proj, B_v, (((x_proj.ndim - 1,), (0,)), ((), ())))  # (32, 6, 197, 197)
+
+    #lora_q = LoRA(d_model, self.rank, name=f'LoRA_0')(x)
+    #lora_v = LoRA(d_model, self.rank, name=f'LoRA_1')(x)
 
     # Atenção modificada com LoRA
     x = nn.MultiHeadDotProductAttention(
