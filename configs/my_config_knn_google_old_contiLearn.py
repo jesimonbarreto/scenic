@@ -17,6 +17,11 @@ def get_config():
   config.experiment_name = 'eval'
   config.extract_train = True
   config.transfer_learning = False
+
+  #LORA
+  config.lora_use = True
+  config.lora_rank = 64
+  
   # Dataset.
   config.dataset_name = 'eval_dataset'
   config.data_dtype_str = 'float32'
