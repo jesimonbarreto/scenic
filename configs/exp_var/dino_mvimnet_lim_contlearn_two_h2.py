@@ -29,10 +29,10 @@ def get_config():
   config.lnorm_1 = "adam"
   config.mlpblock_dense_0 = "adam"
   config.mlpblock_dense_1 = "adam"
-  config.multi_key = "zero"
-  config.multi_out = "zero"
-  config.multi_query = "zero"
-  config.multi_value = "zero"
+  config.multi_key = "adam"
+  config.multi_out = "adam"
+  config.multi_query = "adam"
+  config.multi_value = "adam"
   config.train_layers_str = [True, True]#, True, True, True, True]
   config.use_checkpoint = True #use checkpoint basewith other training 
   config.use_ckpt_dir = '/mnt/disks/stg_dataset/head_2/'
@@ -73,12 +73,12 @@ def get_config():
   config.global_crops_scale = (0.14, 1.0) 
   config.local_crops_number = 0 #if 0, global scale = 0.14,1.0
   config.local_crops_scale = (0.05,0.25)
-  config.student_temp = 0.3
+  config.student_temp = 0.1
   config.center_momentum = 0.9
   config.ncrops = 0 #change other parameters
   config.warmup_teacher_temp = 0.04
-  config.teacher_temp = 0.05
-  config.warmup_teacher_temp_epochs = 3
+  config.teacher_temp = 0.07
+  config.warmup_teacher_temp_epochs = 0
   
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
@@ -91,17 +91,17 @@ def get_config():
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
         '|value_range(0, 1, data_key="x1")' +
-        #'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
-        '|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
-        '|random_grayscale(0.1, data_key="x1")' +
-        '|random_blur(0.5, data_key="x1")' +
+        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
+        #'|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
+        '|random_grayscale(0.2, data_key="x1")' +
+        '|random_blur(1.0, data_key="x1")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        '|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x2")' +
-        '|random_grayscale(0.1, data_key="x2")' +
+        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
+        '|random_grayscale(0.2, data_key="x2")' +
         '|random_blur(0.1, data_key="x2")' +
-        '|random_solarize(0.1, data_key="x2")' +
+        '|random_solarize(0.2, data_key="x2")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
         '|keep("x1", "x2")'
     )
@@ -116,17 +116,17 @@ def get_config():
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
         '|value_range(0, 1, data_key="x1")' +
-        #'|random_color_jitter(0.8, 0.8, 0.8, 0.4, 0.2, data_key="x1")' +
-        '|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
-        '|random_grayscale(0.1, data_key="x1")' +
-        '|random_blur(0.5, data_key="x1")' +
+        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
+        #'|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
+        '|random_grayscale(0.2, data_key="x1")' +
+        '|random_blur(1.0, data_key="x1")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        '|random_color_jitter(0.8, 0.6, 0.6, 0.4, 0.2, data_key="x2")' +
-        '|random_grayscale(0.1, data_key="x2")' +
+        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
+        '|random_grayscale(0.2, data_key="x2")' +
         '|random_blur(0.1, data_key="x2")' +
-        '|random_solarize(0.1, data_key="x2")' +
+        '|random_solarize(0.2, data_key="x2")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
 
         ''.join([f'|copy_resize_file(96, {config.local_crops_scale}, inkey=("crop{i}", "crop{i}"), outkey=("crop{i}", "image1"))' for i in range(config.ncrops)]) +
@@ -211,9 +211,9 @@ def get_config():
   config.model.attention_dropout_rate = 0.0
   
   #head
-  config.model.n_layers = 3
-  config.model.head_hidden_dim = 512
-  config.model.head_bottleneck_dim = 256#64 #256
+  config.model.n_layers = 2
+  config.model.head_hidden_dim = 2048
+  config.model.head_bottleneck_dim = 256 #64 #256
   
   config.model.dropout_rate = 0.0
   config.model.stochastic_depth = 0.1

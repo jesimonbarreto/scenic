@@ -238,6 +238,7 @@ class ViTDINO(nn.Module):
   hidden_size: int
   lora_use: bool
   lora_rank: int
+  last_layers_train_lora: int
   apply_cluster_loss: bool
   head_hidden_dim: int
   n_ref_positions: int
@@ -275,7 +276,7 @@ class ViTDINO(nn.Module):
     # ViT Encoder.
     for lyr in range(self.num_layers):
       if self.lora_use:
-         if lyr < self.num_layers - 1:
+         if lyr < self.num_layers - self.last_layers_train_lora:
             x = Encoder1DBlockLORA(
               mlp_dim=self.mlp_dim,
               num_heads=self.num_heads,
@@ -472,6 +473,7 @@ class ViTDinoModel(base_model.BaseModel):
         hidden_size=self.config.model.hidden_size,
         lora_use=self.config.get('lora_use', False),
         lora_rank=self.config.get('lora_rank', 64),
+        last_layers_train_lora = self.config.get('int_train_last_layers', 1),
         n_ref_positions=self.config.n_ref_positions,
         apply_cluster_loss=self.config.apply_cluster_loss,
         head_hidden_dim=self.config.model.get('head_hidden_dim', 512),

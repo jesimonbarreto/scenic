@@ -16,8 +16,8 @@ def get_config():
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Exp_explora'
-  config.experiment_name = 'explora'
+  config.project = 'test_transferlearning'
+  config.experiment_name = 'continue_learning'
   #config
   config.transfer_learning = True
   config.train_layers = ["encoder", "ToTokenSequence"]
@@ -34,10 +34,13 @@ def get_config():
   config.multi_query = "adam"
   config.multi_value = "adam"
   config.train_layers_str = [True, True]#, True, True, True, True]
-  config.use_checkpoint = False #use checkpoint basewith other training 
+  config.use_checkpoint = True #use checkpoint basewith other training 
   config.use_ckpt_dir = '/mnt/disks/stg_dataset/head_2/'
   config.layer_wise = False
   config.print_lr_infos = False
+  #Uncert loss
+  config.un_loss = True
+
   #LORA
   config.lora_use = True
   config.lora_rank = 64
@@ -353,3 +356,5 @@ def get_config():
   config.val.checkpoint = False
 
   return config
+
+

@@ -16,31 +16,27 @@ def get_config():
   """Returns the default config for a 100 epoch DINO training on ImageNet2012."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Exp_explora'
-  config.experiment_name = 'explora'
+  config.project = 'test_transferlearning'
+  config.experiment_name = 'head'
   #config
   config.transfer_learning = True
   config.train_layers = ["encoder", "ToTokenSequence"]
-  #config.train_layers = ["ToTokenSequence_0", "encoder_norm",
+  config.train_two_last_vit= True
+  config.int_train_last_layers = 2
+  #config.train_layers = ["ToTokenSequence_0", "encoder_norm", "projection_head",
   #                      "key", "MlpBlock_0", "out" 
   #                       ]
-  config.train_layer_comp = ['encoderblock_11'] #None
-  config.lnorm_0 = "adam"
-  config.lnorm_1 = "adam"
-  config.mlpblock_dense_0 = "adam"
-  config.mlpblock_dense_1 = "adam"
-  config.multi_key = "adam"
-  config.multi_out = "adam"
-  config.multi_query = "adam"
-  config.multi_value = "adam"
-  config.train_layers_str = [True, True]#, True, True, True, True]
-  config.use_checkpoint = False #use checkpoint basewith other training 
-  config.use_ckpt_dir = '/mnt/disks/stg_dataset/head_2/'
+  config.train_layer_comp = None #'encoderblock_11'
+  config.train_layers_str = [True, True] #, True, True, True, True]
+  config.use_checkpoint = False #True #use checkpoint basewith other training 
+  config.use_ckpt_dir = '/mnt/disks/stg_dataset/test_test/'
   config.layer_wise = False
   config.print_lr_infos = False
+
   #LORA
   config.lora_use = True
   config.lora_rank = 64
+
   # Dataset.
   config.dataset_name = 'dino_dataset'
   config.data_dtype_str = 'float32'
@@ -49,7 +45,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'video' #'video_crops' # video or random
+  config.mode = 'video' #'video_crops' # video or frame
   
   #plot
   config.plot_ex = False
@@ -116,17 +112,17 @@ def get_config():
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
         '|value_range(0, 1, data_key="x1")' +
-        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
-        #'|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
-        '|random_grayscale(0.2, data_key="x1")' +
-        '|random_blur(1.0, data_key="x1")' +
+        #'|random_color_jitter(0.8, 0.8, 0.8, 0.4, 0.2, data_key="x1")' +
+        '|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
+        '|random_grayscale(0.1, data_key="x1")' +
+        '|random_blur(0.5, data_key="x1")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
-        '|random_grayscale(0.2, data_key="x2")' +
+        '|random_color_jitter(0.8, 0.6, 0.6, 0.4, 0.2, data_key="x2")' +
+        '|random_grayscale(0.1, data_key="x2")' +
         '|random_blur(0.1, data_key="x2")' +
-        '|random_solarize(0.2, data_key="x2")' +
+        '|random_solarize(0.1, data_key="x2")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
 
         ''.join([f'|copy_resize_file(96, {config.local_crops_scale}, inkey=("crop{i}", "crop{i}"), outkey=("crop{i}", "image1"))' for i in range(config.ncrops)]) +
@@ -207,18 +203,18 @@ def get_config():
                              'B': 12,
                              'L': 24,
                              'H': 32}[version]
-  config.model.head_output_dim = 65536 #8192 #4096
+  config.model.head_output_dim = 65536 #65536 #8192 #4096
   config.model.attention_dropout_rate = 0.0
-  
   #head
+  
   config.model.n_layers = 2
   config.model.head_hidden_dim = 2048
   config.model.head_bottleneck_dim = 256 #64 #256
-  
+  ##
   config.model.dropout_rate = 0.0
   config.model.stochastic_depth = 0.1
   config.model_dtype_str = 'float32'
-  config.model.temperature = 0.1
+  config.model.temperature = 0.3 #0.01 
   config.sharpening = 0.05
   #Verificar esses fatores no codigo
   config.norm_last_layer = True
@@ -353,3 +349,5 @@ def get_config():
   config.val.checkpoint = False
 
   return config
+
+

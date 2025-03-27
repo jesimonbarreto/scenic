@@ -390,7 +390,12 @@ def train(
       mask = {}
       _map(params, mask, label_fn)
       if target_keys:
-        mask = modify_encoder_block(mask, number_layers=11)
+        train_vit_two = config.get('train_two_last_vit', False)
+        number_layers_lora_train = 11
+        if train_vit_two:
+          number_layers_lora_train = 10
+          target_keys = ['encoderblock_10','encoderblock_11']
+        mask = modify_encoder_block(mask, number_layers=number_layers_lora_train)
         mask = modify_encoder_block_total(mask, target_keys=target_keys)
       return frozen_dict.freeze(mask)
 
@@ -525,12 +530,14 @@ def train(
   total_steps, steps_per_epoch = train_utils.get_num_training_steps(
       config, dataset.meta_data)
 
+  un_loss = config.get('un_loss', False)
+
   # The function that performs one step of loca training.
   dino_train_step_pmapped = jax.pmap(
       functools.partial(
           dino_train_step,
           flax_model=model.flax_model,
-          loss_fn=model.loss_function,
+          loss_fn=model.loss_function if not un_loss else model.loss_function_uncertainty,
           metrics_fn=model.get_metrics_fn,
           momentum_parameter_scheduler=momentum_parameter_scheduler,
           steps_per_epoch = steps_per_epoch,
