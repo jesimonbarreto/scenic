@@ -38,7 +38,7 @@ sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_head_2.py 
 
 sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_contlearn_two_h2_two.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/my_config_knn_google_old_contiLearn.py --workdir=../test_
+sudo -E python -m knn_main --config=configs/my_config_knn_google_old_contiLearn_1.py --workdir=../test_
 
 ## Explora training head 4 layers
 sudo rm -rf /mnt/disks/stg_dataset/head_2
@@ -46,4 +46,4 @@ sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_head.py --
 
 sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_contlearn_two_h2_head4.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/my_config_knn_google_old_contiLearn.py --workdir=../test_
+sudo -E python -m knn_main --config=configs/my_config_knn_google_old_contiLearn_2.py --workdir=../test_

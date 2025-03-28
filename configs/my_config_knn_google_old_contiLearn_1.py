@@ -18,6 +18,9 @@ def get_config():
   config.extract_train = True
   config.transfer_learning = False
 
+  config.train_two_last_vit= True
+  config.int_train_last_layers = 2
+
   #LORA
   config.lora_use = True
   config.lora_rank = 64
