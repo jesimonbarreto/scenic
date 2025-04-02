@@ -489,6 +489,7 @@ def train(
                      f'acc_rel{k}':correct_predictions/batch_size})
         print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
       total_samples += batch_size
+      break
       
 
     # Calcular a acurácia total para cada K
@@ -505,6 +506,8 @@ def train(
         })
         print(f"K-{k} acurácia total: {accuracy:.4f}")
     # Criar matriz de confusão
+    print(f'all labels {all_labels}')
+    print(f'all labels {all_preds}')
     conf_matrix = confusion_matrix(all_labels, all_preds)
     print("Matriz de Confusão:")
     print(conf_matrix)
