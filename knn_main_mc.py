@@ -489,8 +489,6 @@ def train(
                      f'acc_rel{k}':correct_predictions/batch_size})
         print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
       total_samples += batch_size
-      if i == 1:
-        break
       
 
     # Calcular a acurácia total para cada K
@@ -516,7 +514,7 @@ def train(
     class_errors = jnp.sum(conf_matrix, axis=1) - jnp.diag(conf_matrix)  # Soma dos erros por classe
     class_samples = jnp.sum(conf_matrix, axis=1)  # Total de amostras por classe
     class_error_rates = class_errors / class_samples  # Taxa de erro por classe
-    worst_classes = jnp.argsort(class_error_rates)[-5:][::-1]  # Top 5 piores classes
+    worst_classes = jnp.argsort(class_error_rates)[-10:][::-1]  # Top 5 piores classes
     print("\nClasses com pior desempenho:")
     for cls in worst_classes:
       print(f'Classe {cls}: Taxa de erro = {class_error_rates[cls]:.4f}')
