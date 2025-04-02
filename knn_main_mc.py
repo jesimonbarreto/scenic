@@ -489,7 +489,8 @@ def train(
                      f'acc_rel{k}':correct_predictions/batch_size})
         print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
       total_samples += batch_size
-      break
+      if i == 1:
+        break
       
 
     # Calcular a acurácia total para cada K
