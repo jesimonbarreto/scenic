@@ -481,6 +481,10 @@ def train(
       
       probas_for_k = {k: jnp.sum(matmul[:, :k, :], axis=1) for k in ks}
 
+      all_labels.extend(label_eval)
+      all_preds.extend(jnp.argmax(probas_for_k[1], axis=1))
+      
+
       for k in ks:
         correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
         total_correct_predictions[k] += correct_predictions
