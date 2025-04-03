@@ -511,7 +511,7 @@ def train(
     # Criar matriz de confusão
     print(f'all labels {all_labels}')
     print(f'all labels {all_preds}')
-    conf_matrix = confusion_matrix(label_eval, jnp.argmax(probas_for_k[1], axis=1))
+    conf_matrix = confusion_matrix(jnp.concatenate(all_labels), jnp.concatenate(all_preds))
     print("Matriz de Confusão:")
     print(conf_matrix)
     # Calcular taxa de erro por classe
