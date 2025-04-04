@@ -572,6 +572,54 @@ class ViTDinoModel(base_model.BaseModel):
     center = self.update_center(teacher_output, center)
     #jax.debug.print("🤯 Center Depois: {center} 🤯", center=center)
     return total_loss, center
+
+
+  def loss_function_cos(self,
+                  teacher_output: jnp.ndarray,
+                  student_output: jnp.ndarray,
+                  center: jnp.ndarray,
+                  epoch: int,
+                  weights: Optional[jnp.ndarray] = None) -> float:
+    """Returns the cross-entropy loss with cosine distance regularization."""
+
+    student_out = student_output / self.student_temp
+    student_out = jnp.split(student_out, self.ncrops)
+
+    temp = self.teacher_temp_schedule[epoch]
+    teacher_out = opr.softmax((teacher_output - center) / temp, axis=-1)
+    teacher_out = jnp.split(lax.stop_gradient(teacher_out), 2)
+
+    total_loss = 0
+    n_loss_terms = 0
+    cosine_reg = 0  # acumula a regularização por distância de cosseno
+    n_reg_terms = 0
+
+    for iq, q in enumerate(teacher_out):
+        for v in range(len(student_out)):
+            if v == iq:
+                continue
+
+            # Loss DINO original (KL-like)
+            loss = jnp.sum(-q * opr.log_softmax(student_out[v], axis=-1), axis=-1)
+            total_loss += jnp.mean(loss)
+            n_loss_terms += 1
+
+            # 🔹 Regularização com distância de cosseno entre teacher e student 🔹
+            cosine_dist = self.cosine_distance(student_out[v], q)  # função já fornecida
+            cosine_reg += jnp.mean(cosine_dist)
+            n_reg_terms += 1
+
+    # Média da loss principal
+    total_loss /= n_loss_terms
+
+    # Média da regularização
+    if n_reg_terms > 0:
+        cosine_reg /= n_reg_terms
+        alpha = 0.04  # peso do termo de regularização
+        total_loss += alpha * cosine_reg
+
+    center = self.update_center(teacher_output, center)
+    return total_loss, center
   
   def loss_function_uncertainty(self,
                   teacher_output: jnp.ndarray,
@@ -617,123 +665,6 @@ class ViTDinoModel(base_model.BaseModel):
     center = self.update_center(teacher_output, center)
 
     return total_loss, center
-  
-
-
-  def loss_function_contrastive(self, 
-                              teacher_output, 
-                              student_output, 
-                              center, 
-                              epoch):
-    """Loss do DINO com um termo contrastivo para melhor separação."""
-    
-    student_out = student_output / self.student_temp
-    student_out = jnp.split(student_out, self.ncrops)
-
-    temp = self.teacher_temp_schedule[epoch]
-    teacher_out = opr.softmax((teacher_output - center) / temp, axis=-1)
-    teacher_out = jnp.split(lax.stop_gradient(teacher_out), 2)
-
-    total_loss, n_loss_terms = 0, 0
-
-    for iq, q in enumerate(teacher_out):
-        for v in range(len(student_out)):
-            if v == iq: continue  
-            
-            loss = jnp.sum(-q * opr.log_softmax(student_out[v], axis=-1), axis=-1)
-
-            # 🔥 **Termo Contrastivo** 🔥
-            cos_sim = jnp.dot(student_out[v], student_out[v].T)  # Similaridade entre amostras
-            contrastive_loss = jnp.mean(jnp.exp(cos_sim))  # Penaliza embeddings muito parecidos
-
-            loss = loss - 0.05 * contrastive_loss  # Ajuste do peso do termo contrastivo
-
-            total_loss += jnp.mean(loss)
-            n_loss_terms += 1
-
-    total_loss /= n_loss_terms
-    center = self.update_center(teacher_output, center)
-
-    return total_loss, center
-
-
-  def loss_function_dino_repulsion(self, teacher_output, student_output, center, epoch):
-      """Loss do DINO modificada para projeções de 65K dimensões."""
-
-      def dispersion_loss(projections, pca_dim=256):
-        """
-        Incentiva que as projeções ocupem um espaço maior, mas sem overdispersão.
-        - projections: (batch_size, 65536)
-        - pca_dim: Número de componentes para calcular dispersão (default: 256)
-        """
-        batch_size, full_dim = projections.shape
-
-        # Reduz para pca_dim dimensões usando uma projeção linear fixa (simulação de PCA)
-        projection_matrix = jax.random.normal(jax.random.PRNGKey(0), shape=(full_dim, pca_dim))
-        reduced_projections = jnp.dot(projections, projection_matrix)
-
-        # Calcula dispersão das projeções reduzidas
-        std_dev = jnp.std(reduced_projections, axis=0)  
-        return -jnp.mean(std_dev)
-      
-      def repulsion_loss(projections, sample_dim=1024):
-        """
-        Penaliza projeções muito similares em um subconjunto de dimensões aleatórias.
-        - projections: (batch_size, 65536)
-        - sample_dim: Número de dimensões para calcular similaridade (default: 1024)
-        """
-        batch_size, full_dim = projections.shape
-
-        # Seleciona um subconjunto aleatório de dimensões
-        idx = jax.random.choice(jax.random.PRNGKey(0), full_dim, shape=(sample_dim,), replace=False)
-        sampled_projections = projections[:, idx]
-
-        # Normaliza as projeções selecionadas
-        sampled_projections = sampled_projections / jnp.linalg.norm(sampled_projections, axis=-1, keepdims=True)
-
-        # Matriz de similaridade de cosseno para dimensões amostradas
-        similarity_matrix = jnp.dot(sampled_projections, sampled_projections.T)
-
-        # Máscara para remover auto-similaridade (diagonal)
-        mask = jnp.eye(batch_size)
-        similarity_matrix = (1 - mask) * similarity_matrix  
-
-        # Penaliza valores altos de similaridade
-        return jnp.mean(jnp.exp(similarity_matrix))  
-
-
-
-      student_out = student_output / self.student_temp
-      student_out = jnp.split(student_out, self.ncrops)
-
-      temp = self.teacher_temp_schedule[epoch]
-      teacher_out = opr.softmax((teacher_output - center) / temp, axis=-1)
-      teacher_out = jnp.split(lax.stop_gradient(teacher_out), 2)
-
-      total_loss, n_loss_terms = 0, 0
-
-      for iq, q in enumerate(teacher_out):
-          for v in range(len(student_out)):
-              if v == iq: continue  
-              
-              # Loss original do DINO
-              loss = jnp.sum(-q * opr.log_softmax(student_out[v], axis=-1), axis=-1)
-              loss = jnp.mean(loss)
-
-              # Aplicamos nas projeções de 65K dimensões
-              repulsion = repulsion_loss(student_out[v], sample_dim=1024)  
-              dispersion = dispersion_loss(student_out[v], pca_dim=256)  
-
-              # Combina tudo com pesos ajustáveis
-              final_loss = loss + 0.15 * repulsion + 0.05 * dispersion  
-
-              total_loss += final_loss
-              n_loss_terms += 1
-
-      total_loss /= n_loss_terms
-      center = self.update_center(teacher_output, center)
-
-      return total_loss, center
 
   def cosine_similarity(self, A, B):
     dot_product = jnp.dot(A, B)

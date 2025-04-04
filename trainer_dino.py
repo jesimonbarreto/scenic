@@ -538,7 +538,7 @@ def train(
           dino_train_step,
           flax_model=model.flax_model,
           #alterar loss function
-          loss_fn=model.loss_function_contrastive if not un_loss else model.loss_function_dino_repulsion,
+          loss_fn=model.loss_function if not un_loss else model.loss_function_cos,
           metrics_fn=model.get_metrics_fn,
           momentum_parameter_scheduler=momentum_parameter_scheduler,
           steps_per_epoch = steps_per_epoch,
