@@ -13,7 +13,7 @@ def get_config():
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'test_Explota_mvimagenetest'
+  config.project = 'Search_Explota_mvimagenetest'
   config.experiment_name = 'eval'
   config.extract_train = False #True
   config.transfer_learning = False
