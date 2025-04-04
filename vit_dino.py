@@ -611,12 +611,9 @@ class ViTDinoModel(base_model.BaseModel):
 
     # Média da loss principal
     total_loss /= n_loss_terms
-
-    # Média da regularização
-    if n_reg_terms > 0:
-        cosine_reg /= n_reg_terms
-        alpha = 0.04  # peso do termo de regularização
-        total_loss += alpha * cosine_reg
+    cosine_reg /= n_reg_terms
+    alpha = 0.04  # peso do termo de regularização
+    total_loss += alpha * cosine_reg
 
     center = self.update_center(teacher_output, center)
     return total_loss, center
