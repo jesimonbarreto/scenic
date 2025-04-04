@@ -53,10 +53,10 @@ cd /home/jesimonbarreto/scenic
 #sudo rm -rf /mnt/disks/stg_dataset/head_2
 #sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_head_all.py --workdir=/mnt/disks/stg_dataset/head_2
 
-sudo rm -rf /mnt/disks/stg_dataset/test_test2
-sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_contlearn_two_h2_all_const.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/my_config_knn_google_old_contiLearn_1.py --workdir=../test_
+#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+#sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_contlearn_two_h2_all_const.py --workdir=/mnt/disks/stg_dataset/test_test2
+#sudo -E python -m knn_main --config=configs/my_config_knn_google_old_contiLearn_1.py --workdir=../test_
 
-sudo rm -rf /mnt/disks/stg_dataset/test_test2
-sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_contlearn_two_h2_all_proj.py --workdir=/mnt/disks/stg_dataset/test_test2
+#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+#sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_contlearn_two_h2_all_proj.py --workdir=/mnt/disks/stg_dataset/test_test2
 sudo -E python -m knn_main --config=configs/my_config_knn_google_old_contiLearn_1.py --workdir=../test_

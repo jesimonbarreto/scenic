@@ -15,7 +15,7 @@ def get_config():
   #WANDB
   config.project = 'Search_Explota_mvimagenetest'
   config.experiment_name = 'eval'
-  config.extract_train = False #True
+  config.extract_train = True
   config.transfer_learning = False
 
   config.train_two_last_vit= True
