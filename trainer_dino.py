@@ -158,7 +158,7 @@ def dino_train_step(
         drop_moment=drop_moment,
         backbone = True,
         train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
     st = flax_model.apply(
         {'params': params},
@@ -168,7 +168,7 @@ def dino_train_step(
         drop_moment=drop_moment,
         backbone = True,
         train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
     
     if config.ncrops>0:
       cc = flax_model.apply(
@@ -179,13 +179,20 @@ def dino_train_step(
           drop_moment=drop_moment,
           backbone = True,
           train=True,
-          rngs={'dropout': dropout_rng, 'droptok': droptok_rng})["x_train"]
+          rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
       
-      student_out = jnp.concatenate([st,cc])
+      student_out = jnp.concatenate([st["x_train"],cc["x_train"]])
+      s_emb = jnp.concatenate([st["x_norm_clstoken"],cc["x_norm_clstoken"]])
     else:
-      student_out = st
+      student_out = st["x_train"]
+      s_emb = st["x_norm_clstoken"]
     
-    loss_dino, center = loss_fn(teacher_out, student_out, center, epoch)
+    loss_dino, center = loss_fn(teacher_out["x_train"],
+                                student_out,
+                                teacher_out["x_norm_clstoken"],
+                                s_emb,
+                                center,
+                                epoch)
     total_loss = loss_dino
 
     return total_loss, (loss_dino, center)

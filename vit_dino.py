@@ -577,51 +577,47 @@ class ViTDinoModel(base_model.BaseModel):
   def loss_function_cos(self,
                   teacher_output: jnp.ndarray,
                   student_output: jnp.ndarray,
-                  teacher_embedding: jnp.ndarray,
-                  student_embedding: jnp.ndarray,
+                  teacher_cls_embedding: jnp.ndarray,
+                  student_cls_embedding: jnp.ndarray,
                   center: jnp.ndarray,
                   epoch: int,
                   weights: Optional[jnp.ndarray] = None) -> float:
-    """
-    DINO loss com regularização nos embeddings (pré-projeção).
-    Suporta global + local crops.
-    """
+    """DINO loss + Cosine regularização entre teacher (global CLS) e student (todos os CLS)."""
 
     student_out = student_output / self.student_temp
-    student_out = jnp.split(student_out, self.ncrops)  # 2 global + n local crops
+    student_out = jnp.split(student_out, self.ncrops)
 
     temp = self.teacher_temp_schedule[epoch]
     teacher_out = opr.softmax((teacher_output - center) / temp, axis=-1)
-    teacher_out = jnp.split(lax.stop_gradient(teacher_out), 2)  # só 2 global crops
+    teacher_out = jnp.split(lax.stop_gradient(teacher_out), 2)
 
     total_loss = 0
-    cosine_reg = 0
     n_loss_terms = 0
-    n_reg_terms = 0
 
-    for iq, q in enumerate(teacher_out):  # loop sobre global crops do teacher
-        for v, s in enumerate(student_out):  # loop sobre todos os student crops
+    for iq, q in enumerate(teacher_out):
+        for v in range(len(student_out)):
             if v == iq:
-                continue  # skip mesma view
-            loss = jnp.sum(-q * opr.log_softmax(s, axis=-1), axis=-1)
+                continue
+            loss = jnp.sum(-q * opr.log_softmax(student_out[v], axis=-1), axis=-1)
             total_loss += jnp.mean(loss)
             n_loss_terms += 1
 
-            # Regularização entre os embeddings correspondentes
-            student_emb = student_embedding[v]
-            teacher_emb = teacher_embedding[iq]
-            cosine_dist = self.cosine_distance(student_emb, teacher_emb)
-            cosine_reg += jnp.mean(cosine_dist)
-            n_reg_terms += 1
-
-    # Média das perdas
     total_loss /= n_loss_terms
-    if n_reg_terms > 0:
-        cosine_reg /= n_reg_terms
-        total_loss += 0.04 * cosine_reg  # peso alpha ajustável
+
+    # ✅ Cosine regularização: teacher CLS vs student CLS de todos os crops
+    reg_terms = []
+    for i in range(2):  # teacher_cls_embedding: (B, D) x 2 global views
+        for j in range(self.ncrops):  # student_cls_embedding: (B, D) x ncrops
+            dist = self.cosine_distance(student_cls_embedding[j], teacher_cls_embedding[i])
+            reg_terms.append(jnp.mean(dist))
+    cosine_reg = jnp.mean(jnp.stack(reg_terms))
+
+    alpha = 0.04
+    total_loss += alpha * cosine_reg
 
     center = self.update_center(teacher_output, center)
     return total_loss, center
+
 
   
   def loss_function_uncertainty(self,
