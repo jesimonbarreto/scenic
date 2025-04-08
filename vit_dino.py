@@ -612,7 +612,7 @@ class ViTDinoModel(base_model.BaseModel):
             reg_terms.append(jnp.mean(dist))
     cosine_reg = jnp.mean(jnp.stack(reg_terms))
 
-    alpha = 0.01
+    alpha = 0.04
     total_loss += alpha * cosine_reg
 
     center = self.update_center(teacher_output, center)
