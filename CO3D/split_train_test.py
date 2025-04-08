@@ -18,10 +18,10 @@ for filename in os.listdir(base_path):
         with zipfile.ZipFile(zip_path, 'r') as zf:
             # Lista os caminhos únicos de pastas de vídeos dentro do zip
             folder_names = set()
+            class_name = filename.replace('CO3D_', '').replace('.zip', '')
             for name in zf.namelist():
                 parts = name.strip('/').split('/')
                 if len(parts) >= 2:
-                    class_name = parts[0]
                     folder_name = parts[1]
                     folder_names.add(folder_name)
 
@@ -37,8 +37,12 @@ for filename in os.listdir(base_path):
             train_dict[class_name].extend(train_folders)
             test_dict[class_name].extend(test_folders)
 
-# Salva como npz com dicionários
-np.savez('train.npz', **train_dict)
-np.savez('test.npz', **test_dict)
+# Caminho completo dos arquivos de saída
+train_path = os.path.join(base_path, 'train.npz')
+test_path = os.path.join(base_path, 'test.npz')
 
-print(f"Salvo com sucesso. Total de classes: {len(train_dict)}")
+# Salva como npz com dicionários
+np.savez(train_path, **train_dict)
+np.savez(test_path, **test_dict)
+
+print(f"Salvo com sucesso em:\n{train_path}\n{test_path}")
