@@ -189,8 +189,8 @@ def dino_train_step(
     
     loss_dino, center = loss_fn(teacher_out["x_train"],
                                 student_out,
-                                teacher_out["x_norm_clstoken"],
-                                s_emb,
+                                #teacher_out["x_norm_clstoken"],
+                                #s_emb,
                                 center,
                                 epoch)
     total_loss = loss_dino
@@ -545,7 +545,7 @@ def train(
           dino_train_step,
           flax_model=model.flax_model,
           #alterar loss function
-          loss_fn=model.loss_function if not un_loss else model.loss_function_cos,
+          loss_fn=model.loss_function if not un_loss else model.loss_function_uncertainty,
           metrics_fn=model.get_metrics_fn,
           momentum_parameter_scheduler=momentum_parameter_scheduler,
           steps_per_epoch = steps_per_epoch,

@@ -651,7 +651,7 @@ class ViTDinoModel(base_model.BaseModel):
 
             # 🔥 **Ponderação por Incerteza** 🔥
             entropy = -jnp.sum(q * jnp.log(q + 1e-6), axis=-1)  # Entropia do professor
-            gamma = 2.0  # Ajuste da ponderação
+            gamma = 1.0  # Ajuste da ponderação
             loss = (1 + gamma * entropy) * loss  # Maior peso para exemplos de alta incerteza
 
             total_loss += jnp.mean(loss)
