@@ -10,6 +10,8 @@ import jax
 import jax.numpy as jnp
 import re
 import random
+from PIL import Image
+
 # Set seeds for reproducibility
 seed_value = 42
 random.seed(seed_value)  # Fixes seed for Python's random module
@@ -82,11 +84,12 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #  encoding_format= 'jpeg'),
             'image1': tfds.features.Image(encoding_format='jpeg'),
             'image2': tfds.features.Image(encoding_format='jpeg'),
+            #'label': tfds.features.ClassLabel(names=list(mvimgnet_classes)),
         }),
         # If there's a common (input, target) tuple from the
         # features, specify them here. They'll be used if
         # `as_supervised=True` in `builder.as_dataset`.
-        supervised_keys=('image1','image2'),  # Set to `None` to disable
+        supervised_keys=('image1','image2', 'label'),  # Set to `None` to disable
         homepage='https://dataset-homepage/',
     )
 
@@ -95,8 +98,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     # TODO(MVImgNet): Downloads the data and defines the splits
     #path = dl_manager.download_and_extract('https://todo-data-url')
 
-    path = '/mnt/disks/stg_dataset/dataset/mvimgnet/data/'
-    train_path = os.path.join(path, 'train')
+    path = os.path.join('/mnt/disks/dataset/mvimgnet/data/')
     
 
     # TODO(MVImgNet): Returns the Dict[split names, Iterator[Key, Example]]
@@ -111,7 +113,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         tfds.core.SplitGenerator(
             name=tfds.Split.TRAIN,
             gen_kwargs={
-                "datapath": train_path,
+                "datapath": path,
             },
         )
     ]
@@ -183,11 +185,24 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   def check_npz_exists(self, frames_video):
       """Checks if all .npz files corresponding to the frames exist."""
       for frame in frames_video:
-          npz_path = frame.replace('.png', '.npz')
+          npz_path = frame.replace('.jpg', '.npy')
           if not os.path.exists(npz_path):
               return False
       return True
 
+  
+  def limited_true_function(self, max_true=10):
+    true_count = 0
+
+    def deterministic_true():
+        nonlocal true_count
+        if true_count < max_true:
+            true_count += 1
+            return True
+        return False
+
+    return deterministic_true
+  
   def find_most_distant_pairs(self, frames_video, n):
     """
     Compares the cosine distances between the embeddings of the frames
@@ -237,66 +252,118 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     min_distance = min(selected_distances) if selected_distances else None
 
     return pairs, max_distance, min_distance
+  
+  import random
+
+
+
+
+
+  def find_most_distant_pairs_randomized(self, frames_video, n):
+    """
+    Selects frames randomly and finds the farthest frame from each selected frame,
+    forming n pairs while ensuring no frame is reused in multiple pairs.
+    """
+    # Check if all .npz files exist
+    if not self.check_npz_exists(frames_video):
+        return None
+
+    # Load the embedding vectors (1, 384) for each frame
+    vectors = []
+    for frame in frames_video:
+        npz_path = frame.replace('.jpg', '.npy')
+        vectors.append(self.load_npz(npz_path))
+
+    # List to track used frames
+    used_frames = set()
+    pairs = []
+
+    while len(pairs) < n and len(used_frames) < len(frames_video):
+        # Randomly select a frame that hasn't been used yet
+        available_frames = [i for i in range(len(frames_video)) if i not in used_frames]
+        if not available_frames:
+            break
+
+        random_idx = random.choice(available_frames)
+        used_frames.add(random_idx)
+
+        # Find the farthest frame from the selected frame
+        farthest_idx = None
+        max_distance = -float('inf')
+        
+        for i in range(len(vectors)):
+            if i != random_idx and i not in used_frames:
+                dist = self.calculate_cosine_distance_dot(vectors[random_idx], vectors[i])
+                if dist > max_distance:
+                    max_distance = dist
+                    farthest_idx = i
+        
+        if farthest_idx is not None:
+            pairs.append((frames_video[random_idx], frames_video[farthest_idx]))
+            used_frames.add(farthest_idx)
+
+    # Extract distances for the selected pairs
+    #distances = [
+    #    self.calculate_cosine_distance_dot(self.load_npz(pair[0].replace('.jpg', '.npy')), self.load_npz(pair[1].replace('.jpg', '.npy')))
+    #    for pair in pairs
+    #]
+
+    # Calculate the maximum and minimum distance from the selected pairs
+    max_distance = 0 #max(distances) if distances else None
+    min_distance = 0 #min(distances) if distances else None
+
+    return pairs, max_distance, min_distance
+
 
   def _generate_examples(self, datapath):
     """Yields examples."""
-    
-    datapath, file_path = os.path.split(datapath)
-    if not datapath.endswith('/'):
-        datapath += '/'
-    
-    if file_path == 'train':
-        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/train_balanceado.npz'
-        dist =  5 # 3,5,7,9,10
-        n = 3
-    else:
-        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/test_balanceado.npz'
-        dist =  5 # 3,5,7,9,10
-        n = 3
-
-
-    train_ref = np.load(file_path, allow_pickle=True)
-    keys_ref = train_ref.keys()
-    
+    detmn_true = self.limited_true_function(max_true=20)
+    dir_saveimage = "/home/jesimonbarreto/plots/"
+    cont = 1
 
     for label in tf.io.gfile.listdir(datapath):
-      #if int(label) not in filter_imagnet:
-      #   continue
-      '''if label not in keys_ref:
-         print('label')
-         print(label)
-         print('keys label')
-         print(keys_ref)
-         continue'''
-      train_class_ref = train_ref[label]
+      if int(label) not in filter_imagnet:
+         continue
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
-        if obj_var not in train_class_ref:
-           continue
-        dir_search = os.path.join(datapath, label, obj_var, 'images', "*.jpg")
+        dir_search = os.path.join(datapath, label, obj_var,'images', "*.jpg")
         frames_video = tf.io.gfile.glob(dir_search)
         #base_names = [os.path.basename(fpath) for fpath in frames_video]
         id = label+'_'+obj_var
+        dist = 5
+        n = 3
 
         # Ordena a lista de paths usando o número da sequência como chave
         frames_video = sorted(frames_video, key=self.get_sequence_number)
 
         # Seleciona os pares
-        dist = random.randint(5, 10)
-
-        pairs = self.select_pairs_with_distance(frames_video, dist, n)
+        #pairs = self.select_pairs_with_distance(frames_video, dist, n)
+        pairs = self.find_most_distant_pairs_randomized(frames_video, n)
+        #metrics mse, 
+        if pairs is None:
+           continue
         
+        pairs, max_distance, min_distance = pairs
         if len(pairs) == 0:
            continue
         
+        #print(f'Max {max_distance} Min {min_distance}')
+        
         for k ,image_path in enumerate(pairs):
+          plot_image = detmn_true()
           img1 = self.process_image(image_path[0])
           img1 = img1.astype(jnp.uint8)
           img2 = self.process_image(image_path[1])
           img2 = img2.astype(jnp.uint8)
+          if plot_image:
+            Image.fromarray(img1).save(f"{dir_saveimage}{cont}_1.png")
+            Image.fromarray(img2).save(f"{dir_saveimage}{cont}_2.png")
+            cont+=1
+
           record = {
             #"video": video_,
             "image1": img1,
             "image2": img2,
+            #"label": int(label)
           }
           self.n_total_pairs+=1
           #print('number total samples '+str(self.n_total_pairs))

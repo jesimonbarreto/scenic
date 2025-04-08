@@ -18,45 +18,19 @@ random.seed(seed_value)  # Fixes seed for Python's random module
 jax_key = jax.random.PRNGKey(seed_value)
 
 
-mvimgnet_classes = [
-    "bag", "bottle", "washer", "vessel", "train", "telephone", "table", "stove", "sofa", "skateboard", 
-    "rifle", "pistol", "remote control", "printer", "flowerpot", "pillow", "piano", "mug", "motorcycle", 
-    "microwave", "microphone", "mailbox", "loudspeaker", "laptop", "lamp", "knife", "pot", "helmet", 
-    "guitar", "bookshelf", "faucet", "earphone", "display", "dishwasher", "computer keyboard", "clock", 
-    "chair", "car", "cap", "can", "camera", "cabinet", "bus", "bowl", "bicycle", "bench", "bed", "bathtub", 
-    "basket", "ashcan", "airplane", "umbrella", "plush toy", "toy figure", "towel", "toothbrush", "toy bear", 
-    "toy cat", "toy bird", "toy insect", "toy cow", "toy dog", "toy monkey", "toy elephant", "toy fish", 
-    "toy horse", "toy sheep", "toy mouse", "toy tiger", "toy rabbit", "toy dragon", "toy snake", "toy chook", 
-    "toy pig", "rice cooker", "pressure cooker", "toaster", "dryer", "battery", "curtain", "blackboard eraser", 
-    "bucket", "calculator", "candle", "cassette", "cup sleeve", "computer mouse", "easel", "fan", "cookie", 
-    "fries", "donut", "coat rack", "guitar stand", "can opener", "flashlight", "hammer", "scissors", "screw driver", 
-    "spanner", "hanger", "jug", "fork", "chopsticks", "spoon", "ladder", "ceiling lamp", "wall lamp", "lamp post", 
-    "light switch", "mirror", "paper box", "wheelchair", "walking stick", "picture frame", "shower", "toilet", 
-    "sink", "power socket", "bagged snacks", "tripod", "selfie stick", "hair dryer", "lipstick", "glasses", 
-    "sanitary napkin", "toilet paper", "rockery", "Chinese hot dishes", "root carving", "flower", "book", 
-    "pipe PVC metal pipe", "projector", "cabinet air conditioner", "desk air conditioner", "refrigerator", 
-    "percussion", "strings", "wind instruments", "balloons", "scarf", "shoe", "skirt", "pants", "clothing", 
-    "box", "soccer", "roast duck", "pizza", "ginger", "cauliflower", "broccoli", "cabbage", "eggplant", 
-    "pumpkin", "winter melon", "tomato", "corn", "sunflower", "potato", "sweet potato", "Chinese cabbage", 
-    "onion", "momordica charantia", "chili", "cucumber", "grapefruit", "jackfruit", "star fruit", "avocado", 
-    "shakyamuni", "coconut", "pineapple", "kiwi", "pomegranate", "pawpaw", "watermelon", "apple", "banana", 
-    "pear", "cantaloupe", "durian", "persimmon", "grape", "peach", "power strip", "racket", "toy butterfly", 
-    "toy duck", "toy turtle", "bath sponge", "glove", "badminton", "lantern", "chestnut", "accessory", "shovel", 
-    "cigarette", "stapler", "lighter", "bread", "key", "toothpaste", "swim ring", "watch", "telescope", "eggs", 
-    "bun", "guava", "okra", "tangerine", "lotus root", "taro", "lemon", "garlic", "mango", "sausage", "besom", 
-    "lock", "ashtray", "conch", "seafood", "hairbrush", "ice cream", "razor", "adhesive hook", "hand warmer", 
-    "thermometer", "bell", "sugarcane", "adapter(water pipe)", "calendar", "insecticide", "electric saw", 
-    "inflator", "ironmongery", "bulb"
+classes_co3d = [
+    "apple", "backpack", "ball", "banana", "baseballbat", "baseballglove", "bench",
+    "bicycle", "book", "bottle", "bowl", "broccoli", "cake", "car", "carrot",
+    "cellphone", "chair", "couch", "cup", "donut", "frisbee", "hairdryer", "handbag",
+    "hotdog", "hydrant", "keyboard", "kite", "laptop", "microwave", "motorcycle",
+    "mouse", "orange", "parkingmeter", "pizza", "plant", "remote", "sandwich",
+    "skateboard", "stopsign", "suitcase", "teddybear", "toaster", "toilet", "toybus",
+    "toyplane", "toytrain", "toytruck", "tv", "umbrella", "vase"
 ]
-
-filter_imagnet = [2, 7, 10, 12, 13, 15, 19, 20, 21, 22, 23, 26, 33, 34, 47,
-                  49, 51, 76, 81, 83, 84, 94, 96, 113, 120, 123, 133, 136,
-                  149, 151, 152, 158, 166, 168, 173, 175, 179, 187, 197,
-                  200, 214, 221, 224]
 
 
 class Builder(tfds.core.GeneratorBasedBuilder):
-  """DatasetBuilder for mvimgnet dataset."""
+  """DatasetBuilder for CO3D dataset."""
 
   VERSION = tfds.core.Version('1.0.0')
   RELEASE_NOTES = {
@@ -95,17 +69,8 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     # TODO(MVImgNet): Downloads the data and defines the splits
     #path = dl_manager.download_and_extract('https://todo-data-url')
 
-    path = '/mnt/disks/stg_dataset/dataset/mvimgnet/data/'
-    train_path = os.path.join(path, 'train')
-    
-
-    # TODO(MVImgNet): Returns the Dict[split names, Iterator[Key, Example]]
-  
-    '''dirname = self.builder_config.dirname
-    url = _URL_PREFIX + "{}.tgz".format(dirname)
-    path = dl_manager.download_and_extract(url)
-    train_path = os.path.join(path, dirname, "train")
-    val_path = os.path.join(path, dirname, "val")'''
+    path = '/mnt/disks/stg_dataset/dataset/CO3D/'
+    train_path = os.path.join(path, 'train')  
 
     return [
         tfds.core.SplitGenerator(
@@ -116,20 +81,6 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         )
     ]
 
-  '''def _generate_examples(self, datapath):
-    """Yields examples."""
-    for label in tf.io.gfile.listdir(datapath):
-      for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
-        for fpath in tf.io.gfile.glob(os.path.join(datapath, label, obj_var, "*.jpg")):
-          fname = os.path.basename(fpath)
-          record = {
-              "image": fpath,
-              "label": mvimgnet_classes[label],
-              "label_number": label,
-              "obj_var": obj_var
-          }
-          yield fname, record
-  '''
   def process_image(self, image_path):
       # Leia o arquivo da imagem
       image = tf.io.read_file(image_path)
@@ -281,8 +232,6 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         frames_video = sorted(frames_video, key=self.get_sequence_number)
 
         # Seleciona os pares
-        dist = random.randint(5, 10)
-
         pairs = self.select_pairs_with_distance(frames_video, dist, n)
         
         if len(pairs) == 0:

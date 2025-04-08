@@ -82,11 +82,12 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #  encoding_format= 'jpeg'),
             'image1': tfds.features.Image(encoding_format='jpeg'),
             'image2': tfds.features.Image(encoding_format='jpeg'),
+            #'label': tfds.features.ClassLabel(names=list(mvimgnet_classes)),
         }),
         # If there's a common (input, target) tuple from the
         # features, specify them here. They'll be used if
         # `as_supervised=True` in `builder.as_dataset`.
-        supervised_keys=('image1','image2'),  # Set to `None` to disable
+        supervised_keys=('image1','image2', 'label'),  # Set to `None` to disable
         homepage='https://dataset-homepage/',
     )
 
@@ -95,8 +96,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     # TODO(MVImgNet): Downloads the data and defines the splits
     #path = dl_manager.download_and_extract('https://todo-data-url')
 
-    path = '/mnt/disks/stg_dataset/dataset/mvimgnet/data/'
-    train_path = os.path.join(path, 'train')
+    path = os.path.join('/mnt/disks/dataset/mvimgnet/data/')
     
 
     # TODO(MVImgNet): Returns the Dict[split names, Iterator[Key, Example]]
@@ -111,7 +111,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         tfds.core.SplitGenerator(
             name=tfds.Split.TRAIN,
             gen_kwargs={
-                "datapath": train_path,
+                "datapath": path,
             },
         )
     ]
@@ -183,7 +183,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   def check_npz_exists(self, frames_video):
       """Checks if all .npz files corresponding to the frames exist."""
       for frame in frames_video:
-          npz_path = frame.replace('.png', '.npz')
+          npz_path = frame.replace('.jpg', '.npy')
           if not os.path.exists(npz_path):
               return False
       return True
@@ -240,49 +240,21 @@ class Builder(tfds.core.GeneratorBasedBuilder):
 
   def _generate_examples(self, datapath):
     """Yields examples."""
-    
-    datapath, file_path = os.path.split(datapath)
-    if not datapath.endswith('/'):
-        datapath += '/'
-    
-    if file_path == 'train':
-        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/train_balanceado.npz'
-        dist =  5 # 3,5,7,9,10
-        n = 3
-    else:
-        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/test_balanceado.npz'
-        dist =  5 # 3,5,7,9,10
-        n = 3
-
-
-    train_ref = np.load(file_path, allow_pickle=True)
-    keys_ref = train_ref.keys()
-    
-
     for label in tf.io.gfile.listdir(datapath):
       #if int(label) not in filter_imagnet:
       #   continue
-      '''if label not in keys_ref:
-         print('label')
-         print(label)
-         print('keys label')
-         print(keys_ref)
-         continue'''
-      train_class_ref = train_ref[label]
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
-        if obj_var not in train_class_ref:
-           continue
-        dir_search = os.path.join(datapath, label, obj_var, 'images', "*.jpg")
+        dir_search = os.path.join(datapath, label, obj_var,'images', "*.jpg")
         frames_video = tf.io.gfile.glob(dir_search)
         #base_names = [os.path.basename(fpath) for fpath in frames_video]
         id = label+'_'+obj_var
+        dist = 5
+        n = 3
 
         # Ordena a lista de paths usando o número da sequência como chave
         frames_video = sorted(frames_video, key=self.get_sequence_number)
 
         # Seleciona os pares
-        dist = random.randint(5, 10)
-
         pairs = self.select_pairs_with_distance(frames_video, dist, n)
         
         if len(pairs) == 0:
@@ -297,6 +269,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #"video": video_,
             "image1": img1,
             "image2": img2,
+            #"label": int(label)
           }
           self.n_total_pairs+=1
           #print('number total samples '+str(self.n_total_pairs))

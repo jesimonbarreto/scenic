@@ -17,16 +17,25 @@ random.seed(seed_value)  # Fixes seed for Python's random module
 # JAX seed, typically used for JAX random operations (if needed)
 jax_key = jax.random.PRNGKey(seed_value)
 
+classes_co3d = [
+    "apple", "backpack", "ball", "banana", "baseballbat", "baseballglove", "bench",
+    "bicycle", "book", "bottle", "bowl", "broccoli", "cake", "car", "carrot",
+    "cellphone", "chair", "couch", "cup", "donut", "frisbee", "hairdryer", "handbag",
+    "hotdog", "hydrant", "keyboard", "kite", "laptop", "microwave", "motorcycle",
+    "mouse", "orange", "parkingmeter", "pizza", "plant", "remote", "sandwich",
+    "skateboard", "stopsign", "suitcase", "teddybear", "toaster", "toilet", "toybus",
+    "toyplane", "toytrain", "toytruck", "tv", "umbrella", "vase"
+]
 
 
 
 # Função para obter a posição do número na lista ordenada
-def get_position(number):
+def get_position(name_class):
     """
     Retorna a posição de um número na lista ordenada.
     """
-    if number in labels_number_:
-        return labels_number_.index(number)
+    if name_class in classes_co3d:
+        return classes_co3d.index(name_class)
     else:
         return -1  # Retorna -1 se o número não estiver na lista
 
@@ -56,7 +65,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #  video_shape,
             #  encoding_format= 'jpeg'),
             'image': tfds.features.Image(encoding_format='jpeg'),
-            'label': tfds.features.ClassLabel(names=list(mvimgnet_classes)),
+            'label': tfds.features.ClassLabel(names=list(classes_co3d)),
         }),
         # If there's a common (input, target) tuple from the
         # features, specify them here. They'll be used if
@@ -68,7 +77,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   def _split_generators(self, dl_manager: tfds.download.DownloadManager):
     """Returns SplitGenerators."""
 
-    path = '/mnt/disks/stg_dataset/dataset/mvimgnet/data/'
+    path = '/mnt/disks/stg_dataset/dataset/CO3D/'
     train_path = os.path.join(path, 'train')
     test_path = os.path.join(path, 'test')  
 
@@ -129,9 +138,9 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         datapath += '/'
     
     if file_path == 'train':
-        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/train_balanceado.npz'
+        file_path = 'mnt/disks/stg_dataset/dataset/CO3D/train.npz'
     else:
-        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/test_balanceado.npz'
+        file_path = '/mnt/disks/stg_dataset/dataset/CO3D/test.npz'
     
     n = 1
 
