@@ -520,39 +520,58 @@ def random_grayscale(p):
 @registry.Registry.register("preprocess_ops.cam_motion", "function")
 @utils.InKeyOutKey()
 @utils.BatchedImagePreprocessing()
-def cam_motion(max_translate=0.1, max_rotate=10, max_scale=0.05):
+def cam_motion(max_translate=0.1,
+                max_rotate=10.0,
+                max_scale=0.05,
+                brightness_delta=0.1,
+                contrast_range=(0.9, 1.1)):
   """simulate cam motion."""
   def simulate_cam_motion(image):
-    # Normaliza para [-1, 1] para usar affine
+    """
+    Simula movimento de câmera aplicando transformações geométricas e de iluminação.
+    
+    Args:
+        image: Tensor [H, W, 3], dtype uint8 ou float32.
+        max_translate: fração da largura/altura (ex: 0.1 = 10%).
+        max_rotate: graus de rotação máximos (ex: 10.0).
+        max_scale: variação de escala (ex: 0.05 = ±5%).
+        brightness_delta: variação de brilho.
+        contrast_range: (min, max) do contraste.
+
+    Returns:
+        Imagem transformada, float32 no intervalo [0, 1].
+    """
+    import math
+
+    # Garante float32 [0, 1]
     image = tf.image.convert_image_dtype(image, tf.float32)
-    
-    h, w = tf.shape(image)[0], tf.shape(image)[1]
-    
-    # Translação
-    tx = tf.random.uniform([], -max_translate, max_translate) * tf.cast(w, tf.float32)
-    ty = tf.random.uniform([], -max_translate, max_translate) * tf.cast(h, tf.float32)
+    h, w = tf.cast(tf.shape(image)[0], tf.float32), tf.cast(tf.shape(image)[1], tf.float32)
 
-    # Rotação (em radianos)
-    angle = tf.random.uniform([], -max_rotate, max_rotate) * (3.1415926 / 180.0)
-
-    # Escala
+    # Parâmetros aleatórios
+    angle_deg = tf.random.uniform([], -max_rotate, max_rotate)
+    angle_rad = angle_deg * math.pi / 180.0
     scale = 1.0 + tf.random.uniform([], -max_scale, max_scale)
+    tx = tf.random.uniform([], -max_translate, max_translate) * w
+    ty = tf.random.uniform([], -max_translate, max_translate) * h
 
-    # Matriz de transformação afim
-    transform = tfa.image.angles_to_projective_transforms(angle, tf.cast(h, tf.float32), tf.cast(w, tf.float32))
-    transform = tfa.image.compose_transforms([
-        tfa.image.Translation2d(tx, ty),
-        tfa.image.scale_to_projective_transforms(scale, scale),
-        transform
-    ])
+    # Matriz afim: 8 elementos
+    cos_a = tf.math.cos(angle_rad) * scale
+    sin_a = tf.math.sin(angle_rad) * scale
+    transform = tf.convert_to_tensor([
+        cos_a, -sin_a, tx,
+        sin_a,  cos_a, ty,
+        0.0,    0.0
+    ], dtype=tf.float32)
 
     # Aplica transformação
     image = tfa.image.transform(image, transform, interpolation='BILINEAR')
-    
-    # Pequena variação de iluminação
-    image = tf.image.random_brightness(image, max_delta=0.1)
-    image = tf.image.random_contrast(image, lower=0.9, upper=1.1)
-    
+
+    # Ajustes de iluminação
+    image = tf.image.random_brightness(image, max_delta=brightness_delta)
+    image = tf.image.random_contrast(image, lower=contrast_range[0], upper=contrast_range[1])
+
+    # Clipa para [0, 1] só por segurança
+    image = tf.clip_by_value(image, 0.0, 1.0)
     return image
   return simulate_cam_motion
 
