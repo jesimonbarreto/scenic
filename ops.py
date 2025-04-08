@@ -6,6 +6,7 @@ from scenic.dataset_lib.big_transfer.preprocessing import utils
 import tensorflow as tf
 import tensorflow.compat.v2 as tf2
 import jax.numpy as jnp
+import tensorflow_addons as tfa  # para affine transform mais poderosa
 
 # The two following decorators mimic the support for single-input
 # single-output ops already in scenic.dataset_lib.big_transfer.preprocessing and
@@ -515,6 +516,45 @@ def random_grayscale(p):
         lambda: tf.tile(tf.image.rgb_to_grayscale(image), [1, 1, 3]),
         lambda: image)
   return _to_grayscale
+
+@registry.Registry.register("preprocess_ops.cam_motion", "function")
+@utils.InKeyOutKey()
+@utils.BatchedImagePreprocessing()
+def cam_motion(max_translate=0.1, max_rotate=10, max_scale=0.05):
+  """simulate cam motion."""
+  def simulate_cam_motion(image):
+    # Normaliza para [-1, 1] para usar affine
+    image = tf.image.convert_image_dtype(image, tf.float32)
+    
+    h, w = tf.shape(image)[0], tf.shape(image)[1]
+    
+    # Translação
+    tx = tf.random.uniform([], -max_translate, max_translate) * tf.cast(w, tf.float32)
+    ty = tf.random.uniform([], -max_translate, max_translate) * tf.cast(h, tf.float32)
+
+    # Rotação (em radianos)
+    angle = tf.random.uniform([], -max_rotate, max_rotate) * (3.1415926 / 180.0)
+
+    # Escala
+    scale = 1.0 + tf.random.uniform([], -max_scale, max_scale)
+
+    # Matriz de transformação afim
+    transform = tfa.image.angles_to_projective_transforms(angle, tf.cast(h, tf.float32), tf.cast(w, tf.float32))
+    transform = tfa.image.compose_transforms([
+        tfa.image.Translation2d(tx, ty),
+        tfa.image.scale_to_projective_transforms(scale, scale),
+        transform
+    ])
+
+    # Aplica transformação
+    image = tfa.image.transform(image, transform, interpolation='BILINEAR')
+    
+    # Pequena variação de iluminação
+    image = tf.image.random_brightness(image, max_delta=0.1)
+    image = tf.image.random_contrast(image, lower=0.9, upper=1.1)
+    
+    return image
+  return simulate_cam_motion
 
 
 def gaussian_blur(image, kernel_size, sigma, padding="SAME"):
