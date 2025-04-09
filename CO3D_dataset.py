@@ -25,7 +25,7 @@ from scenic.dataset_lib import dataset_utils
 from scenic.dataset_lib import datasets
 import tensorflow as tf
 import tensorflow_datasets as tfds
-import CO3D.CO3D_dataset_builder
+import co3d.co3d_dataset_builder
 
 TRAIN_IMAGES = 1281167
 EVAL_IMAGES = 50000
@@ -284,7 +284,7 @@ def imagenet_load_split(batch_size,
   return ds
 
 
-@datasets.add_dataset('CO3D')
+@datasets.add_dataset('co3d')
 def get_dataset(*,
                 batch_size,
                 eval_batch_size,
