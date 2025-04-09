@@ -26,7 +26,7 @@ def get_config():
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
-  config.dataset_configs.dataset = 'mvimgnetest'
+  config.dataset_configs.dataset = 'co3dtest'
   config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
