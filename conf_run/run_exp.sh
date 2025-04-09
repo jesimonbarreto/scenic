@@ -49,7 +49,7 @@ cd /home/jesimonbarreto/scenic
 #sudo -E python -m knn_main --config=configs/my_config_knn_google_old_contiLearn_2.py --workdir=../test_
 
 
-sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/mvimgnet/
+#sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/mvimgnet/
 
 ## Explora training head with our best configurations
 sudo rm -rf /mnt/disks/stg_dataset/head_2

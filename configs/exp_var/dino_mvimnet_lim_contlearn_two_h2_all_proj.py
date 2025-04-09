@@ -58,7 +58,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'video' #'video_crops' # video or random
+  config.mode = 'frame' #'video_crops' # video or random
   
   #plot
   config.plot_ex = False
@@ -134,9 +134,9 @@ def get_config():
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        '|cam_motion(max_translate=0.1, max_rotate=10.0, max_scale=0.05,brightness_delta=0.1, contrast_range=(0.9, 1.1), data_key="x2")' +
+        #'|cam_motion(max_translate=0.1, max_rotate=10.0, max_scale=0.05,brightness_delta=0.1, contrast_range=(0.9, 1.1), data_key="x2")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
-        '|random_flip_image(0.8, data_key="x2")' +
+        #'|random_flip_image(0.8, data_key="x2")' +
         '|random_grayscale(0.2, data_key="x2")' +
         '|random_blur(0.1, data_key="x2")' +
         '|random_solarize(0.2, data_key="x2")' +
@@ -150,6 +150,39 @@ def get_config():
         ''.join([f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="crop{i}")' for i in range(config.ncrops)]) +
         '|keep("x1", "x2"' + ''.join([f', "crop{i}"' for i in range(config.ncrops)]) + ')'
       )
+  elif config.mode == 'frame' and config.ncrops > 0:
+    config.dataset_configs.pp_train = (
+        f'copy("image1", "x1")'+
+        f'|copy("image2", "x1")'+
+        ''.join([f'|copy("image{1 if i % 2 == 0 else 2}", "crop{i}")' for i in range(config.ncrops)]) +
+
+        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
+        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image1"))' +
+        '|value_range(0, 1, data_key="x1")' +
+        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
+        #'|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
+        '|random_grayscale(0.2, data_key="x1")' +
+        '|random_blur(1.0, data_key="x1")' +
+        f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
+
+        '|value_range(0, 1, data_key="x2")' +
+        #'|cam_motion(max_translate=0.1, max_rotate=10.0, max_scale=0.05,brightness_delta=0.1, contrast_range=(0.9, 1.1), data_key="x2")' +
+        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
+        #'|random_flip_image(0.8, data_key="x2")' +
+        '|random_grayscale(0.2, data_key="x2")' +
+        '|random_blur(0.1, data_key="x2")' +
+        '|random_solarize(0.2, data_key="x2")' +
+        f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
+
+        ''.join([f'|copy_resize_file(96, {config.local_crops_scale}, inkey=("crop{i}", "crop{i}"), outkey=("crop{i}", "image1"))' for i in range(config.ncrops)]) +
+        ''.join([f'|value_range(0, 1, data_key="crop{i}")' for i in range(config.ncrops)]) +
+        ''.join([f'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="crop{i}")' for i in range(config.ncrops)]) +
+        ''.join([f'|random_grayscale(0.2, data_key="crop{i}")' for i in range(config.ncrops)]) +
+        ''.join([f'|random_blur(0.5, data_key="crop{i}")' for i in range(config.ncrops)]) +
+        ''.join([f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="crop{i}")' for i in range(config.ncrops)]) +
+        '|keep("x1", "x2"' + ''.join([f', "crop{i}"' for i in range(config.ncrops)]) + ')'
+      )
+  
   else:
     config.dataset_configs.pp_train = (
         #'decode(inkey=("image1"), outkey=("image1"))' +
