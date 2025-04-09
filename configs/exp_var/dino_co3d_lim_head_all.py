@@ -46,7 +46,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'frame' #'video_crops' # video or frame
+  config.mode = 'video' #'video_crops' # video or frame
   
   #plot
   config.plot_ex = False
@@ -208,7 +208,7 @@ def get_config():
   
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.dataset = 'mvimgnet'#'youtube8m'#'mvimgnet'
+  config.dataset_configs.dataset = 'co3d'#'mvimgnet'#'youtube8m'#'mvimgnet'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
 
