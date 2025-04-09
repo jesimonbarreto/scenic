@@ -138,7 +138,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         datapath += '/'
     
     if file_path == 'train':
-        file_path = 'mnt/disks/stg_dataset/dataset/CO3D/train.npz'
+        file_path = '/mnt/disks/stg_dataset/dataset/CO3D/train.npz'
     else:
         file_path = '/mnt/disks/stg_dataset/dataset/CO3D/test.npz'
     
