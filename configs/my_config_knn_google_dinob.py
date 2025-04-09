@@ -14,8 +14,9 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Eval_Dino'
-  config.experiment_name = 'Eval_Dino_B'
+  config.experiment_name = 'Eval_Dino_v1_B'
   config.extract_train = True
+  config.transfer_learning = False
   # Dataset.
   config.dataset_name = 'eval_dataset'
   config.data_dtype_str = 'float32'
@@ -25,13 +26,13 @@ def get_config():
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
-  config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.dataset_dir = '/mnt/disks/dataset/dataset/imagenet/'
+  config.dataset_configs.dataset = 'mvimgnetest'
+  config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
   config.dataset_configs.batch_size_train = 256
-  config.dataset_configs.batch_size_test = 50
-  config.num_classes = 1000
+  config.dataset_configs.batch_size_test = 64
+  config.num_classes = 238
   reference_resolution = 224
   crop_size = 224
   config.T = 0.07
@@ -76,12 +77,12 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/home/jesimonbarreto/test'#'/home/jesimonbarreto/exp_test_now/'
+  config.train_dir = '/mnt/disks/stg_dataset/'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = True
   config.write_summary = True
   config.steps_checkpoints = [0]
-  config.ks = [5,10,20]
-  config.dir_files = '/mnt/disks/dataset/eval_files/'
+  config.ks = [1,3,5,7,10,20]
+  config.dir_files = '/mnt/disks/stg_dataset/eval_files/'
 
   config.data_dtype_str = 'float32'
   #config.data_dtype_str = 'bfloat16'

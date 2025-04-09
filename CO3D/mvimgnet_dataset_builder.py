@@ -197,11 +197,11 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         datapath += '/'
     
     if file_path == 'train':
-        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/train_balanceado.npz'
+        file_path = '/mnt/disks/stg_dataset/dataset/CO3D/train.npz'
         dist =  5 # 3,5,7,9,10
         n = 3
     else:
-        file_path = '/mnt/disks/stg_dataset/dataset/mvimgnet/test_balanceado.npz'
+        file_path = '/mnt/disks/stg_dataset/dataset/CO3D/test.npz'
         dist =  5 # 3,5,7,9,10
         n = 3
 
@@ -250,3 +250,43 @@ class Builder(tfds.core.GeneratorBasedBuilder):
           self.n_total_pairs+=1
           #print('number total samples '+str(self.n_total_pairs))
           yield str(k)+'_'+id, record
+
+
+
+          for zip_name in tf.io.gfile.listdir(data_dir):
+            if not zip_name.endswith('.zip'):
+                continue
+
+            class_name = zip_name.replace('.zip', '')
+            if class_name not in ref_keys:
+                continue
+
+            class_ref = ref_data[class_name]
+            zip_path = os.path.join(data_dir, zip_name)
+
+            with tf.io.gfile.GFile(zip_path, 'rb') as f:
+                zip_bytes = f.read()
+
+            with zipfile.ZipFile(io.BytesIO(zip_bytes)) as z:
+                all_files = z.namelist()
+
+                for instance_id in class_ref:
+                    # Ex: class_name/instance_id/images/frameXXXXX.jpg
+                    prefix = f"{class_name}/{instance_id}/images/"
+                    frame_paths = [f for f in all_files if f.startswith(prefix) and f.endswith('.jpg')]
+
+                    if not frame_paths:
+                        continue
+
+                    samples = self._select_random_values(frame_paths, n)
+
+                    for k, frame in enumerate(samples):
+                        with z.open(frame) as img_f:
+                            image = Image.open(img_f).convert('RGB')
+                            image = image.resize((224, 224))
+                            image = np.array(image).astype(np.uint8)
+
+                            yield f"{class_name}_{instance_id}_{k}", {
+                                'image': image,
+                                'label': get_position(int(class_name)),  # Supondo que class_name é número
+                            }
