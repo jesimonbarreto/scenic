@@ -137,7 +137,7 @@ def get_config():
     config.dataset_configs.pp_train = (
         f'copy("image1", "x1")'+
         f'|copy("image2", "x1")'+
-        ''.join([f'|copy("image{1 if i % 2 == 0 else 2}", "crop{i}")' for i in range(config.ncrops)]) +
+        ''.join([f'|copy("image1", "crop{i}")' for i in range(config.ncrops)]) +
 
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image1"))' +
