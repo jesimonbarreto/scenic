@@ -150,12 +150,6 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     
 
     for label in tf.io.gfile.listdir(datapath):
-      if label not in keys_ref:
-         print('label')
-         print(label)
-         print('keys label')
-         print(keys_ref)
-         continue
       train_class_ref = train_ref[label]
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
         if obj_var not in train_class_ref:
@@ -179,12 +173,6 @@ class Builder(tfds.core.GeneratorBasedBuilder):
           img = img.astype(jnp.uint8)
           record = {
             "image": img,
-            "label": get_position(int(label))
+            "label": get_position(label)
           }
           yield str(k)+'_'+id, record
-
-        #ROdar novamente [sem filtro de classes]
-        #COnfigurar dataset mvimgnet
-        #alterar validação para usar esse
-        #Carregar dados
-        #executar experimentop
