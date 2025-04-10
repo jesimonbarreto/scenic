@@ -57,7 +57,7 @@ cd /home/jesimonbarreto/scenic
 
 ## Explora training head with our best configurations
 sudo rm -rf /mnt/disks/stg_dataset/head_2
-sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_head_all_b.py --workdir=/mnt/disks/stg_dataset/head_2
+sudo -E python -m main_dino --config=configs/exp_var/dino_co3d_lim_head_all_b.py --workdir=/mnt/disks/stg_dataset/head_2
 
 sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/exp_var/dino_mvimnet_lim_contlearn_two_h2_all_proj_b.py --workdir=/mnt/disks/stg_dataset/test_test2
