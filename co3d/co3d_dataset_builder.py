@@ -211,8 +211,9 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     
 
     for label in tf.io.gfile.listdir(datapath):
-      #full_path = tf.io.gfile.join(datapath, label)
-      #if tf.io.gfile.isdir(full_path):
+      full_path = tf.io.gfile.join(datapath, label)
+      if not tf.io.gfile.isdir(full_path):
+         continue
       
       train_class_ref = train_ref[label]
       for obj_var in tf.io.gfile.listdir(os.path.join(datapath, label)):
