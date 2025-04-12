@@ -4,7 +4,7 @@
 import ml_collections
 
 VARIANT = 'B/16'
-_IMAGENET_TRAIN_SIZE = 237402 #40800 #415106 #40608 #237402 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
+_IMAGENET_TRAIN_SIZE = 237402 #20412 #40800 #415106 #40608 #237402 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
 _IMAGENET_TEST_SIZE = 55823 #4535 #55823
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
@@ -46,7 +46,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'frame' #'video_crops' # video or frame
+  config.mode = 'video' #'video_crops' # video or frame
   
   #plot
   config.plot_ex = False
