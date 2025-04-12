@@ -1,7 +1,7 @@
 import ml_collections, os
 import jax.numpy as jnp
 VARIANT = 'B/16'
-_IMAGENET_TRAIN_SIZE = 237402 #9469 #1281167
+_IMAGENET_TRAIN_SIZE = 177559 #9469 #1281167
 _IMAGENET_TEST_SIZE = 55823 #4535
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
@@ -137,7 +137,7 @@ def get_config():
                              'B': 12,
                              'L': 24,
                              'H': 32}[version]
-  config.model.head_output_dim = 8192 #4096 #65536 
+  config.model.head_output_dim = 65536 #4096 #65536 
   config.model.attention_dropout_rate = 0.0
   config.model.dropout_rate = 0.0
   config.model.stochastic_depth = 0.1
