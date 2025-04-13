@@ -1,8 +1,8 @@
 import ml_collections, os
 import jax.numpy as jnp
 VARIANT = 'B/14'
-_IMAGENET_TRAIN_SIZE = 237402 #20412 #177559 #9469 #1281167
-_IMAGENET_TEST_SIZE = 55823 #4535 #55823
+_IMAGENET_TRAIN_SIZE = 177559 #9469 #1281167
+_IMAGENET_TEST_SIZE = 55823 #4535
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 MEAN = [0.5]
@@ -13,18 +13,10 @@ def get_config():
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'Search_Explota_mvimagenetest'
-  config.experiment_name = 'eval_mvimgnet'
+  config.project = 'Eval_Dino'
+  config.experiment_name = 'Eval_Dino_mvimgnet_B'
   config.extract_train = True
   config.transfer_learning = False
-
-  config.train_two_last_vit= True
-  config.int_train_last_layers = 2
-
-  #LORA
-  config.lora_use = True
-  config.lora_rank = 64
-  
   # Dataset.
   config.dataset_name = 'eval_dataset'
   config.data_dtype_str = 'float32'
@@ -34,11 +26,11 @@ def get_config():
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
-  config.dataset_configs.dataset = 'mvimgnetest' #'co3dtest' #'imagenet2012'
+  config.dataset_configs.dataset = 'mvimgnetest' #'co3dtest'
   config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
-  config.dataset_configs.batch_size_train = 256
+  config.dataset_configs.batch_size_train = 512
   config.dataset_configs.batch_size_test = 64
   config.num_classes = 238
   reference_resolution = 224
@@ -85,10 +77,10 @@ def get_config():
   ### kNN
 
   #dir of checkpoints
-  config.train_dir = '/mnt/disks/stg_dataset/test_test2'#'/home/jesimonbarreto/exp_test_now/'
-  config.preextracted = False
+  config.train_dir = '/mnt/disks/stg_dataset/'#'/home/jesimonbarreto/exp_test_now/'
+  config.preextracted = True
   config.write_summary = True
-  config.steps_checkpoints = [-1]
+  config.steps_checkpoints = [0]
   config.ks = [1,3,5,7,10,20]
   config.dir_files = '/mnt/disks/stg_dataset/eval_files/'
 
@@ -145,12 +137,7 @@ def get_config():
                              'B': 12,
                              'L': 24,
                              'H': 32}[version]
-  config.model.head_output_dim = 65536 #4096 #65536
-  #head
-  config.model.n_layers = 2 #1
-  config.model.head_hidden_dim = 2048
-  config.model.head_bottleneck_dim = 256 #64 #256
-  ##
+  config.model.head_output_dim = 65536 #4096 #65536 
   config.model.attention_dropout_rate = 0.0
   config.model.dropout_rate = 0.0
   config.model.stochastic_depth = 0.1
@@ -167,7 +154,7 @@ def get_config():
 
   config.checkpoint = False#'/home/jesimonbarreto/scenic/checkpoint_501'
   config.dir_weight = '/home/jesimonbarreto/'
-  config.weight_load = 'dinov2_vit'+version.lower()+'14' #'dino_vitb16' #'dinov2_vit'+version.lower()+'14'
+  config.weight_load = 'dinov2_vit'+version.lower()+'14' # 'dino_vitb16'#'dinov2_vit'+version.lower()+'14'
   # Learning rate.
   #cosine schedule lr
   config.lr_configs = ml_collections.ConfigDict()
@@ -182,7 +169,7 @@ def get_config():
   config.weight_decay = 0.04
   #verificar
   config.weight_decay_end = 0.4
-  config.lr=0.0005
+  config.lr=0.000005
   config.warmup_epochs=10
   config.optimizer = 'adamw'
   config.drop_path_rate= 0.1

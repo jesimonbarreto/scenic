@@ -4,8 +4,8 @@
 import ml_collections
 
 VARIANT = 'B/14'
-_IMAGENET_TRAIN_SIZE = 237402 #20412 #40608 #237402 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
-_IMAGENET_TEST_SIZE = 55823 #4535
+_IMAGENET_TRAIN_SIZE = 237402 #20412 #40800 #415106 #40608 #237402 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
+_IMAGENET_TEST_SIZE = 55823 #4535 #55823
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 
@@ -17,39 +17,27 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Exp_explora'
-  config.experiment_name = 'continue_learning'
+  config.experiment_name = 'head'
   #config
   config.transfer_learning = True
   config.train_layers = ["encoder", "ToTokenSequence"]
-  #config.train_layers = ["ToTokenSequence_0", "encoder_norm",
+  #config.train_layers = ["ToTokenSequence_0", "encoder_norm", "projection_head",
   #                      "key", "MlpBlock_0", "out" 
   #                       ]
+  config.train_layer_comp = None #'encoderblock_11'
+  config.train_layers_str = [True, True] #, True, True, True, True]
+  config.use_checkpoint = False #True #use checkpoint basewith other training 
+  config.use_ckpt_dir = '/mnt/disks/stg_dataset/test_test/'
+  config.layer_wise = False
+  config.print_lr_infos = False
 
   config.train_two_last_vit= True
   config.int_train_last_layers = 2
 
-  #Uncert loss
-  config.un_loss = True
-
-  
-
-  config.train_layer_comp = ['encoderblock_11'] #None
-  config.lnorm_0 = "adam"
-  config.lnorm_1 = "adam"
-  config.mlpblock_dense_0 = "adam"
-  config.mlpblock_dense_1 = "adam"
-  config.multi_key = "adam"
-  config.multi_out = "adam"
-  config.multi_query = "adam"
-  config.multi_value = "adam"
-  config.train_layers_str = [True, True]#, True, True, True, True]
-  config.use_checkpoint = True #use checkpoint basewith other training 
-  config.use_ckpt_dir = '/mnt/disks/stg_dataset/head_2/'
-  config.layer_wise = False
-  config.print_lr_infos = False
   #LORA
   config.lora_use = True
   config.lora_rank = 64
+
   # Dataset.
   config.dataset_name = 'dino_dataset'
   config.data_dtype_str = 'float32'
@@ -58,7 +46,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'frame' #'video_crops' # video or random
+  config.mode = 'video' #'video_crops' # video or frame
   
   #plot
   config.plot_ex = False
@@ -84,7 +72,7 @@ def get_config():
   config.local_crops_scale = (0.05,0.25)
   config.student_temp = 0.1
   config.center_momentum = 0.9
-  config.ncrops = 10 #change other parameters
+  config.ncrops = 0 #change other parameters
   config.warmup_teacher_temp = 0.04
   config.teacher_temp = 0.07
   config.warmup_teacher_temp_epochs = 0
@@ -107,11 +95,9 @@ def get_config():
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        #'|cam_motion(max_translate=0.1, max_rotate=10, max_scale=0.05, data_key="x2")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
         '|random_grayscale(0.2, data_key="x2")' +
         '|random_blur(0.1, data_key="x2")' +
-        #'|random_flip_image(0.8, data_key="x2")' +
         '|random_solarize(0.2, data_key="x2")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
         '|keep("x1", "x2")'
@@ -127,19 +113,17 @@ def get_config():
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
         f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
         '|value_range(0, 1, data_key="x1")' +
-        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
-        #'|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
-        '|random_grayscale(0.2, data_key="x1")' +
-        '|random_blur(1.0, data_key="x1")' +
+        #'|random_color_jitter(0.8, 0.8, 0.8, 0.4, 0.2, data_key="x1")' +
+        '|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
+        '|random_grayscale(0.1, data_key="x1")' +
+        '|random_blur(0.5, data_key="x1")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        #'|cam_motion(max_translate=0.1, max_rotate=10.0, max_scale=0.05,brightness_delta=0.1, contrast_range=(0.9, 1.1), data_key="x2")' +
-        '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
-        #'|random_flip_image(0.8, data_key="x2")' +
-        '|random_grayscale(0.2, data_key="x2")' +
+        '|random_color_jitter(0.8, 0.6, 0.6, 0.4, 0.2, data_key="x2")' +
+        '|random_grayscale(0.1, data_key="x2")' +
         '|random_blur(0.1, data_key="x2")' +
-        '|random_solarize(0.2, data_key="x2")' +
+        '|random_solarize(0.1, data_key="x2")' +
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
 
         ''.join([f'|copy_resize_file(96, {config.local_crops_scale}, inkey=("crop{i}", "crop{i}"), outkey=("crop{i}", "image1"))' for i in range(config.ncrops)]) +
@@ -182,7 +166,6 @@ def get_config():
         ''.join([f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="crop{i}")' for i in range(config.ncrops)]) +
         '|keep("x1", "x2"' + ''.join([f', "crop{i}"' for i in range(config.ncrops)]) + ')'
       )
-  
   else:
     config.dataset_configs.pp_train = (
         #'decode(inkey=("image1"), outkey=("image1"))' +
@@ -225,7 +208,7 @@ def get_config():
   
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.dataset = 'mvimgnet'#'mvimgnet'#'youtube8m'#'mvimgnet'
+  config.dataset_configs.dataset = 'mvimgnet' #'co3d' #'youtube8m'#'mvimgnet'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
 
@@ -253,18 +236,17 @@ def get_config():
                              'B': 12,
                              'L': 24,
                              'H': 32}[version]
-  config.model.head_output_dim = 65536 #8192 #4096
+  config.model.head_output_dim = 65536 #65536 #8192 #4096
   config.model.attention_dropout_rate = 0.0
-  
   #head
   config.model.n_layers = 2
   config.model.head_hidden_dim = 2048
   config.model.head_bottleneck_dim = 256 #64 #256
-  
+  ##
   config.model.dropout_rate = 0.0
   config.model.stochastic_depth = 0.1
   config.model_dtype_str = 'float32'
-  config.model.temperature = 0.1
+  config.model.temperature = 0.3 #0.01 
   config.sharpening = 0.05
   #Verificar esses fatores no codigo
   config.norm_last_layer = True

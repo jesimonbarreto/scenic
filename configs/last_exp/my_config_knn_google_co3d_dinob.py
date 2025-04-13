@@ -1,6 +1,6 @@
 import ml_collections, os
 import jax.numpy as jnp
-VARIANT = 'B/16'
+VARIANT = 'B/14'
 _IMAGENET_TRAIN_SIZE = 177559 #9469 #1281167
 _IMAGENET_TEST_SIZE = 55823 #4535
 MEAN_RGB = [0.485, 0.456, 0.406]
@@ -14,7 +14,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Eval_Dino'
-  config.experiment_name = 'Eval_Dino_v1_B'
+  config.experiment_name = 'Eval_Dino_co3d_B'
   config.extract_train = True
   config.transfer_learning = False
   # Dataset.
@@ -26,7 +26,7 @@ def get_config():
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
-  config.dataset_configs.dataset = 'mvimgnetest' #'co3dtest'
+  config.dataset_configs.dataset = 'co3dtest' #'mvimgnetest' #'co3dtest'
   config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
@@ -154,7 +154,7 @@ def get_config():
 
   config.checkpoint = False#'/home/jesimonbarreto/scenic/checkpoint_501'
   config.dir_weight = '/home/jesimonbarreto/'
-  config.weight_load = 'dino_vitb16'#'dinov2_vit'+version.lower()+'14'
+  config.weight_load = 'dinov2_vit'+version.lower()+'14' # 'dino_vitb16'#'dinov2_vit'+version.lower()+'14'
   # Learning rate.
   #cosine schedule lr
   config.lr_configs = ml_collections.ConfigDict()

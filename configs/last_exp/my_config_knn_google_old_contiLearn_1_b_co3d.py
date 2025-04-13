@@ -14,7 +14,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'Search_Explota_mvimagenetest'
-  config.experiment_name = 'eval_mvimgnet'
+  config.experiment_name = 'eval_co3b'
   config.extract_train = True
   config.transfer_learning = False
 
@@ -34,7 +34,7 @@ def get_config():
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
-  config.dataset_configs.dataset = 'mvimgnetest' #'co3dtest' #'imagenet2012'
+  config.dataset_configs.dataset = 'co3dtest' #'mvimgnetest' #'co3dtest' #'imagenet2012'
   config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
