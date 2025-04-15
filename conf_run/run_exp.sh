@@ -57,7 +57,7 @@ cd /home/jesimonbarreto/scenic
 
 ## Explora training head with our best configurations
 
-sudo -E python -m knn_main --config=configs/last_exp/my_config_knn_google_mvimnet_dinob.py --workdir=../test_
+#sudo -E python -m knn_main --config=configs/last_exp/my_config_knn_google_mvimnet_dinob.py --workdir=../test_
 
 sudo rm -rf /mnt/disks/stg_dataset/head_2
 sudo -E python -m main_dino --config=configs/last_exp/dino_mvimnet_lim_head_all_b.py --workdir=/mnt/disks/stg_dataset/head_2
