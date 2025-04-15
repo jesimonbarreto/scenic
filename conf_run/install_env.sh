@@ -17,3 +17,4 @@ pip install wandb
 pip install jax[tpu] -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
 pip install keras_applications==1.0.8
 pip install scikit-learn
+pip install numpy==1.26.4
