@@ -3,7 +3,7 @@
 
 import ml_collections
 
-VARIANT = 'B/14'
+VARIANT = 'B/16'
 _IMAGENET_TRAIN_SIZE = 237402 #20412 #40608 #237402 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
 _IMAGENET_TEST_SIZE = 55823 #4535
 MEAN_RGB = [0.485, 0.456, 0.406]
@@ -257,7 +257,7 @@ def get_config():
   config.model.attention_dropout_rate = 0.0
   
   #head
-  config.model.n_layers = 3
+  config.model.n_layers = 2
   config.model.head_hidden_dim = 2048
   config.model.head_bottleneck_dim = 256 #64 #256
   
@@ -271,7 +271,7 @@ def get_config():
   config.momentum_teacher = 0.996
   config.use_bn_in_head = False
   config.load_weight = True
-  config.load_weights = 'dinov2_vit'+version.lower()+'14' #'dino_vitb16'#'dino_vitdeits16'#'dinov2_vit'+version.lower()+'14'
+  config.load_weights = 'dino_vitb16'#'dinov2_vit'+version.lower()+'14' #'dino_vitb16'#'dino_vitdeits16'#'dinov2_vit'+version.lower()+'14'
 
 
   # LOCA specific parameters.
