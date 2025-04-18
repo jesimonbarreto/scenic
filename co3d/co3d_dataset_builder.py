@@ -194,7 +194,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     # Inicializa o arquivo caso não exista
     if not os.path.exists(ARQUIVO_CONTROLE):
         parametros = np.array([2, 3, 4])
-        controle = np.zeros_like(parametros)
+        controle = np.array([0, 0, 0])
         np.savez(ARQUIVO_CONTROLE, parametros=parametros, controle=controle)
 
     # Carrega o arquivo existente
@@ -219,7 +219,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
   def _generate_examples(self, datapath):
     """Yields examples."""
     
-    ARQUIVO_CONTROLE = "control_time.npz"
+    ARQUIVO_CONTROLE = "/mnt/disks/stg_dataset/dataset/CO3D/control_time.npz"
 
     datapath, file_path = os.path.split(datapath)
     if not datapath.endswith('/'):
@@ -256,7 +256,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         # Ordena a lista de paths usando o número da sequência como chave
         frames_video = sorted(frames_video, key=self.get_sequence_number)
 
-        dist = self.read_file_load(ARQUIVO_CONTROLE)#1 #random.randint(10, 25)
+        dist = self.read_file_load(ARQUIVO_CONTROLE = ARQUIVO_CONTROLE)#1 #random.randint(10, 25)
 
         # Seleciona os pares
         pairs = self.select_pairs_with_distance(frames_video, dist, n)
