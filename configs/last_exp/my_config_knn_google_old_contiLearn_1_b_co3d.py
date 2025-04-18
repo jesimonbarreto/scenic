@@ -1,6 +1,6 @@
 import ml_collections, os
 import jax.numpy as jnp
-VARIANT = 'B/14'
+VARIANT = 'B/16'
 _IMAGENET_TRAIN_SIZE = 237402 #20412 #177559 #9469 #1281167
 _IMAGENET_TEST_SIZE = 55823 #4535 #55823
 MEAN_RGB = [0.485, 0.456, 0.406]
@@ -147,7 +147,7 @@ def get_config():
                              'H': 32}[version]
   config.model.head_output_dim = 65536 #4096 #65536
   #head
-  config.model.n_layers = 3 #1
+  config.model.n_layers = 2 #1
   config.model.head_hidden_dim = 2048
   config.model.head_bottleneck_dim = 256 #64 #256
   ##

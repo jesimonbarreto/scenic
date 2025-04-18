@@ -256,7 +256,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         # Ordena a lista de paths usando o número da sequência como chave
         frames_video = sorted(frames_video, key=self.get_sequence_number)
 
-        dist = 4 #random.randint(10, 25)
+        dist = 1 #random.randint(10, 25)
 
         # Seleciona os pares
         pairs = self.select_pairs_with_distance(frames_video, dist, n)
