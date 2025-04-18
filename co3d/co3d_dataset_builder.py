@@ -188,10 +188,39 @@ class Builder(tfds.core.GeneratorBasedBuilder):
     min_distance = min(selected_distances) if selected_distances else None
 
     return pairs, max_distance, min_distance
+  
+
+  def read_file_load(self, ARQUIVO_CONTROLE = "control_time.npz"):
+    # Inicializa o arquivo caso não exista
+    if not os.path.exists(ARQUIVO_CONTROLE):
+        parametros = np.array([2, 3, 4])
+        controle = np.zeros_like(parametros)
+        np.savez(ARQUIVO_CONTROLE, parametros=parametros, controle=controle)
+
+    # Carrega o arquivo existente
+    dados = np.load(ARQUIVO_CONTROLE)
+    parametros = dados['parametros']
+    controle = dados['controle']
+
+    # Encontra o primeiro índice com valor 0
+    indices_disponiveis = np.where(controle == 0)[0]
+    if len(indices_disponiveis) == 0:
+        raise ValueError("Todos os parâmetros já foram utilizados.")
+
+    idx = indices_disponiveis[0]
+    parametro = parametros[idx]
+
+    # Atualiza o controle e salva novamente
+    controle[idx] = 1
+    np.savez(ARQUIVO_CONTROLE, parametros=parametros, controle=controle)
+
+    return int(parametro)
 
   def _generate_examples(self, datapath):
     """Yields examples."""
     
+    ARQUIVO_CONTROLE = "control_time.npz"
+
     datapath, file_path = os.path.split(datapath)
     if not datapath.endswith('/'):
         datapath += '/'
@@ -227,7 +256,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
         # Ordena a lista de paths usando o número da sequência como chave
         frames_video = sorted(frames_video, key=self.get_sequence_number)
 
-        dist = 1 #random.randint(10, 25)
+        dist = self.read_file_load(ARQUIVO_CONTROLE)#1 #random.randint(10, 25)
 
         # Seleciona os pares
         pairs = self.select_pairs_with_distance(frames_video, dist, n)
