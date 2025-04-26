@@ -77,16 +77,103 @@ cd /home/jesimonbarreto/scenic
 
 #sudo -E python -m knn_main --config=configs/last_exp/my_config_knn_google_co3d_dinob.py --workdir=../test_
 
-sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/co3d/
-sudo rm -rf /mnt/disks/stg_dataset/head_2
-sudo -E python -m main_dino --config=configs/last_exp/dino_co3d_lim_head_all_b.py --workdir=/mnt/disks/stg_dataset/head_2
+#sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/co3d/
+#sudo rm -rf /mnt/disks/stg_dataset/head_2
+#sudo -E python -m main_dino --config=configs/last_exp/dino_co3d_lim_head_all_b.py --workdir=/mnt/disks/stg_dataset/head_2
 
-sudo rm -rf /mnt/disks/stg_dataset/test_test2
-sudo -E python -m main_dino --config=configs/last_exp/dino_co3d_lim_contlearn_two_h2_all_proj_b.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/last_exp/my_config_knn_google_old_contiLearn_1_b_co3d.py --workdir=../test_
+#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+#sudo -E python -m main_dino --config=configs/last_exp/dino_co3d_lim_contlearn_two_h2_all_proj_b.py --workdir=/mnt/disks/stg_dataset/test_test2
+#sudo -E python -m knn_main --config=configs/last_exp/my_config_knn_google_old_contiLearn_1_b_co3d.py --workdir=../test_
 #sudo rm -rf /mnt/disks/stg_dataset/head_2
 #sudo -E python -m main_dino --config=configs/last_exp/dino_co3d_lim_head_all_b_frame.py --workdir=/mnt/disks/stg_dataset/head_2
 
 #sudo rm -rf /mnt/disks/stg_dataset/test_test2
 #sudo -E python -m main_dino --config=configs/last_exp/dino_mvimnet_lim_contlearn_two_h2_all_proj_b_frame.py --workdir=/mnt/disks/stg_dataset/test_test2
 #sudo -E python -m knn_main --config=configs/last_exp/my_config_knn_google_old_contiLearn_1_b_co3d.py --workdir=../test_
+
+
+
+#explora Dv1 - CO3D - video
+sudo rm -rf /mnt/disks/stg_dataset/head_2
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dino_explora.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dino_explora.py --workdir=../test_
+
+#explora Dv2 - CO3D - video
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dinov2_explora.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dinov2_explora.py --workdir=../test_
+
+#explora Dv1 - MVimgnet - video
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/mvimgnet/dino_explora.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dino_explora.py --workdir=../test_
+
+#explora Dv2 - MVimgnet - video
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/mvimgnet/dinov2_explora.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dinov2_explora.py --workdir=../test_
+
+
+#Dv1 - CO3D - frame + transf. cam move
+sudo rm -rf /mnt/disks/stg_dataset/head_2
+sudo -E python -m main_dino --config=configs/final/co3d/dino_head_frame.py --workdir=/mnt/disks/stg_dataset/head_2
+
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dino_frame.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dino.py --workdir=../test_
+
+#loss normal - Dino v1 - CO3D
+sudo rm -rf /mnt/disks/stg_dataset/head_2
+sudo -E python -m main_dino --config=configs/final/co3d/dino_head.py --workdir=/mnt/disks/stg_dataset/head_2
+
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dino_loss.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dino.py --workdir=../test_
+
+#loss normal - Dino v2 - CO3D
+sudo rm -rf /mnt/disks/stg_dataset/head_2
+sudo -E python -m main_dino --config=configs/final/co3d/dinov2_head.py --workdir=/mnt/disks/stg_dataset/head_2
+
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dinov2_loss.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dinov2.py --workdir=../test_
+
+#loss normal - Dino v1 - MVIMGNET
+
+sudo rm -rf /mnt/disks/stg_dataset/head_2
+sudo -E python -m main_dino --config=configs/final/mvimgnet/dino_head.py --workdir=/mnt/disks/stg_dataset/head_2
+
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/mvimgnet/dino_loss.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dino.py --workdir=../test_
+
+#loss normal - Dino v2 - MVIMGNET
+
+sudo rm -rf /mnt/disks/stg_dataset/head_2
+sudo -E python -m main_dino --config=configs/final/mvimgnet/dinov2_head.py --workdir=/mnt/disks/stg_dataset/head_2
+
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/mvimgnet/dinov2_loss.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dinov2.py --workdir=../test_
+
+
+#without training head - Dino v1 - CO3D
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dino_nohead.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dino.py --workdir=../test_
+
+#without training head - Dino v2 - CO3D
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dinov2_nohead.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dinov2.py --workdir=../test_
+
+#without training head - Dino v1 - MVIMGNET
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/mvimgnet/dino_nohead.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dino.py --workdir=../test_
+
+#without training head - Dino v2 - MVIMGNET
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/mvimgnet/dinov2_nohead.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dinov2.py --workdir=../test_
