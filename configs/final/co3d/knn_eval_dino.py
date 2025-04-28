@@ -88,6 +88,7 @@ def get_config():
   config.train_dir = '/mnt/disks/stg_dataset/test_test2'#'/home/jesimonbarreto/exp_test_now/'
   config.preextracted = False
   config.write_summary = True
+  config.get_all_checkpoins = False
   config.steps_checkpoints = [-1]
   config.ks = [1,3,5,7,10,20]
   config.dir_files = '/mnt/disks/stg_dataset/eval_files/'

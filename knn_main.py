@@ -86,30 +86,25 @@ def get_highest_checkpoint(directory):
 
     return []
 
-def get_all_checkpoint(directory):
+def get_all_checkpoint_numbers(directory):
     """
-    Retorna o caminho completo do arquivo checkpoint com o maior número no formato `checkpoint_numero`.
+    Retorna uma lista dos números dos arquivos de checkpoint no formato `checkpoint_numero`.
 
     Args:
         directory (str): Caminho do diretório onde buscar os arquivos.
 
     Returns:
-        str: Caminho completo do arquivo com o maior número encontrado no formato `checkpoint_numero`, ou None se não encontrar.
+        List[int]: Lista de números extraídos dos arquivos encontrados, ou lista vazia se nenhum for encontrado.
     """
     checkpoint_pattern = re.compile(r"^checkpoint_(\d+)$")
-    highest_checkpoint = None
-    highest_number = -1
-    checkpoints = []
+    checkpoint_numbers = []
 
     for file_name in os.listdir(directory):
         match = checkpoint_pattern.match(file_name)
         if match:
-            checkpoints.append(os.path.join(directory,file_name))
+            checkpoint_numbers.append(int(match.group(1)))
 
-    if len(checkpoints)>0:
-        return checkpoints
-
-    return []
+    return checkpoint_numbers
 
 def generate_conditional_freeze_layers(rules, negate_flags, use_and=True):
     """
@@ -276,9 +271,16 @@ def train(
   files_save = config.get('dir_files')
   num_classes = config.get('num_classes')
   if not config.preextracted:
-    name_path_step = get_highest_checkpoint(train_dir)
-    part_file = int(name_path_step[0].split('_')[-1])
-    steps = [part_file]
+    all_ckpnt = config.get('get_all_checkpoins', True)
+    if all_ckpnt: 
+      name_path_step = get_highest_checkpoint(train_dir)
+      part_file = int(name_path_step[0].split('_')[-1])
+      steps = [part_file]
+    else:
+      steps = get_all_checkpoint_numbers(train_dir)
+      print('\n\n Steps used :')
+      print(steps)
+      print('\n\n')
   else:
     steps = [0]
   
