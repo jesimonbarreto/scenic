@@ -22,7 +22,7 @@ def get_config():
   config.int_train_last_layers = 2
 
   #LORA
-  config.lora_use = True
+  config.lora_use = False
   config.lora_rank = 64
   
   # Dataset.
