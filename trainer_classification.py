@@ -25,7 +25,7 @@ import ml_collections
 import optax
 from scenic.dataset_lib import dataset_utils
 import utils_dino as utils
-import vit_dino as vit
+import vit_dino_classification as vit
 from scenic.train_lib import lr_schedules
 from scenic.train_lib import train_utils
 import math, sys, os
@@ -135,22 +135,17 @@ def dino_train_step(
   new_rng, dropout_rng, droptok_rng = jax.random.split(train_state.rng, num=3)
   dropout_rng = train_utils.bind_rng_to_host_device(
       dropout_rng, axis_name='batch', bind_to='device')
-  droptok_rng = train_utils.bind_rng_to_host_device(
-      droptok_rng, axis_name='batch', bind_to='device')
   step = train_state.global_step
   momentum_parameter = momentum_parameter_scheduler(step)
-  n_pos = config.n_ref_positions  # Number of reference positions.
   bs = batch['x1'].shape[0]  # Per-device batch size.
-  n_q_foc = config.dataset_configs.number_of_focal_queries
+  labels = batch['labels']
   batch = utils.prepare_input(batch, config)
 
   def training_loss_fn(params, center, epoch):
-    # Step 1): Predict teacher network, predict student.
-    # get features
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
 
-    teacher_out = flax_model.apply(
+    logits = flax_model.apply(
         {'params': train_state.ema_params if use_ema else params},
         batch['sample'][0],
         seqlen=config.reference_seqlen,
@@ -158,51 +153,26 @@ def dino_train_step(
         drop_moment=drop_moment,
         backbone = True,
         train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
+        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})['x_class']
     
-    st = flax_model.apply(
-        {'params': params},
-        batch['sample'][0],
-        seqlen=config.reference_seqlen,
-        seqlen_selection=config.reference_seqlen_selection,
-        drop_moment=drop_moment,
-        backbone = True,
-        train=True,
-        rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
-    
-    if config.ncrops>0:
-      cc = flax_model.apply(
-          {'params': params},
-          batch['sample'][1],
-          seqlen=config.reference_seqlen,
-          seqlen_selection=config.reference_seqlen_selection,
-          drop_moment=drop_moment,
-          backbone = True,
-          train=True,
-          rngs={'dropout': dropout_rng, 'droptok': droptok_rng})
-      
-      student_out = jnp.concatenate([st["x_train"],cc["x_train"]])
-      s_emb = jnp.concatenate([st["x_norm_clstoken"],cc["x_norm_clstoken"]])
-    else:
-      student_out = st["x_train"]
-      s_emb = st["x_norm_clstoken"]
-    
-    loss_dino, center = loss_fn(teacher_out["x_train"],
-                                student_out,
-                                #teacher_out["x_norm_clstoken"],
-                                #s_emb,
-                                center,
-                                epoch)
-    total_loss = loss_dino
+    loss = optax.softmax_cross_entropy(
+      logits=logits, 
+      labels=jax.nn.one_hot(labels, logits.shape[-1])
+    ).mean()
 
-    return total_loss, (loss_dino, center)
+    pred_labels = jnp.argmax(logits, axis=-1)
+    acc = (pred_labels == labels).mean()
+    
+
+    return loss, (loss, acc)
   
   compute_gradient_fn = jax.value_and_grad(training_loss_fn, has_aux=True)
-  (total_loss, (loss_dino, center)), grad = compute_gradient_fn(
+  (total_loss, (loss_dino, acc)), grad = compute_gradient_fn(
       train_state.params, center, epoch)
-  #metrics = metrics_fn(logits, batch)
+  metrics = acc
   metrics = (
-      dict(total_loss=(total_loss, 1)))
+      dict(total_loss=(total_loss, 1),
+           acc=(acc, 1) ))
 
   # Update the network parameters.
   grad = jax.lax.pmean(grad, axis_name='batch')
