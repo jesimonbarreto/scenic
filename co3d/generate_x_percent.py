@@ -37,7 +37,7 @@ def gerar_subset_npz(input_npz_path, output_npz_path, percent: float, seed: int 
 
 base_path = '/mnt/disks/stg_dataset/dataset/CO3D/'
 
-percent = 0.4  # 20%
+percent = 0.6  # 20%
 input_npz_path = os.path.join(base_path, 'train.npz')
 output_npz_path = os.path.join(base_path, f'train_{int(percent*100)}_percent.npz')
 
