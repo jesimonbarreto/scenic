@@ -239,7 +239,7 @@ def get_config():
   config.model.head_output_dim = 65536 #65536 #8192 #4096
   config.model.attention_dropout_rate = 0.0
   #head
-  config.model.n_layers = 3
+  config.model.n_layers = 2
   config.model.head_hidden_dim = 2048
   config.model.head_bottleneck_dim = 256 #64 #256
   ##
@@ -324,7 +324,7 @@ def get_config():
   config.val.dataset_configs.batch_size_test = 64
   config.val.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.val.dataset_configs.batch_size_train
   config.val.steps_per_epoch_eval = _IMAGENET_TEST_SIZE // config.val.dataset_configs.batch_size_test
-  config.val.num_classes = 1000
+  config.val.num_classes = 50
   reference_resolution = 224
   crop_size = 224
   config.val.T = 0.07

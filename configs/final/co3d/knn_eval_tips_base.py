@@ -14,7 +14,7 @@ def get_config():
   config = ml_collections.ConfigDict()
   #WANDB
   config.project = 'final_exp'
-  config.experiment_name = 'eval_co3b_tips'
+  config.experiment_name = 'eval_co3b_tips_base'
   config.extract_train = True
   config.transfer_learning = False
 
@@ -40,7 +40,7 @@ def get_config():
   config.dataset_configs.test_split = 'validation'
   config.dataset_configs.batch_size_train = 256
   config.dataset_configs.batch_size_test = 64
-  config.num_classes = 238
+  config.num_classes = 50
   reference_resolution = 224
   crop_size = 224
   config.T = 0.07
@@ -147,7 +147,7 @@ def get_config():
                              'H': 32}[version]
   config.model.head_output_dim = 65536 #4096 #65536
   #head
-  config.model.n_layers = 3 #1
+  config.model.n_layers = 2 #1
   config.model.head_hidden_dim = 2048
   config.model.head_bottleneck_dim = 256 #64 #256
   ##

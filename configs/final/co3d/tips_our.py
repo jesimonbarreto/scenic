@@ -342,7 +342,7 @@ def get_config():
   config.val.dataset_configs.batch_size_test = 64
   config.val.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.val.dataset_configs.batch_size_train
   config.val.steps_per_epoch_eval = _IMAGENET_TEST_SIZE // config.val.dataset_configs.batch_size_test
-  config.val.num_classes = 1000
+  config.val.num_classes = 50
   reference_resolution = 224
   crop_size = 224
   config.val.T = 0.07
