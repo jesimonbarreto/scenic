@@ -25,7 +25,7 @@ from scenic.dataset_lib import dataset_utils
 from scenic.dataset_lib import datasets
 import tensorflow as tf
 import tensorflow_datasets as tfds
-import co3d.co3d_dataset_builder
+import co3d.co3d_dataset_builder_percent
 
 TRAIN_IMAGES = 20412
 EVAL_IMAGES = 5000
