@@ -147,7 +147,7 @@ def dino_train_step(
 
     logits = flax_model.apply(
         {'params': params},
-        batch['sample'][0],
+        batch['sample'],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,
         drop_moment=drop_moment,
