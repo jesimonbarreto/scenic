@@ -139,14 +139,14 @@ def dino_train_step(
   momentum_parameter = momentum_parameter_scheduler(step)
   bs = batch['x1'].shape[0]  # Per-device batch size.
   labels = batch['labels']
-  batch = utils.prepare_input(batch, config)
+  batch = utils.prepare_input_class(batch, config)
 
   def training_loss_fn(params, center, epoch):
     use_ema = config.apply_cluster_loss
     drop_moment = 'late' if config.apply_cluster_loss else 'early'
 
     logits = flax_model.apply(
-        {'params': train_state.ema_params if use_ema else params},
+        {'params': params},
         batch['sample'][0],
         seqlen=config.reference_seqlen,
         seqlen_selection=config.reference_seqlen_selection,

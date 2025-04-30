@@ -179,6 +179,19 @@ def prepare_input(inputs: Dict[str, jnp.ndarray],
 
   return batch
 
+def prepare_input_class(inputs: Dict[str, jnp.ndarray],
+                  config: ml_collections.ConfigDict) -> Dict[str, jnp.ndarray]:
+  """Prepare the different views for LOCA training."""
+  
+  n_crops = config.ncrops
+  mode = config.mode
+  
+  sample_x = jnp.concatenate([inputs['image1'], inputs['image1']])
+  # views.
+  batch = dict() 
+  batch['sample'] = [sample_x]
+  return batch
+
 def prepare_input_frame(inputs: Dict[str, jnp.ndarray],
                   config: ml_collections.ConfigDict,
                   epoch: int) -> Dict[str, jnp.ndarray]:
