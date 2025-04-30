@@ -137,7 +137,7 @@ def dino_train_step(
       dropout_rng, axis_name='batch', bind_to='device')
   step = train_state.global_step
   momentum_parameter = momentum_parameter_scheduler(step)
-  bs = batch['x1'].shape[0]  # Per-device batch size.
+  bs = batch['image1'].shape[0]  # Per-device batch size.
   labels = batch['labels']
   batch = utils.prepare_input_class(batch, config)
 
