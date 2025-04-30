@@ -57,6 +57,23 @@ from sklearn.decomposition import PCA
 FLAGS = flags.FLAGS
 
 
+def criar_diretorio_incremental(raiz, base_nome="gen"):
+    """
+    Cria um diretório dentro de `raiz` com nome base `gen_N`, onde N é o menor número
+    inteiro tal que o diretório ainda não exista. Retorna o caminho completo criado.
+    
+    Exemplo: se já existem gen_1, gen_2, cria gen_3.
+    """
+    n = 1
+    while True:
+        nome_diretorio = f"{base_nome}_{n}"
+        caminho_completo = os.path.join(raiz, nome_diretorio)
+        if not os.path.exists(caminho_completo):
+            os.makedirs(caminho_completo)
+            break
+        n += 1
+    return caminho_completo
+
 # Aliases for custom types:
 Batch = Dict[str, jnp.ndarray]
 MetricFn = Callable[
@@ -277,9 +294,12 @@ def train(
       image = (image - [0.5]) / [0.5]  # Normalize using provided mean and std dev
       return image
 
+  dir_save_base = criar_diretorio_incremental('/home/jesimonbarreto/', base_nome="gen")
+  
   ##########################################################################################
     # Load image
-  for name_img in glob.glob('/mnt/disks/dataset/mvimgnet/copy/*.*'):
+  
+  for name_img in glob.glob('/mnt/disks/stg_dataset/mvimgnet/copy/*.*'):
     img = Image.open(name_img).convert('RGB')
     resul_name = name_img.split('/')[-1].split('.')[0]
 
@@ -313,7 +333,7 @@ def train(
     pca_features = (pca_features - pca_features.min()) / (pca_features.max() - pca_features.min())
     pca_features = pca_features * 255
     plt.imshow(pca_features.reshape(16, 16, 3).astype(np.uint8))
-    plt.savefig('/home/jesimonbarreto/gen_random/'+resul_name+'.png')
+    plt.savefig(os.path.join(dir_save_base, resul_name+'.png'))
 
 if __name__ == '__main__':
   app.run(main=knn_evaluate)
