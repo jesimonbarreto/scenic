@@ -14,7 +14,8 @@ import tensorflow as tf
 import mvimagenet_dataset
 import youtube8m_dataset
 import mvimagenetest_dataset
-import CO3D_dataset
+#import CO3D_dataset
+import CO3D_dataset_class
 
 
 #tamanho das amostras estao indo é diferente para o batch
