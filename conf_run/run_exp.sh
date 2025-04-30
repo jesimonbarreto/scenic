@@ -97,7 +97,12 @@ sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/final/co3d/dino_nohead.py --workdir=/mnt/disks/stg_dataset/test_test2
 sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dino.py --workdir=../test_
 
-#without training head - Dino v1 - MVIMGNET
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dinov2_nohead.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dinov2.py --workdir=../test_
+
+
+#without training head - Dino v2 - MVIMGNET
 #sudo rm -rf /mnt/disks/stg_dataset/test_test2
-#sudo -E python -m main_dino --config=configs/final/mvimgnet/dino_nohead.py --workdir=/mnt/disks/stg_dataset/test_test2
-#sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dino.py --workdir=../test_
+#sudo -E python -m main_dino --config=configs/final/mvimgnet/dinov2_nohead.py --workdir=/mnt/disks/stg_dataset/test_test2
+#sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dinov2.py --workdir=../test_

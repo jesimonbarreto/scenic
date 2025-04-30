@@ -238,7 +238,6 @@ class ViTDINO(nn.Module):
   num_heads: int
   patches: ml_collections.ConfigDict
   hidden_size: int
-  n_classes_cls: int = 50
   lora_use: bool
   lora_rank: int
   last_layers_train_lora: int
@@ -247,6 +246,7 @@ class ViTDINO(nn.Module):
   n_ref_positions: int
   head_bottleneck_dim: int
   head_output_dim: int
+  n_classes_cls: int = 50
   positional_embedding: str = 'learned'
   dropout_rate: float = 0.0
   attention_dropout_rate: float = 0.0
