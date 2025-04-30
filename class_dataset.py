@@ -14,7 +14,7 @@ import tensorflow as tf
 import mvimagenet_dataset
 import youtube8m_dataset
 import mvimagenetest_dataset
-import CO3D_dataset
+import CO3D_dataset_class
 
 
 #tamanho das amostras estao indo é diferente para o batch
@@ -91,7 +91,7 @@ def get_dataset(*,
   train_iter = map(dataset_utils.tf_to_numpy, train_iter)
   train_iter = map(shard_batches, train_iter)
   train_iter = jax_utils.prefetch_to_device(train_iter, prefetch_buffer_size)
-  input_shape = (-1,) + tuple(train_ds.element_spec['image1'].shape[1:])
+  input_shape = (-1,) + tuple(train_ds.element_spec['x1'].shape[1:])
   logging.info('input_shape details %s', input_shape)
   meta_data = {
       'input_shape': input_shape,
