@@ -19,7 +19,7 @@ import CO3D_dataset_class
 
 #tamanho das amostras estao indo é diferente para o batch
 
-@datasets.add_dataset('dino_dataset')
+@datasets.add_dataset('class_dataset')
 def get_dataset(*,
                 batch_size,
                 eval_batch_size,
