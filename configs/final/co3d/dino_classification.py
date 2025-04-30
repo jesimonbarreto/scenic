@@ -88,6 +88,7 @@ def get_config():
   config.warmup_teacher_temp = 0.04
   config.teacher_temp = 0.07
   config.warmup_teacher_temp_epochs = 0
+  config.num_classes_filter = 50
   
   config.dataset_configs.number_of_focal_queries = n_queries - 1
 
