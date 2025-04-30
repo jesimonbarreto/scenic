@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 import ml_collections
 from scenic import app
-import class_dataset  # pylint: disable=unused-import
+import dino_dataset  # pylint: disable=unused-import
 import ops  # pylint: disable=unused-import
 #import trainer_dino as trainer
 import trainer_classification as trainer
