@@ -94,7 +94,7 @@ def get_config():
 
   config.dataset_configs.pp_train = (
       #'decode' +
-      '|copy("image1", "image_resized")' +
+      'copy("image1", "image_resized")' +
       #f'|adjust_labels({config.dataset_configs.desired_classes}, {config.num_classes},{config.dataset_configs.filter_classes}, key="label", key_result="label_adj")' +
       f'|onehot({config.num_classes_filter}, key="label", key_result="label_onehot")' +
       '|resize_small(256, data_key="image1")'+
