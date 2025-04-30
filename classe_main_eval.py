@@ -38,6 +38,7 @@ import datasets_eval
 import optax
 from scenic.train_lib import lr_schedules
 import copy
+from collections import defaultdict
 
 import functools
 from typing import Any, Callable, Dict, Tuple, Optional, Type
@@ -157,16 +158,7 @@ def representation_fn_eval(
     Representation learned by the model for the given inputs and the labels and
     masks. If `gather_to_host` is True, these are collected from all hosts.
   """
-  #variables = {'params': train_state.params, **train_state.model_state}
 
-  '''embedding = flax_model.apply(
-    variables, 
-    batch['sample'],
-    train=False,
-    return_feats = True,
-    debug=False, 
-    project_feats = project_feats,
-  )'''
   embedding = flax_model.apply(
         {'params': train_state.params},
         batch['image_resized'],
@@ -175,14 +167,13 @@ def representation_fn_eval(
         drop_moment='late',
         backbone = True,
         train=False)
-  embedding = jnp.squeeze(embedding['x_norm_clstoken'])
-  embedding = normalize(embedding)
+  embedding = jnp.squeeze(embedding['x_classe'])
+  #embedding = normalize(embedding)
 
   if gather_to_host:
     embedding = jax.lax.all_gather(embedding, 'batch')
     batch = jax.lax.all_gather(batch, 'batch')
   
-
   return embedding
 
 def knn_evaluate(
@@ -297,14 +288,6 @@ def train(
       print(f"file: {ckpt_file}")
       print(f"ckpt_num: {ckpt_num}")
 
-      #try:
-
-      '''train_state, _ = train_utils.restore_checkpoint(
-          ckpt_dir, 
-          train_state, 
-          assert_exist=True, 
-          step=int(ckpt_num),
-        )'''
       
       train_state = utils.restore_pretrained_checkpoint(
           ckpt_dir, 
@@ -312,11 +295,6 @@ def train(
           assert_exist=True, 
           step=int(ckpt_num),
         )
-        
-      #except:
-
-      #  sys.exit("no checkpoint found")
-      #  continue
 
       train_state = jax_utils.replicate(train_state)
 
@@ -364,67 +342,10 @@ def train(
     
     if not os.path.exists(dir_save_y):
       os.makedirs(dir_save_y)
-    if config.get('extract_train'):
-      print('Starting to extract features train')
-      for i in range(config.steps_per_epoch):
-        path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
-        batch_train = next(dataset.train_iter)
-        emb_train = extract_features(batch_train)
-        print(f'shape emb_train {emb_train.shape}')
-        norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
-        print(f'processing batch {i} shape {emb_train.shape}. Norma 1 {norm_res}')
-        if not norm_res:
-          emb_train = normalize(emb_train)
-        label_train = batch_train['label']
-        emb_train = emb_train[0]
-        bl, bg, emb = emb_train.shape
-        emb_train = emb_train.reshape((bl*bg, emb))
-        label_train = label_train.reshape((bl*bg))
-        jnp.savez(path_file, emb=emb_train, label=label_train)
-      print('Finishing extract features train')
-    else:
-      print('Not extract train')
-
-    @jax.vmap
-    def euclidean_distance(x1, x2):
-      return jnp.linalg.norm(x1 - x2, axis=-1)
-
-    @jax.vmap
-    def cosine_similarity(x1, x2):
-      return jnp.dot(x1, x2) / (jnp.linalg.norm(x1, axis=-1) * jnp.linalg.norm(x2, axis=-1))
-    
-    def compute_diff(u, v):
-      return (u[:, None] - v[None, :]) ** 2
-
-    compute_diff = jax.vmap(compute_diff, in_axes=1, out_axes=-1)
-
-    p_argsort = jax.pmap(jnp.argsort, in_axes=0)
-
-    def calculate_similarity(train_samples, test_samples):
-      return jnp.dot(test_samples, train_samples.T)
-
-    def compute_distance(U, V):
-      return compute_diff(U, V).mean(axis=-1)
-    
-    def compute_dist(u, v):
-      return jnp.linalg.norm(u[:, None] - v[None, :], axis=-1)
-    
-    # Função para calcular a acurácia de um batch
-    def calculate_batch_correct_predictions(probas, labels):
-      predictions = jnp.argmax(probas, axis=1)
-      correct_predictions = jnp.sum(predictions == labels)
-      return correct_predictions
     
     devices = jax.device_count()
     n_test = config.dataset_configs.batch_size_test
     
-    ks = config.get('ks')
-    
-    def compute_k_closest(U, V, k):
-      D = compute_distance(U, V)
-      D = D.reshape(devices, n_test // devices, -1)
-      nearest = p_argsort(D)[..., 1:k+1]
-      return nearest
     
     def one_hot(x, num_classes):
       return jax.nn.one_hot(x, num_classes)
@@ -432,75 +353,43 @@ def train(
     len_test = 0
     T=config.get('T')
     total_correct_predictions = {k: 0 for k in ks}
+    total_correct = 0
     total_samples = 0
-    max_k = jnp.array(ks).max()
+    correct_per_class = defaultdict(int)
+    total_per_class = defaultdict(int)
     for i in range(config.steps_per_epoch_eval):
       print(f'processing step eval {i}')
       batch_eval = next(dataset.valid_iter)
-      emb_test = extract_features(batch_eval)[0]
-      bl, bg, emb = emb_test.shape
-      emb_test = emb_test.reshape((bl*bg, emb))
-      label_eval = batch_eval['label'].reshape((bl*bg))
-      norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2))==1
-      print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
-      if not norm_res:
-        emb_test = normalize(emb_test)
-    
-      print(f'embeeding shape test {emb_test.shape}')
-      sim_all = []
-      labels = []
-      len_test += len(batch_eval)
-      for j in range(config.steps_per_epoch):
-        emb_file_save = os.path.join(dir_save_ckp,f'ckp_{step}_b{j}')
-        data_load = jnp.load(emb_file_save+'.npz')
-        emb_train = data_load['emb']#extract_features(batch_train)
-        label_train = data_load['label']#batch_train['label'][0]
+      logits = extract_features(batch_eval)[0]
+      y_true = batch_eval['label']
+      # Predição
+      y_pred = jnp.argmax(logits, axis=-1)
+      batch_correct = jnp.sum(y_pred == y_true)
+      total_correct += batch_correct
+      total_samples += y_true.shape[0]
 
-        sim = calculate_similarity(emb_train, emb_test)
-        sim_all.append(sim)
-        labels.append(label_train)
-      
-      sim_all = jnp.concatenate(sim_all, axis=1)
-      labels = jnp.concatenate(labels)
+      # Acertos por classe
+      for true_label, pred_label in zip(y_true, y_pred):
+        total_per_class[int(true_label)] += 1
+        if pred_label == true_label:
+          correct_per_class[int(true_label)] += 1
 
-      # Usamos argsort para obter os índices que ordenariam a matriz
-      sorted_indices = jnp.argsort(sim_all, axis=-1)[:, ::-1]  # Ordena em ordem decrescente
-      topk_indices = sorted_indices[:, :max_k]
+    # Cálculo final
+    accuracy = total_correct / total_samples
+    print(f'\nAcurácia total: {accuracy:.4f}')
 
-      # Selecionamos os maiores valores de similaridade usando os índices ordenados
-      topk_sims = jnp.take_along_axis(sim_all, topk_indices, axis=-1)
-      labels = labels[topk_indices]#jnp.take_along_axis(labels, topk_indices, axis=-1)
+    # Acurácia por classe
+    print("\nAcurácia por classe:")
+    for cls in sorted(total_per_class.keys()):
+        acc_cls = correct_per_class[cls] / total_per_class[cls]
+        print(f"Classe {cls}: {acc_cls:.4f}")
 
-      batch_size = labels.shape[0]
-      topk_sims_transform = softmax(topk_sims / T, axis=1)
-      
-      matmul = one_hot(labels, num_classes=num_classes) * topk_sims_transform[:, :, None]
-      
-      probas_for_k = {k: jnp.sum(matmul[:, :k, :], axis=1) for k in ks}
-
-      for k in ks:
-        correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
-        total_correct_predictions[k] += correct_predictions
-        wandb.log({f'batch_size_{k}':batch_size, 
-                     f'correct_predictions{k}':correct_predictions,
-                     f'acc_rel{k}':correct_predictions/batch_size})
-        print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
-      total_samples += batch_size
-      
-
-    # Calcular a acurácia total para cada K
-    total_accuracies = {k: total_correct_predictions[k] / total_samples for k in ks}
-
-    # Resultado
-    print(f'total samples used {total_samples}')
-    print("Acurácia total para diferentes valores de K:")
-    for k, accuracy in total_accuracies.items():
-        wandb.log({
-          "step": step,
-          "K": k,
-          "Accuracy": round(accuracy,4)
-        })
-        print(f"K-{k} acurácia total: {accuracy:.4f}")
+    # Log opcional
+    wandb.log({
+        "step": step,
+        "Total_Accuracy": float(accuracy),
+        **{f"Class_{cls}_Accuracy": float(correct_per_class[cls] / total_per_class[cls]) for cls in correct_per_class}
+    })
 
   train_utils.barrier_across_hosts()
 
