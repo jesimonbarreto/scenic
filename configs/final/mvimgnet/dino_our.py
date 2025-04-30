@@ -56,7 +56,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'frame' #'video_crops' # video or random
+  config.mode = 'video' #'video_crops' # video or random
   
   #plot
   config.plot_ex = False
@@ -164,7 +164,7 @@ def get_config():
         f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
-        '|cam_motion(max_translate=0.1, max_rotate=10.0, max_scale=0.05,brightness_delta=0.1, contrast_range=(0.9, 1.1), data_key="x2")' +
+        #'|cam_motion(max_translate=0.1, max_rotate=10.0, max_scale=0.05,brightness_delta=0.1, contrast_range=(0.9, 1.1), data_key="x2")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x2")' +
         #'|random_flip_image(0.8, data_key="x2")' +
         '|random_grayscale(0.2, data_key="x2")' +
@@ -223,7 +223,7 @@ def get_config():
   
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.dataset = 'mvimgnet'#'mvimgnet'#'youtube8m'#'mvimgnet'
+  config.dataset_configs.dataset = 'co3d'#'mvimgnet'#'youtube8m'#'mvimgnet'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
 
@@ -311,9 +311,9 @@ def get_config():
   config.save_state_0 = False
   config.xprof = True  # Profile using xprof.
   config.checkpoint = True  # Do checkpointing.
-  config.checkpoint_steps = 5000
+  config.checkpoint_steps = 1000
   config.log_summary_steps = 5
-  config.max_keep_checkpoint = 2
+  config.max_keep_checkpoint = 10
 
   ####### Config val
 
