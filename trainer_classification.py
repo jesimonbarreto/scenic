@@ -557,10 +557,10 @@ def train(
 
       if config.plot_ex and fstexe:
         print(f' config {config.ncrops}')
-        plot_example(train_batch, 
-                     number_plot=config.number_plot,
-                     dir_plot=config.dir_plot,
-                     number_crops=config.ncrops)
+        #plot_example(train_batch, 
+        #             number_plot=config.number_plot,
+        #             dir_plot=config.dir_plot,
+        #             number_crops=config.ncrops)
         fstexe = False
 
       train_state, center, tm = dino_train_step_pmapped(
