@@ -1,7 +1,7 @@
 cd /home/jesimonbarreto/scenic
 #loss normal - Dino v1 - CO3D
 
-sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/
+#sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/
 
 
 sudo rm -rf /mnt/disks/stg_dataset/test_test2
