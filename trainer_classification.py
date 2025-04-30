@@ -138,7 +138,7 @@ def dino_train_step(
   step = train_state.global_step
   momentum_parameter = momentum_parameter_scheduler(step)
   bs = batch['image1'].shape[0]  # Per-device batch size.
-  labels = batch['labels']
+  labels = batch['label']
   batch = utils.prepare_input_class(batch, config)
 
   def training_loss_fn(params, center, epoch):
