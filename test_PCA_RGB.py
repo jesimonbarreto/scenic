@@ -10,7 +10,9 @@ import ml_collections
 from scenic import app
 from scenic.train_lib import train_utils
 import ops  # pylint: disable=unused-import
-
+from flax.core import freeze, unfreeze
+from flax.core import frozen_dict
+from flax.core.frozen_dict import FrozenDict
 import os
 import sys
 
@@ -169,9 +171,107 @@ def train(
 
   # Create optimizer.
   weight_decay_mask = jax.tree_map(lambda x: x.ndim != 1, params)
-  tx = optax.inject_hyperparams(optax.adamw)(
-      learning_rate=learning_rate_fn, weight_decay=config.weight_decay,
-      mask=weight_decay_mask,)
+  params = freeze(params)
+  def modify_encoder_block(data, number_layers=11):
+    for idx_layer in range(number_layers):
+      target_key = f"encoderblock_{idx_layer}"
+      if target_key in data and data[target_key] == "zero":
+          data[target_key] = {
+              "LoRA_0": {"lora_A": "adam", "lora_B": "adam"},
+              #"LoRA_1": {"lora_A": "adam", "lora_B": "adam"},
+              "LayerNorm_0": {"bias": "adam", "scale": "adam"},
+              "LayerNorm_1": {"bias": "adam", "scale": "adam"},
+              "MlpBlock_0": {
+                  "Dense_0": {"bias": "zero",
+                              "kernel": "zero"},
+                  "Dense_1": {"bias": "zero",
+                              "kernel": "zero"},
+              },
+              "MultiHeadDotProductAttention_0": {
+                  "key": {"bias": "zero",
+                          "kernel": "zero"},
+                  "out": {"bias": "zero",
+                          "kernel": "zero"},
+                  "query": {"bias": "zero",
+                            "kernel": "zero"},
+                  "value": {"bias": "zero",
+                            "kernel": "zero"},
+              },
+          }
+    
+    return data
+  
+  def modify_encoder_block_total(data, target_keys):
+    for target_key in target_keys:
+      if target_key in data and data[target_key] == "zero":
+          data[target_key] = {
+              "LayerNorm_0": {"bias": config.lnorm_0, "scale": config.lnorm_0},
+              "LayerNorm_1": {"bias": config.lnorm_1, "scale": config.lnorm_1},
+              "MlpBlock_0": {
+                  "Dense_0": {"bias": config.mlpblock_dense_0,
+                              "kernel": config.mlpblock_dense_0},
+                  "Dense_1": {"bias": config.mlpblock_dense_1,
+                              "kernel": config.mlpblock_dense_1},
+              },
+              "MultiHeadDotProductAttention_0": {
+                  "key": {"bias": config.multi_key,
+                          "kernel": config.multi_key},
+                  "out": {"bias": config.multi_out,
+                          "kernel": config.multi_out},
+                  "query": {"bias": config.multi_query,
+                            "kernel": config.multi_query},
+                  "value": {"bias": config.multi_value,
+                            "kernel": config.multi_value},
+              },
+          }
+    
+    return data
+  
+  def create_mask(params, label_fn, target_keys=None):
+    def _map(params, mask, label_fn):
+        for k in params:
+            if label_fn(k):
+                mask[k] = 'zero'
+            else:
+                if isinstance(params[k], FrozenDict):
+                    mask[k] = {}
+                    _map(params[k], mask[k], label_fn)
+                else:
+                    mask[k] = 'adam'
+    mask = {}
+    _map(params, mask, label_fn)
+    if target_keys:
+      train_vit_two = config.get('train_two_last_vit', False)
+      number_layers_lora_train = 11
+      if train_vit_two:
+        number_layers_lora_train = 10
+        target_keys = ['encoderblock_10','encoderblock_11']
+      mask = modify_encoder_block(mask, number_layers=number_layers_lora_train)
+      mask = modify_encoder_block_total(mask, target_keys=target_keys)
+    return frozen_dict.freeze(mask)
+
+  def zero_grads():
+      # from https://github.com/deepmind/optax/issues/159#issuecomment-896459491
+      def init_fn(_):
+          return ()
+      def update_fn(updates, state, params=None):
+          return jax.tree_map(jnp.zeros_like, updates), ()
+      return optax.GradientTransformation(init_fn, update_fn)
+  
+  list_str_layers = config.get('train_layers') or ["encoder", "ToTokenSequence"]
+  list_str_layers_ver = config.get('train_layers_str') or [True, True]
+  last_layer_train = config.get('train_layer_comp') or None
+  freeze_encoder_and_token = generate_conditional_freeze_layers(
+    list_str_layers, list_str_layers_ver, use_and=False
+  )
+  mask_t = create_mask(params, freeze_encoder_and_token, last_layer_train)
+  print(mask_t)
+  tx = optax.multi_transform(
+      {'adam': optax.inject_hyperparams(optax.adamw)(
+      learning_rate=learning_rate_fn, weight_decay=config.weight_decay,),
+      'zero': zero_grads()},
+        mask_t
+      )
   opt_state = jax.jit(tx.init, backend='cpu')(params)
 
   # Create chrono class to track and store training statistics and metadata.
