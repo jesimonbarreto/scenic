@@ -86,7 +86,7 @@ def get_config():
 
   #dir of checkpoints
   config.train_dir = '/mnt/disks/stg_dataset/test_test2'#'/home/jesimonbarreto/exp_test_now/'
-  config.preextracted = True
+  config.preextracted = False
   config.write_summary = True
   config.steps_checkpoints = [-1]
   config.ks = [1,3,5,7,10,20]

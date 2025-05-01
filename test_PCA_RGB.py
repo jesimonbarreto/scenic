@@ -298,7 +298,7 @@ def train(
   
   ##########################################################################################
     # Load image
-  
+  print(f'directory {dir_save_base}')
   for name_img in glob.glob('/mnt/disks/stg_dataset/dataset/mvimgnet/copy/*.*'):
     print(f'processing {name_img}')
     img = Image.open(name_img).convert('RGB')
