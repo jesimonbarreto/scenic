@@ -76,6 +76,22 @@ def criar_diretorio_incremental(raiz, base_nome="gen"):
         n += 1
     return caminho_completo
 
+def generate_conditional_freeze_layers(rules, negate_flags, use_and=True):
+    """
+    Retorna uma função lambda que verifica várias condições de 'in' ou 'not in' em cada elemento da lista.
+
+    Parâmetros:
+        rules (list[str]): Lista de strings para verificar no nome da camada.
+        negate_flags (list[bool]): Lista de booleans para indicar se deve usar 'not in' (True) ou 'in' (False) para cada regra.
+
+    Retorna:
+        function: Função lambda personalizada.
+    """
+    return lambda layer_name: (all if use_and else any)(
+        (rule in layer_name if negate else rule not in layer_name)
+        for rule, negate in zip(rules, negate_flags)
+    )
+
 # Aliases for custom types:
 Batch = Dict[str, jnp.ndarray]
 MetricFn = Callable[
