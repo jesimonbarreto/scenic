@@ -16,11 +16,41 @@ def get_config():
   config.project = 'final_exp'
   config.experiment_name = 'eval_co3b_tips'
   config.extract_train = True
-  config.transfer_learning = False
+  config.transfer_learning = True
 
   config.train_two_last_vit= True
   config.int_train_last_layers = 2
 
+  #LORA
+  config.lora_use = True
+  config.lora_rank = 64
+
+  config.transfer_learning = True
+  config.train_layers = ["encoder", "ToTokenSequence"]
+  #config.train_layers = ["ToTokenSequence_0", "encoder_norm",
+  #                      "key", "MlpBlock_0", "out" 
+  #                       ]
+
+  config.train_two_last_vit= True
+  config.int_train_last_layers = 2
+
+  #Uncert loss
+  config.un_loss = True
+
+  config.train_layer_comp = ['encoderblock_11'] #None
+  config.lnorm_0 = "adam"
+  config.lnorm_1 = "adam"
+  config.mlpblock_dense_0 = "adam"
+  config.mlpblock_dense_1 = "adam"
+  config.multi_key = "adam"
+  config.multi_out = "adam"
+  config.multi_query = "adam"
+  config.multi_value = "adam"
+  config.train_layers_str = [True, True]#, True, True, True, True]
+  config.use_checkpoint = True #use checkpoint basewith other training 
+  config.use_ckpt_dir = '/mnt/disks/stg_dataset/head_2/'
+  config.layer_wise = False
+  config.print_lr_infos = False
   #LORA
   config.lora_use = True
   config.lora_rank = 64
