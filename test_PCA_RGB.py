@@ -332,7 +332,7 @@ def train(
     pca_features = pca.transform(img)
     pca_features = (pca_features - pca_features.min()) / (pca_features.max() - pca_features.min())
     pca_features = pca_features * 255
-    plt.imshow(pca_features.reshape(16, 16, 3).astype(np.uint8))
+    #plt.imshow(pca_features.reshape(16, 16, 3).astype(np.uint8))
     plt.savefig(os.path.join(dir_save_base, resul_name+'.png'))
 
 if __name__ == '__main__':
