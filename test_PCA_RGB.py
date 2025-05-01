@@ -297,7 +297,7 @@ def train(
   train_state = utils.TrainState(
       global_step=0, opt_state=opt_state, tx=tx, params=params,
       ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
-  train_dir= '/mnt/disks/stg_dataset/mvimgnet_video/'
+  train_dir= '/mnt/disks/stg_dataset/mvimgnet_frame/'
   step = 19570 #19570
   print(f"step: {step}")
     
