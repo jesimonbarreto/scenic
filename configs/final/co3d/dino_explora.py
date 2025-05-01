@@ -58,7 +58,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'video' #'video_crops' # video or random
+  config.mode = 'frame' #'video_crops' # video or random
   
   #plot
   config.plot_ex = False
@@ -72,7 +72,7 @@ def get_config():
   config.gama_loss = 1
   config.teta_loss= 0.7
   config.max_grad_norm = 1
-  config.num_training_epochs = 100#400
+  config.num_training_epochs = 10#400
   config.batch_size = 256
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42

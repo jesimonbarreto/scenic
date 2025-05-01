@@ -58,7 +58,7 @@ def get_config():
   config.dataset_configs.shuffle_buffer_size = 250_000
   reference_resolution = 224
   n_queries = 10
-  config.mode = 'frame' #'video_crops' # video or random
+  config.mode = 'video' #'video_crops' # video or random
   
   #plot
   config.plot_ex = False
@@ -225,7 +225,7 @@ def get_config():
   
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
-  config.dataset_configs.dataset = 'co3d'#'mvimgnet'#'youtube8m'#'mvimgnet'
+  config.dataset_configs.dataset = 'mvimgnet'#'mvimgnet'#'youtube8m'#'mvimgnet'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
 
@@ -257,7 +257,7 @@ def get_config():
   config.model.attention_dropout_rate = 0.0
   
   #head
-  config.model.n_layers = 3
+  config.model.n_layers = 2
   config.model.head_hidden_dim = 2048
   config.model.head_bottleneck_dim = 256 #64 #256
   
@@ -271,7 +271,7 @@ def get_config():
   config.momentum_teacher = 0.996
   config.use_bn_in_head = False
   config.load_weight = True
-  config.load_weights = 'dinov2_vit'+version.lower()+'14'#'dino_vitb16'#'dino_vitdeits16'#'dinov2_vit'+version.lower()+'14'
+  config.load_weights = 'tips_b14'#'dinov2_vit'+version.lower()+'14'#'dino_vitb16'#'dino_vitdeits16'#'dinov2_vit'+version.lower()+'14'
 
 
   # LOCA specific parameters.
