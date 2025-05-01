@@ -299,7 +299,7 @@ def train(
   ##########################################################################################
     # Load image
   
-  for name_img in glob.glob('/mnt/disks/stg_dataset/mvimgnet/copy/*.*'):
+  for name_img in glob.glob('/mnt/disks/stg_dataset/dataset/mvimgnet/copy/*.*'):
     img = Image.open(name_img).convert('RGB')
     resul_name = name_img.split('/')[-1].split('.')[0]
 
