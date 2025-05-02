@@ -5,7 +5,7 @@ cd /home/jesimonbarreto/scenic
 
 ## Explora 
 
-#sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/co3d/
+#.sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/co3d/
 
 # CO3D - frame
 sudo rm -rf /mnt/disks/stg_dataset/test_test2
