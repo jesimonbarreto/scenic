@@ -544,8 +544,8 @@ def train(
     correct_matches = jnp.array(correct_matches)
     incorrect_matches = jnp.array(incorrect_matches)
 
-    save_npz_unique(os.path.join('~/', f'correct_matches_step{step}'), 'matches', correct_matches)
-    save_npz_unique(os.path.join('~/', f'incorrect_matches_step{step}'), 'matches', incorrect_matches)
+    save_npz_unique(os.path.join('/home/jesimonbarreto/', f'correct_matches_step{step}'), 'matches', correct_matches)
+    save_npz_unique(os.path.join('/home/jesimonbarreto/', f'incorrect_matches_step{step}'), 'matches', incorrect_matches)
 
   train_utils.barrier_across_hosts()
 
