@@ -742,10 +742,26 @@ def adjust_ids(   key="tfds_id",
   
   """adjust encodes the input.
   """
+  # Alfabeto fixo (adicione mais símbolos se quiser)
   # Função para ajustar os rótulos para serem de 0 a len(desired_classes)-1
   def _adjust_ids(data):
+
+    ALPHABET = list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-@. ")
+    CHAR_TO_INT = {c: i+1 for i, c in enumerate(ALPHABET)}  # +1 para reservar 0 para padding
+    INT_TO_CHAR = {i: c for c, i in CHAR_TO_INT.items()}
+
+    VOCAB_SIZE = len(CHAR_TO_INT) + 1  # incluindo padding
+
+    def encode_string_to_int_tensor(s: tf.Tensor, max_len: int = 128) -> tf.Tensor:
+        """Codifica string para tensor de int usando o dicionário fixo."""
+        chars = tf.strings.unicode_split(s, 'UTF-8')
+        ids = tf.ragged.map_flat_values(lambda ch: CHAR_TO_INT.get(ch.numpy().decode('utf-8'), 0), chars)
+        ids = ids.to_tensor(default_value=0)
+        ids = ids[0][:max_len]
+        pad_len = tf.maximum(0, max_len - tf.shape(ids)[0])
+        return tf.concat([ids, tf.zeros([pad_len], tf.int32)], axis=0)    
     
-    data[key_result] = tf.strings.to_hash_bucket_fast(data[key], 2**31 - 1)
+    data[key_result] = encode_string_to_int_tensor(data[key])
     return data
   return _adjust_ids
 
