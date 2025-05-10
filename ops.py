@@ -744,10 +744,13 @@ def adjust_ids(   key="tfds_id",
   """
   # Função para ajustar os rótulos para serem de 0 a len(desired_classes)-1
   def _adjust_ids(data):
-    def string_to_array(tensor):
-      string = tensor.numpy().decode("utf-8")  # assume que é um tf.string
-      return tf.constant(list(string.encode("utf-8")), dtype=tf.int32)
-    data[key_result] = string_to_array(data[key])
+    def string_to_int_array(s: str, max_len: int = 64) -> jnp.ndarray:
+      # Codifica a string como utf-8, trunca e converte em int32
+      b = s.encode("utf-8")[:max_len]
+      arr = jnp.zeros((max_len,), dtype=jnp.int32)
+      arr[:len(b)] = jnp.frombuffer(b, dtype=jnp.uint8).astype(jnp.int32)
+      return arr
+    data[key_result] = string_to_int_array(data[key])
     return data
   return _adjust_ids
 
