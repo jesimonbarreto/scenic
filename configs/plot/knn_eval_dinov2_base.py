@@ -78,7 +78,7 @@ def get_config():
       '|value_range(0, 1, data_key="image_resized")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'+
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")'+
-      '|keep("image", "image_resized", "label", "label_onehot", "tfds_id")'
+      '|keep("image", "image_resized", "tfds_id")'
       #'|keep("image", "image_resized", "label_adj", "label", "label_onehot")'
   )
 

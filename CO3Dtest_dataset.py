@@ -27,9 +27,9 @@ import tensorflow as tf
 import tensorflow_datasets as tfds
 import co3dtest.co3dtest_dataset_builder
 
-TRAIN_IMAGES = 1281167
-EVAL_IMAGES = 50000
-NUM_CLASSES = 1000
+TRAIN_IMAGES = 20412
+EVAL_IMAGES = 4500
+NUM_CLASSES = 50
 
 IMAGE_SIZE = 224
 CROP_PADDING = 32
@@ -247,10 +247,10 @@ def imagenet_load_split(batch_size,
 
   def decode_example(example):
     if train:
-      image = preprocess_for_train(example['video'], dtype, image_size,
+      image = preprocess_for_train(example['image'], dtype, image_size,
                                    data_augmentations)
     else:
-      image = preprocess_for_eval(example['video'], dtype, image_size)
+      image = preprocess_for_eval(example['image'], dtype, image_size)
 
     label = example['label']
     label = tf.one_hot(label, NUM_CLASSES) if onehot_labels else label
@@ -261,7 +261,7 @@ def imagenet_load_split(batch_size,
   dataset_builder.download_and_prepare()
   ds = dataset_builder.as_dataset(
       split=split, decoders={
-          'video': tfds.decode.SkipDecoding(),
+          'image': tfds.decode.SkipDecoding(),
       })
   options = tf.data.Options()
   options.threading.private_threadpool_size = 48
