@@ -736,6 +736,18 @@ def adjust_labels(desired_classes,
   return _adjust_labels
 
 
+@registry.Registry.register("preprocess_ops.adjust_ids", "function")
+def adjust_ids(   key="tfds_id",
+                  key_result="tfds_id"):
+  
+  """adjust encodes the input.
+  """
+  # Função para ajustar os rótulos para serem de 0 a len(desired_classes)-1
+  def _adjust_ids(data):
+    data[key_result] = data[key]
+    return data
+  return _adjust_ids
+
 @registry.Registry.register("preprocess_ops.copy_video", "function")
 def get_copy_video(inkey, outkeys):
   """Copies value of `inkey` into `outkey`."""
