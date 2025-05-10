@@ -15,7 +15,7 @@ def get_config():
   #WANDB
   config.project = 'final_exp'
   config.experiment_name = 'eval_co3b'
-  config.extract_train = False
+  config.extract_train = True
   config.transfer_learning = False
 
   config.train_two_last_vit= False
