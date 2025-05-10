@@ -738,24 +738,14 @@ def adjust_labels(desired_classes,
 
 @registry.Registry.register("preprocess_ops.adjust_ids", "function")
 def adjust_ids(   key="tfds_id",
-                  key_result="tfds_idi"):
+                  key_result="tfds_id"):
   
   """adjust encodes the input.
   """
   # Função para ajustar os rótulos para serem de 0 a len(desired_classes)-1
   def _adjust_ids(data):
-    def string_to_int_array(s: str, max_len: int = 64) -> jnp.ndarray:
-        try:
-          if isinstance(s, str):
-              return s.encode('utf-8')
-          elif hasattr(s, 'numpy'):
-              return s.numpy().decode('utf-8').encode('utf-8')
-          else:
-              return str(s).encode('utf-8')  # fallback, evita erro
-        except Exception as e:
-            print(f"Erro ao codificar string: {e}")
-
-    data[key_result] = string_to_int_array(data[key])
+    
+    data[key_result] = tf.strings.to_hash_bucket_fast(data[key], 2**31 - 1)
     return data
   return _adjust_ids
 
