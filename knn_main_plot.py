@@ -134,6 +134,18 @@ def normalize(input, p=2.0, axis=1, eps=1e-12):
     norms = jnp.linalg.norm(input, ord=p, axis=axis, keepdims=True)
     return input / jnp.maximum(norms, eps)
 
+
+def save_npz_unique(path_base, array_name, data_array):
+    """Salva um .npz sem sobrescrever, adicionando sufixos incrementais se necessário."""
+    path = f"{path_base}.npz"
+    idx = 1
+    while os.path.exists(path):
+        path = f"{path_base}_{idx}.npz"
+        idx += 1
+    jnp.savez(path, **{array_name: data_array})
+    print(f"Salvo em: {path}")
+
+
 def representation_fn_eval(
     train_state: train_utils.TrainState,
     batch: Batch,
@@ -380,7 +392,8 @@ def train(
         bl, bg, emb = emb_train.shape
         emb_train = emb_train.reshape((bl*bg, emb))
         label_train = label_train.reshape((bl*bg))
-        jnp.savez(path_file, emb=emb_train, label=label_train)
+        ids_ = batch_train['tfds_id'].reshape((bl*bg))
+        jnp.savez(path_file, emb=emb_train, label=label_train, ids=jnp.array(ids_))
 
       print('Finishing extract features train')
     else:
@@ -435,73 +448,102 @@ def train(
     total_correct_predictions = {k: 0 for k in ks}
     total_samples = 0
     max_k = jnp.array(ks).max()
+    correct_matches = []
+    incorrect_matches = []
     for i in range(config.steps_per_epoch_eval):
       print(f'processing step eval {i}')
       batch_eval = next(dataset.valid_iter)
       emb_test = extract_features(batch_eval)[0]
       bl, bg, emb = emb_test.shape
-      emb_test = emb_test.reshape((bl*bg, emb))
-      label_eval = batch_eval['label'].reshape((bl*bg))
-      norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2))==1
+      emb_test = emb_test.reshape((bl * bg, emb))
+      label_eval = batch_eval['label'].reshape((bl * bg))
+
+      # PEGAMOS OS IDs DO TESTE
+      ids_test = batch_eval['tfds_id'].reshape((bl * bg,))
+
+      norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2)) == 1
       print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
       if not norm_res:
-        emb_test = normalize(emb_test)
-    
+          emb_test = normalize(emb_test)
+
       print(f'embeeding shape test {emb_test.shape}')
       sim_all = []
       labels = []
+      ids_all = []
       len_test += len(batch_eval)
-      for j in range(config.steps_per_epoch):
-        emb_file_save = os.path.join(dir_save_ckp, f'ckp_{step}_b{j}')
-        data_load = jnp.load(emb_file_save+'.npz')
-        emb_train = data_load['emb']#extract_features(batch_train)
-        label_train = data_load['label']#batch_train['label'][0]
 
-        sim = calculate_similarity(emb_train, emb_test)
-        sim_all.append(sim)
-        labels.append(label_train)
-      
+      for j in range(config.steps_per_epoch):
+          emb_file_save = os.path.join(dir_save_ckp, f'ckp_{step}_b{j}')
+          data_load = jnp.load(emb_file_save + '.npz')
+          emb_train = data_load['emb']
+          label_train = data_load['label']
+          ids_train = data_load['ids']
+
+          sim = calculate_similarity(emb_train, emb_test)
+          sim_all.append(sim)
+          labels.append(label_train)
+          ids_all.append(ids_train)
+
       sim_all = jnp.concatenate(sim_all, axis=1)
       labels = jnp.concatenate(labels)
+      ids_all = jnp.concatenate(ids_all)
 
-      # Usamos argsort para obter os índices que ordenariam a matriz
-      sorted_indices = jnp.argsort(sim_all, axis=-1)[:, ::-1]  # Ordena em ordem decrescente
+      sorted_indices = jnp.argsort(sim_all, axis=-1)[:, ::-1]
       topk_indices = sorted_indices[:, :max_k]
-
-      # Selecionamos os maiores valores de similaridade usando os índices ordenados
       topk_sims = jnp.take_along_axis(sim_all, topk_indices, axis=-1)
-      labels = labels[topk_indices]#jnp.take_along_axis(labels, topk_indices, axis=-1)
+      labels = labels[topk_indices]
+      topk_ids = ids_all[topk_indices]
+
+      # PEGAMOS O VIZINHO MAIS PRÓXIMO
+      top1_labels = labels[:, 0]
+      top1_ids = topk_ids[:, 0]
+
+      # COMPARA E SALVA OS MATCHES
+      for b in range(len(ids_test)):
+          test_id = ids_test[b]
+          train_id = top1_ids[b]
+          is_correct = top1_labels[b] == label_eval[b]
+          pair = [test_id, train_id]
+          if is_correct:
+              correct_matches.append(pair)
+          else:
+              incorrect_matches.append(pair)
 
       batch_size = labels.shape[0]
       topk_sims_transform = softmax(topk_sims / T, axis=1)
-      
       matmul = one_hot(labels, num_classes=num_classes) * topk_sims_transform[:, :, None]
-      
       probas_for_k = {k: jnp.sum(matmul[:, :k, :], axis=1) for k in ks}
 
       for k in ks:
-        correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
-        total_correct_predictions[k] += correct_predictions
-        wandb.log({f'batch_size_{k}':batch_size, 
-                     f'correct_predictions{k}':correct_predictions,
-                     f'acc_rel{k}':correct_predictions/batch_size})
-        print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
+          correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
+          total_correct_predictions[k] += correct_predictions
+          wandb.log({
+              f'batch_size_{k}': batch_size,
+              f'correct_predictions{k}': correct_predictions,
+              f'acc_rel{k}': correct_predictions / batch_size
+          })
+          print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
       total_samples += batch_size
-      
+      break
 
-    # Calcular a acurácia total para cada K
+    # Calcular a acurácia total
     total_accuracies = {k: total_correct_predictions[k] / total_samples for k in ks}
-
-    # Resultado
     print(f'total samples used {total_samples}')
     print("Acurácia total para diferentes valores de K:")
     for k, accuracy in total_accuracies.items():
-        wandb.log({
+      wandb.log({
           "step": step,
           "K": k,
-          "Accuracy": round(accuracy,4)
-        })
-        print(f"K-{k} acurácia total: {accuracy:.4f}")
+          "Accuracy": round(accuracy, 4)
+      })
+      print(f"K-{k} acurácia total: {accuracy:.4f}")
+
+    # SALVA OS MATCHES NO FINAL
+    correct_matches = jnp.array(correct_matches)
+    incorrect_matches = jnp.array(incorrect_matches)
+
+    save_npz_unique(os.path.join('~/', f'correct_matches_step{step}'), 'matches', correct_matches)
+    save_npz_unique(os.path.join('~/', f'incorrect_matches_step{step}'), 'matches', incorrect_matches)
 
   train_utils.barrier_across_hosts()
 
