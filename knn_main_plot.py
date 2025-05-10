@@ -394,7 +394,7 @@ def train(
         bl, bg, emb = emb_train.shape
         emb_train = emb_train.reshape((bl*bg, emb))
         label_train = label_train.reshape((bl*bg))
-        ids_ = ids.reshape((bl*bg))
+        ids_ = ids.reshape((bl*bg), 128)
         jnp.savez(path_file, emb=emb_train, label=label_train, ids=jnp.array(ids_))
 
       print('Finishing extract features train')
@@ -461,7 +461,7 @@ def train(
       label_eval = batch_eval['label'].reshape((bl * bg))
 
       # PEGAMOS OS IDs DO TESTE
-      ids_test = batch_eval['tfds_id'].reshape((bl * bg,))
+      ids_test = batch_eval['tfds_id'].reshape((bl * bg, 128))
 
       norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2)) == 1
       print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
