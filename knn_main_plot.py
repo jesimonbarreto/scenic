@@ -381,6 +381,8 @@ def train(
       for i in range(config.steps_per_epoch):
         path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
         batch_train = next(dataset.train_iter)
+        ids = batch_train['tfds_id']
+        del batch_train['tfds_id']
         emb_train = extract_features(batch_train)
         print(f'shape emb_train {emb_train.shape}')
         norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
@@ -392,7 +394,7 @@ def train(
         bl, bg, emb = emb_train.shape
         emb_train = emb_train.reshape((bl*bg, emb))
         label_train = label_train.reshape((bl*bg))
-        ids_ = batch_train['tfds_id'].reshape((bl*bg))
+        ids_ = ids.reshape((bl*bg))
         jnp.savez(path_file, emb=emb_train, label=label_train, ids=jnp.array(ids_))
 
       print('Finishing extract features train')
