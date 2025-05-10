@@ -526,7 +526,6 @@ def train(
           })
           print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
       total_samples += batch_size
-      break
 
     # Calcular a acurácia total
     total_accuracies = {k: total_correct_predictions[k] / total_samples for k in ks}
