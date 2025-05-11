@@ -35,12 +35,12 @@ def get_config():
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
   config.dataset_configs.dataset = 'co3dtest' #'mvimgnetest' #'co3dtest' #'imagenet2012'
-  config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
+  config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/plot/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
   config.dataset_configs.batch_size_train = 256
   config.dataset_configs.batch_size_test = 64
-  config.num_classes = 238
+  config.num_classes = 50
   reference_resolution = 224
   crop_size = 224
   config.T = 0.07
@@ -69,7 +69,7 @@ def get_config():
       '|copy("image", "image_resized")' +
       #f'|adjust_labels({config.dataset_configs.desired_classes}, {config.num_classes},{config.dataset_configs.filter_classes}, key="label", key_result="label_adj")' +
       f'|onehot({config.num_classes_filter}, key="label", key_result="label_onehot")' +
-      '|adjust_ids(key="tfds_id", key_result="tfds_id")' +
+      '|adjust_ids(key="index", key_result="index")' +
       '|resize_small(256, data_key="image")'+
       '|resize_small(256, data_key="image_resized")'+
       '|central_crop(224, data_key="image")'+
@@ -78,7 +78,7 @@ def get_config():
       '|value_range(0, 1, data_key="image_resized")' +
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'+
       f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")'+
-      '|keep("image", "image_resized", "label", "label_onehot", "tfds_id")'
+      '|keep("image", "image_resized", "label", "label_onehot", "index")'
       #'|keep("image", "image_resized", "label_adj", "label", "label_onehot")'
   )
 

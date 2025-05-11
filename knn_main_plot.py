@@ -381,8 +381,8 @@ def train(
       for i in range(config.steps_per_epoch):
         path_file = os.path.join(dir_save_ckp,f'ckp_{step}_b{i}')
         batch_train = next(dataset.train_iter)
-        ids = batch_train['tfds_id']
-        del batch_train['tfds_id']
+        ids = batch_train['index']
+        del batch_train['index']
         emb_train = extract_features(batch_train)
         print(f'shape emb_train {emb_train.shape}')
         norm_res = round(jnp.linalg.norm(jnp.array([emb_train[0,0,0]]), ord=2))==1
@@ -461,7 +461,7 @@ def train(
       label_eval = batch_eval['label'].reshape((bl * bg))
 
       # PEGAMOS OS IDs DO TESTE
-      ids_test = batch_eval['tfds_id'].reshape((bl * bg, 128))
+      ids_test = batch_eval['index'].reshape((bl * bg, 128))
 
       norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2)) == 1
       print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
