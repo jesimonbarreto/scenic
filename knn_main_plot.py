@@ -12,6 +12,8 @@ from scenic.train_lib import train_utils
 from scenic.train_lib import pretrain_utils
 import ops  # pylint: disable=unused-import
 from jax.nn import softmax
+from jax.scipy.stats import mode
+
 
 import os
 import sys
@@ -453,91 +455,95 @@ def train(
     correct_matches = []
     incorrect_matches = []
     for i in range(config.steps_per_epoch_eval):
-      print(f'processing step eval {i}')
-      batch_eval = next(dataset.valid_iter)
-      emb_test = extract_features(batch_eval)[0]
-      bl, bg, emb = emb_test.shape
-      emb_test = emb_test.reshape((bl * bg, emb))
-      label_eval = batch_eval['label'].reshape((bl * bg))
+        print(f'processing step eval {i}')
+        batch_eval = next(dataset.valid_iter)
+        emb_test = extract_features(batch_eval)[0]
+        bl, bg, emb = emb_test.shape
+        emb_test = emb_test.reshape((bl * bg, emb))
+        label_eval = batch_eval['label'].reshape((bl * bg))
 
-      # PEGAMOS OS IDs DO TESTE
-      ids_test = batch_eval['index'].reshape((bl * bg, 128))
+        # PEGAMOS OS IDs DO TESTE
+        ids_test = batch_eval['index'].reshape((bl * bg, 128))
 
-      norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2)) == 1
-      print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
-      if not norm_res:
-          emb_test = normalize(emb_test)
+        norm_res = round(jnp.linalg.norm(jnp.array([emb_test[0]]), ord=2)) == 1
+        print(f'processing batch test {i} shape {emb_test.shape}. Norma 1 {norm_res}')
+        if not norm_res:
+            emb_test = normalize(emb_test)
 
-      print(f'embeeding shape test {emb_test.shape}')
-      sim_all = []
-      labels = []
-      ids_all = []
-      len_test += len(batch_eval)
+        print(f'embeeding shape test {emb_test.shape}')
+        sim_all = []
+        labels = []
+        ids_all = []
+        len_test += len(batch_eval)
 
-      for j in range(config.steps_per_epoch):
-          emb_file_save = os.path.join(dir_save_ckp, f'ckp_{step}_b{j}')
-          data_load = jnp.load(emb_file_save + '.npz')
-          emb_train = data_load['emb']
-          label_train = data_load['label']
-          ids_train = data_load['ids']
+        for j in range(config.steps_per_epoch):
+            emb_file_save = os.path.join(dir_save_ckp, f'ckp_{step}_b{j}')
+            data_load = jnp.load(emb_file_save + '.npz')
+            emb_train = data_load['emb']
+            label_train = data_load['label']
+            ids_train = data_load['ids']
 
-          sim = calculate_similarity(emb_train, emb_test)
-          sim_all.append(sim)
-          labels.append(label_train)
-          ids_all.append(ids_train)
+            sim = calculate_similarity(emb_train, emb_test)
+            sim_all.append(sim)
+            labels.append(label_train)
+            ids_all.append(ids_train)
 
-      sim_all = jnp.concatenate(sim_all, axis=1)
-      labels = jnp.concatenate(labels)
-      ids_all = jnp.concatenate(ids_all)
+        sim_all = jnp.concatenate(sim_all, axis=1)
+        labels = jnp.concatenate(labels)
+        ids_all = jnp.concatenate(ids_all)
 
-      sorted_indices = jnp.argsort(sim_all, axis=-1)[:, ::-1]
-      topk_indices = sorted_indices[:, :max_k]
-      topk_sims = jnp.take_along_axis(sim_all, topk_indices, axis=-1)
-      labels = labels[topk_indices]
-      topk_ids = ids_all[topk_indices]
+        sorted_indices = jnp.argsort(sim_all, axis=-1)[:, ::-1]
+        topk_indices = sorted_indices[:, :max_k]
+        topk_sims = jnp.take_along_axis(sim_all, topk_indices, axis=-1)
+        topk_labels = labels[topk_indices]
+        topk_ids = ids_all[topk_indices]
 
-      # PEGAMOS O VIZINHO MAIS PRÓXIMO
-      top1_labels = labels[:, 0]
-      top1_ids = topk_ids[:, 0]
+        # AVALIA USANDO VOTO MAJORITÁRIO ENTRE TOP 3
+        for b in range(len(ids_test)):
+            test_id = ids_test[b]
+            gt_label = label_eval[b]
+            top3_labels = topk_labels[b, :3]
+            top3_ids = topk_ids[b, :3]
 
-      # COMPARA E SALVA OS MATCHES
-      for b in range(len(ids_test)):
-          test_id = ids_test[b]
-          train_id = top1_ids[b]
-          is_correct = top1_labels[b] == label_eval[b]
-          pair = [test_id, train_id]
-          if is_correct:
-              correct_matches.append(pair)
-          else:
-              incorrect_matches.append(pair)
+            # Voto majoritário
+            predicted_label = mode(top3_labels)[0]
+            is_correct = predicted_label == gt_label
 
-      batch_size = labels.shape[0]
-      topk_sims_transform = softmax(topk_sims / T, axis=1)
-      matmul = one_hot(labels, num_classes=num_classes) * topk_sims_transform[:, :, None]
-      probas_for_k = {k: jnp.sum(matmul[:, :k, :], axis=1) for k in ks}
+            entry = [test_id] + list(top3_ids)
+            if is_correct:
+                correct_matches.append(entry)
+            else:
+                incorrect_matches.append(entry)
 
-      for k in ks:
-          correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
-          total_correct_predictions[k] += correct_predictions
-          wandb.log({
-              f'batch_size_{k}': batch_size,
-              f'correct_predictions{k}': correct_predictions,
-              f'acc_rel{k}': correct_predictions / batch_size
-          })
-          print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
-      total_samples += batch_size
+        # AVALIAÇÃO POR K (continua igual)
+        batch_size = topk_labels.shape[0]
+        topk_sims_transform = softmax(topk_sims / T, axis=1)
+        matmul = one_hot(topk_labels, num_classes=num_classes) * topk_sims_transform[:, :, None]
+        probas_for_k = {k: jnp.sum(matmul[:, :k, :], axis=1) for k in ks}
 
-    # Calcular a acurácia total
+        for k in ks:
+            correct_predictions = calculate_batch_correct_predictions(probas_for_k[k], label_eval)
+            total_correct_predictions[k] += correct_predictions
+            wandb.log({
+                f'batch_size_{k}': batch_size,
+                f'correct_predictions{k}': correct_predictions,
+                f'acc_rel{k}': correct_predictions / batch_size
+            })
+            print(f'Considerando k== {k} -- batch {batch_size}/{correct_predictions} certos')
+
+        total_samples += batch_size
+
+    # ACURÁCIA FINAL
     total_accuracies = {k: total_correct_predictions[k] / total_samples for k in ks}
     print(f'total samples used {total_samples}')
     print("Acurácia total para diferentes valores de K:")
     for k, accuracy in total_accuracies.items():
-      wandb.log({
-          "step": step,
-          "K": k,
-          "Accuracy": round(accuracy, 4)
-      })
-      print(f"K-{k} acurácia total: {accuracy:.4f}")
+        wandb.log({
+            "step": step,
+            "K": k,
+            "Accuracy": round(accuracy, 4)
+        })
+        print(f"K-{k} acurácia total: {accuracy:.4f}")
 
     # SALVA OS MATCHES NO FINAL
     correct_matches = jnp.array(correct_matches)

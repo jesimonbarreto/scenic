@@ -13,10 +13,8 @@ classes_co3d = [
     "toyplane", "toytrain", "toytruck", "tv", "umbrella", "vase"
 ]
 
-
-
 # Carrega o dicionário com os matches
-data = np.load('/home/jesimonbarreto/Documents/mestrado/plot_exp/match_results.npz', allow_pickle=True)
+data = np.load('/home/jesimonbarreto/Documents/mestrado/plot_exp/match_results_triple.npz', allow_pickle=True)
 results_dict = {k: data[k].item() for k in data}
 
 # Carrega os splits
@@ -44,33 +42,39 @@ train_dict = build_indexed_dict_with_class(train_ds)
 def extract_index(full_id):
     return full_id.split('__')[-1]
 
-# Plotagem com classe no título
-def plot_case(val_id, correct_id, incorrect_id):
+# Plotagem com 4 imagens
+def plot_case(val_id, correct_id, incorrect_base_id, incorrect_img_id):
     val_index = extract_index(val_id)
     correct_index = extract_index(correct_id)
-    incorrect_index = extract_index(incorrect_id)
+    incorrect_base_index = extract_index(incorrect_base_id)
+    incorrect_img_index = extract_index(incorrect_img_id)
 
     val_ex = val_dict.get(val_index)
     correct_ex = train_dict.get(correct_index)
-    incorrect_ex = train_dict.get(incorrect_index)
+    incorrect_base_ex = train_dict.get(incorrect_base_index)
+    incorrect_img_ex = train_dict.get(incorrect_img_index)
 
-    if val_ex is None or correct_ex is None or incorrect_ex is None:
-        print(f"⚠️ Um ou mais índices não encontrados: {val_index}, {correct_index}, {incorrect_index}")
+    if not all([val_ex, correct_ex, incorrect_base_ex, incorrect_img_ex]):
+        print(f"⚠️ Índices não encontrados: {val_index}, {correct_index}, {incorrect_base_index}, {incorrect_img_index}")
         return
 
-    fig, axs = plt.subplots(1, 3, figsize=(12, 4))
+    fig, axs = plt.subplots(1, 4, figsize=(16, 4))
 
     axs[0].imshow(val_ex['image'])
     axs[0].set_title(f"🔍 Validation\nClass: {classes_co3d[int(val_ex['label'])]}")
     axs[0].axis('off')
 
     axs[1].imshow(correct_ex['image'])
-    axs[1].set_title(f"✅ Correct Match\nClass: {classes_co3d[int(correct_ex['label'])]}")
+    axs[1].set_title(f"✅ Correct\nClass: {classes_co3d[int(correct_ex['label'])]}")
     axs[1].axis('off')
 
-    axs[2].imshow(incorrect_ex['image'])
-    axs[2].set_title(f"❌ Incorrect Match\nClass: {classes_co3d[int(incorrect_ex['label'])]}")
+    axs[2].imshow(incorrect_base_ex['image'])
+    axs[2].set_title(f"❌ Incorrect Base\nClass: {classes_co3d[int(incorrect_base_ex['label'])]}")
     axs[2].axis('off')
+
+    axs[3].imshow(incorrect_img_ex['image'])
+    axs[3].set_title(f"❌ Incorrect Img\nClass: {classes_co3d[int(incorrect_img_ex['label'])]}")
+    axs[3].axis('off')
 
     plt.suptitle(f"Index: {val_index}", fontsize=14)
     plt.tight_layout()
@@ -80,4 +84,5 @@ def plot_case(val_id, correct_id, incorrect_id):
 for val_id, match in results_dict.items():
     print(val_id)
     print(match)
-    plot_case(val_id, match['correct'], match['incorrect'])
+    plot_case(val_id, match['correct'], match['incorrect_base'], match['incorrect_img'])
+
