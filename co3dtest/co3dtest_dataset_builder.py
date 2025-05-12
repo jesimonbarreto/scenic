@@ -66,7 +66,7 @@ class Builder(tfds.core.GeneratorBasedBuilder):
             #  encoding_format= 'jpeg'),
             'image': tfds.features.Image(encoding_format='jpeg'),
             'label': tfds.features.ClassLabel(names=list(classes_co3d)),
-            'index': tfds.features.Text(),
+            #'index': tfds.features.Text(),
         }),
         # If there's a common (input, target) tuple from the
         # features, specify them here. They'll be used if
@@ -178,6 +178,6 @@ class Builder(tfds.core.GeneratorBasedBuilder):
           record = {
             "image": img,
             "label": get_position(label),
-            "index": str(k)+'_'+id
+            #"index": str(k)+'_'+id
           }
           yield str(k)+'_'+id, record
