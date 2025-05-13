@@ -1,10 +1,11 @@
-import os
 import numpy as np
 import tensorflow_datasets as tfds
 import matplotlib.pyplot as plt
-import imageio
+import os
+from PIL import Image
 import CO3Dtest_dataset
 
+# Lista de classes
 classes_co3d = [
     "apple", "backpack", "ball", "banana", "baseballbat", "baseballglove", "bench",
     "bicycle", "book", "bottle", "bowl", "broccoli", "cake", "car", "carrot",
@@ -15,9 +16,15 @@ classes_co3d = [
     "toyplane", "toytrain", "toytruck", "tv", "umbrella", "vase"
 ]
 
-data = np.load('/home/jesimonbarreto/Documents/mestrado/plot_exp/match_results_triple.npz', allow_pickle=True)
+# Diretório base de saída
+base_out_dir = '/home/jesimonbarreto/Documents/mestrado/plot_exp/samples'
+os.makedirs(base_out_dir, exist_ok=True)
+
+# Carrega o dicionário com os matches
+data = np.load('/home/jesimonbarreto/Documents/mestrado/plot_exp/match_results_correct_base_50.npz', allow_pickle=True)
 results_dict = {k: data[k].item() for k in data}
 
+# Carrega os splits
 print("🔄 Carregando validation...")
 val_ds = tfds.load('co3dtest', split='validation', data_dir='/home/jesimonbarreto/Documents/mestrado/plot_exp', shuffle_files=False, as_supervised=False)
 print("🔄 Carregando train...")
@@ -40,53 +47,50 @@ train_dict = build_indexed_dict_with_class(train_ds)
 def extract_index(full_id):
     return full_id.split('__')[-1]
 
-# Novo: função para salvar imagens em pastas nomeadas
-def save_image(image, path):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    imageio.imwrite(path, image)
+# Função para salvar imagem
+def save_image(img_array, path):
+    img = Image.fromarray(img_array)
+    img.save(path)
 
-# Substituto de `plot_case` para salvar imagens
-def save_case_images(val_id, correct_id, incorrect_base_id, incorrect_img_id):
+# Para cada amostra, salva as imagens — mas apenas as 50 primeiras
+for i, (val_id, match) in enumerate(results_dict.items()):
+    if i >= 50:
+        break
+
     val_index = extract_index(val_id)
-    correct_index = extract_index(correct_id)
-    incorrect_base_index = extract_index(incorrect_base_id)
-    incorrect_img_index = extract_index(incorrect_img_id)
+    correct_index = extract_index(match['correct'])
+    incorrect_index = extract_index(match['incorrect_base'])
 
     val_ex = val_dict.get(val_index)
     correct_ex = train_dict.get(correct_index)
-    incorrect_base_ex = train_dict.get(incorrect_base_index)
-    incorrect_img_ex = train_dict.get(incorrect_img_index)
+    incorrect_ex = train_dict.get(incorrect_index)
 
-    if not all([val_ex, correct_ex, incorrect_base_ex, incorrect_img_ex]):
-        print(f"⚠️ Índices não encontrados: {val_index}, {correct_index}, {incorrect_base_index}, {incorrect_img_index}")
-        return
+    if val_ex is None or correct_ex is None or incorrect_ex is None:
+        print(f"⚠️ Um ou mais índices não encontrados: {val_index}, {correct_index}, {incorrect_index}")
+        continue
 
-    base_path = os.path.join('/home/jesimonbarreto/Documents/mestrado/plot_exp/samples', val_index)
-    
-    save_image(val_ex['image'], os.path.join(base_path, f'validation_class_{classes_co3d[int(val_ex["label"])]}.png'))
-    save_image(correct_ex['image'], os.path.join(base_path, f'correct_class_{classes_co3d[int(correct_ex["label"])]}.png'))
-    save_image(incorrect_img_ex['image'], os.path.join(base_path, f'incorrect_class_image_{classes_co3d[int(incorrect_img_ex["label"])]}.png'))
-    save_image(incorrect_base_ex['image'], os.path.join(base_path, f'incorrect_class_base_{classes_co3d[int(incorrect_base_ex["label"])]}.png'))
+    val_class = classes_co3d[int(val_ex['label'])]
+    correct_class = classes_co3d[int(correct_ex['label'])]
+    incorrect_class = classes_co3d[int(incorrect_ex['label'])]
 
-    # Comentado: visualização com matplotlib
-    # fig, axs = plt.subplots(1, 4, figsize=(16, 4))
+    sample_dir = os.path.join(base_out_dir, val_index)
+    os.makedirs(sample_dir, exist_ok=True)
+
+    save_image(val_ex['image'], os.path.join(sample_dir, f"validation_{val_class}.png"))
+    save_image(correct_ex['image'], os.path.join(sample_dir, f"correct_{correct_class}.png"))
+    save_image(incorrect_ex['image'], os.path.join(sample_dir, f"incorrect_{incorrect_class}.png"))
+
+    # Comentado: plotagem das imagens
+    # fig, axs = plt.subplots(1, 3, figsize=(12, 4))
     # axs[0].imshow(val_ex['image'])
-    # axs[0].set_title(f"🔍 Validation\nClass: {classes_co3d[int(val_ex['label'])]}")
+    # axs[0].set_title(f"🔍 Validation\nClass: {val_class}")
     # axs[0].axis('off')
     # axs[1].imshow(correct_ex['image'])
-    # axs[1].set_title(f"✅ Correct\nClass: {classes_co3d[int(correct_ex['label'])]}")
+    # axs[1].set_title(f"✅ Correct\nClass: {correct_class}")
     # axs[1].axis('off')
-    # axs[2].imshow(incorrect_base_ex['image'])
-    # axs[2].set_title(f"❌ Incorrect Base\nClass: {classes_co3d[int(incorrect_base_ex['label'])]}")
+    # axs[2].imshow(incorrect_ex['image'])
+    # axs[2].set_title(f"❌ Incorrect\nClass: {incorrect_class}")
     # axs[2].axis('off')
-    # axs[3].imshow(incorrect_img_ex['image'])
-    # axs[3].set_title(f"❌ Incorrect Img\nClass: {classes_co3d[int(incorrect_img_ex['label'])]}")
-    # axs[3].axis('off')
-    # plt.suptitle(f"Index: {val_index}", fontsize=14)
+    # plt.suptitle(f"Sample: {val_index}")
     # plt.tight_layout()
     # plt.show()
-
-# Salvar imagens para todos os casos
-for val_id, match in results_dict.items():
-    print(f"💾 Salvando amostra: {val_id}")
-    save_case_images(val_id, match['correct'], match['incorrect_base'], match['incorrect_img'])

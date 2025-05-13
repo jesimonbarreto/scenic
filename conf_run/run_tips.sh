@@ -11,7 +11,7 @@ cd /home/jesimonbarreto/scenic
 sudo rm -rf /mnt/disks/stg_dataset/head_2
 sudo -E python -m main_dino --config=configs/final/co3d/tips_head_frame.py --workdir=/mnt/disks/stg_dataset/head_2
 
-#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/final/co3d/tips_frame.py --workdir=/mnt/disks/stg_dataset/test_test2
 sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_tips.py --workdir=../test_
 
@@ -19,7 +19,7 @@ sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_tips.py --workdi
 sudo rm -rf /mnt/disks/stg_dataset/head_2
 sudo -E python -m main_dino --config=configs/final/co3d/tips_head.py --workdir=/mnt/disks/stg_dataset/head_2
 
-#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/final/co3d/tips_our.py --workdir=/mnt/disks/stg_dataset/test_test2
 sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_tips.py --workdir=../test_
 
@@ -31,7 +31,7 @@ sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips_base.py
 sudo rm -rf /mnt/disks/stg_dataset/head_2
 sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_head_frame.py --workdir=/mnt/disks/stg_dataset/head_2
 
-#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_frame.py --workdir=/mnt/disks/stg_dataset/test_test2
 sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips.py --workdir=../test_
 
@@ -39,6 +39,6 @@ sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips.py --wo
 sudo rm -rf /mnt/disks/stg_dataset/head_2
 sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_head.py --workdir=/mnt/disks/stg_dataset/head_2
 
-#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_our.py --workdir=/mnt/disks/stg_dataset/test_test2
 sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips.py --workdir=../test_
