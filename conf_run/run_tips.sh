@@ -25,7 +25,7 @@ sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_tips.py --workdi
 
 
 #tips pretrained
-sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips_base.py --workdir=../test_
+#sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips_base.py --workdir=../test_
 
 #frame
 sudo rm -rf /mnt/disks/stg_dataset/head_2
