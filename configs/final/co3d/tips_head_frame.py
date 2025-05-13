@@ -110,28 +110,30 @@ def get_config():
         f'|copy("image2", "x2")'+
         ''.join([f'|copy("image{1 if i % 2 == 0 else 2}", "crop{i}")' for i in range(config.ncrops)]) +
 
-        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
-        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
+        f'|copy_resize_file(448, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
+        f'|copy_resize_file(448, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
         '|value_range(0, 1, data_key="x1")' +
         #'|random_color_jitter(0.8, 0.8, 0.8, 0.4, 0.2, data_key="x1")' +
         '|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
         '|random_grayscale(0.1, data_key="x1")' +
         '|random_blur(0.5, data_key="x1")' +
-        f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
+        '|value_range(0, 1, data_key="x1")' +
+        #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
         '|random_color_jitter(0.8, 0.6, 0.6, 0.4, 0.2, data_key="x2")' +
         '|random_grayscale(0.1, data_key="x2")' +
         '|random_blur(0.1, data_key="x2")' +
         '|random_solarize(0.1, data_key="x2")' +
-        f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
+        '|value_range(0, 1, data_key="x2")' +
+        #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
 
         ''.join([f'|copy_resize_file(96, {config.local_crops_scale}, inkey=("crop{i}", "crop{i}"), outkey=("crop{i}", "image1"))' for i in range(config.ncrops)]) +
         ''.join([f'|value_range(0, 1, data_key="crop{i}")' for i in range(config.ncrops)]) +
         ''.join([f'|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="crop{i}")' for i in range(config.ncrops)]) +
         ''.join([f'|random_grayscale(0.2, data_key="crop{i}")' for i in range(config.ncrops)]) +
         ''.join([f'|random_blur(0.5, data_key="crop{i}")' for i in range(config.ncrops)]) +
-        ''.join([f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="crop{i}")' for i in range(config.ncrops)]) +
+        ''.join([f'|value_range(0, 1, data_key="crop{i}")' for i in range(config.ncrops)]) +
         '|keep("x1", "x2"' + ''.join([f', "crop{i}"' for i in range(config.ncrops)]) + ')'
       )
   elif config.mode == 'frame' and config.ncrops > 0:
