@@ -132,7 +132,7 @@ def get_config():
         '|random_grayscale(0.2, data_key="x1")' +
         '|random_blur(1.0, data_key="x1")' +
         '|value_range(0, 1, data_key="x1")' +
-        #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
+        f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x1")'
 
         '|value_range(0, 1, data_key="x2")' +
         #'|cam_motion(max_translate=0.1, max_rotate=10.0, max_scale=0.05,brightness_delta=0.1, contrast_range=(0.9, 1.1), data_key="x2")' +
@@ -142,7 +142,7 @@ def get_config():
         '|random_blur(0.1, data_key="x2")' +
         '|random_solarize(0.2, data_key="x2")' +
         '|value_range(0, 1, data_key="x2")' +
-        #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
+        f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="x2")'+
 
         ''.join([f'|copy_resize_file(96, {config.local_crops_scale}, inkey=("crop{i}", "crop{i}"), outkey=("crop{i}", "image1"))' for i in range(config.ncrops)]) +
         ''.join([f'|value_range(0, 1, data_key="crop{i}")' for i in range(config.ncrops)]) +
