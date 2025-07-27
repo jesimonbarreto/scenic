@@ -1,4 +1,8 @@
 ### test if you need sudo rm -rf /mnt/disks/dataset/dataset/imagenet/mvimgnet/
+
+wget -P /mnt/disks/stg_dataset/dataset/imagenet/downloads/manual https://image-net.org/data/ILSVRC/2012/ILSVRC2012_img_train.tar --no-check-certificate
+wget -P /mnt/disks/stg_dataset/dataset/imagenet/downloads/manual https://image-net.org/data/ILSVRC/2012/ILSVRC2012_img_val.tar --no-check-certificate
+
 cd /home/jesimonbarreto/scenic
 #sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/mvimgnet/
 #sudo rm -rf /mnt/disks/stg_dataset/dataset/imagenet/mvimgnetest/
