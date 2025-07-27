@@ -477,4 +477,5 @@ PYTORCH_STYLE_WEIGHTS = {
     'dino_vitb16': '/home/jesimonbarreto/dino_vitb16.npz',
     'dino_vitdeits16': '/home/jesimonbarreto/dino_deits16.npz',
     'tips_b14': '/home/jesimonbarreto/tips_b14.npz',
+    'ibot_vit_b16': '/home/jesimonbarreto/ibot_vit_b16.npz',
 }
