@@ -35,7 +35,7 @@ sudo -E python -m main_dino --config=configs/final/co3d/ibot_head.py --workdir=/
 
 sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/final/co3d/ibot_our.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_tips.py --workdir=../test_
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_ibot.py --workdir=../test_
 
 
 ######## MVIMAGENET
@@ -49,4 +49,4 @@ sudo -E python -m main_dino --config=configs/final/mvimgnet/ibot_head.py --workd
 
 sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/final/mvimgnet/ibot_our.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips.py --workdir=../test_
+sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_ibot.py --workdir=../test_
