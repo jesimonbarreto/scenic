@@ -27,7 +27,7 @@ cd /home/jesimonbarreto/scenic
 ######## CO3D
 
 #tips pretrained
-sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_ibot_base.py --workdir=../test_
+#sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_ibot_base.py --workdir=../test_
 
 #video
 sudo rm -rf /mnt/disks/stg_dataset/head_2

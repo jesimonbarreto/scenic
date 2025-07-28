@@ -43,7 +43,7 @@ def get_config():
   config.multi_query = "adam"
   config.multi_value = "adam"
   config.train_layers_str = [True, True]#, True, True, True, True]
-  config.use_checkpoint = False #use checkpoint basewith other training 
+  config.use_checkpoint = True #use checkpoint basewith other training 
   config.use_ckpt_dir = '/mnt/disks/stg_dataset/head_2/'
   config.layer_wise = False
   config.print_lr_infos = False
@@ -259,7 +259,7 @@ def get_config():
   config.model.attention_dropout_rate = 0.0
   
   #head
-  config.model.n_layers = 2
+  config.model.n_layers = 3
   config.model.head_hidden_dim = 2048
   config.model.head_bottleneck_dim = 256 #64 #256
   
