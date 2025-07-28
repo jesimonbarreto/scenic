@@ -509,7 +509,7 @@ def train(
       ema_params=ema_params, rng=rng, metadata={'chrono': chrono.save()})
 
   if config.use_checkpoint:
-    print('Restored checkpoint')
+     print('Restored checkpoint')
      restored_train_state = utils.restore_pretrained_checkpoint(
           config.use_ckpt_dir, train_state, assert_exist=True)
      restored_model_cfg = config.model
