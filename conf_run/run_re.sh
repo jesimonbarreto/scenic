@@ -9,30 +9,30 @@ cd /home/jesimonbarreto/scenic
 
 ############MVIMAGNET
 #DINO
-sudo rm -rf /mnt/disks/stg_dataset/head_2
-sudo -E python -m main_dino --config=configs/final/mvimgnet/dino_head.py --workdir=/mnt/disks/stg_dataset/head_2
+#sudo rm -rf /mnt/disks/stg_dataset/head_2
+#sudo -E python -m main_dino --config=configs/final/mvimgnet/dino_head.py --workdir=/mnt/disks/stg_dataset/head_2
 
-sudo rm -rf /mnt/disks/stg_dataset/test_test2
-sudo -E python -m main_dino --config=configs/final/mvimgnet/dino_our.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dino.py --workdir=../test_ 
+#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+#sudo -E python -m main_dino --config=configs/final/mvimgnet/dino_our.py --workdir=/mnt/disks/stg_dataset/test_test2
+#sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dino.py --workdir=../test_ 
 
 
 #DINO v2
-sudo rm -rf /mnt/disks/stg_dataset/head_2
-sudo -E python -m main_dino --config=configs/final/mvimgnet/dinov2_head.py --workdir=/mnt/disks/stg_dataset/head_2
+#sudo rm -rf /mnt/disks/stg_dataset/head_2
+#sudo -E python -m main_dino --config=configs/final/mvimgnet/dinov2_head.py --workdir=/mnt/disks/stg_dataset/head_2
 
-sudo rm -rf /mnt/disks/stg_dataset/test_test2
-sudo -E python -m main_dino --config=configs/final/mvimgnet/dinov2_our.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dinov2.py --workdir=../test_ 
+#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+#sudo -E python -m main_dino --config=configs/final/mvimgnet/dinov2_our.py --workdir=/mnt/disks/stg_dataset/test_test2
+#sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dinov2.py --workdir=../test_ 
 
 
 #TIPS
-sudo rm -rf /mnt/disks/stg_dataset/head_2
-sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_head.py --workdir=/mnt/disks/stg_dataset/head_2
+#sudo rm -rf /mnt/disks/stg_dataset/head_2
+#sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_head.py --workdir=/mnt/disks/stg_dataset/head_2
 
-sudo rm -rf /mnt/disks/stg_dataset/test_test2
-sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_our.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips.py --workdir=../test_ 
+#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+#sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_our.py --workdir=/mnt/disks/stg_dataset/test_test2
+#sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips.py --workdir=../test_ 
 
 
 ############CO3D
@@ -42,24 +42,40 @@ sudo rm -rf /mnt/disks/stg_dataset/head_2
 sudo -E python -m main_dino --config=configs/final/co3d/dino_head.py --workdir=/mnt/disks/stg_dataset/head_2
 
 sudo rm -rf /mnt/disks/stg_dataset/test_test2
-sudo -E python -m main_dino --config=configs/final/co3d/dino_our.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dino_our_2.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dino.py --workdir=../test_ 
+
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dino_our_5.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dino.py --workdir=../test_ 
+
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dino_our_8.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dino.py --workdir=../test_ 
+
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dino_our_12.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dino.py --workdir=../test_ 
+
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo -E python -m main_dino --config=configs/final/co3d/dino_our_15.py --workdir=/mnt/disks/stg_dataset/test_test2
 sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dino.py --workdir=../test_ 
 
 
 #DINO v2
-sudo rm -rf /mnt/disks/stg_dataset/head_2
-sudo -E python -m main_dino --config=configs/final/co3d/dinov2_head.py --workdir=/mnt/disks/stg_dataset/head_2
+#sudo rm -rf /mnt/disks/stg_dataset/head_2
+#sudo -E python -m main_dino --config=configs/final/co3d/dinov2_head.py --workdir=/mnt/disks/stg_dataset/head_2
 
-sudo rm -rf /mnt/disks/stg_dataset/test_test2
-sudo -E python -m main_dino --config=configs/final/co3d/dinov2_our.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dinov2.py --workdir=../test_ 
+#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+#sudo -E python -m main_dino --config=configs/final/co3d/dinov2_our.py --workdir=/mnt/disks/stg_dataset/test_test2
+#sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_dinov2.py --workdir=../test_ 
 
 #TIPS
-sudo rm -rf /mnt/disks/stg_dataset/head_2
-sudo -E python -m main_dino --config=configs/final/co3d/tips_head.py --workdir=/mnt/disks/stg_dataset/head_2
+#sudo rm -rf /mnt/disks/stg_dataset/head_2
+#sudo -E python -m main_dino --config=configs/final/co3d/tips_head.py --workdir=/mnt/disks/stg_dataset/head_2
 
-sudo rm -rf /mnt/disks/stg_dataset/test_test2
-sudo -E python -m main_dino --config=configs/final/co3d/tips_our.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_tips.py --workdir=../test_ 
+#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+#sudo -E python -m main_dino --config=configs/final/co3d/tips_our.py --workdir=/mnt/disks/stg_dataset/test_test2
+#sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_tips.py --workdir=../test_ 
 
 
