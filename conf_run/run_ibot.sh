@@ -44,9 +44,9 @@ cd /home/jesimonbarreto/scenic
 #sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_ibot_base.py --workdir=../test_
 
 #video
-#sudo rm -rf /mnt/disks/stg_dataset/head_2
-#sudo -E python -m main_dino --config=configs/final/mvimgnet/ibot_head.py --workdir=/mnt/disks/stg_dataset/head_2
+sudo rm -rf /mnt/disks/stg_dataset/head_2
+sudo -E python -m main_dino --config=configs/final/mvimgnet/ibot_head.py --workdir=/mnt/disks/stg_dataset/head_2
 
-#sudo rm -rf /mnt/disks/stg_dataset/test_test2
+sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/final/mvimgnet/ibot_our.py --workdir=/mnt/disks/stg_dataset/test_test2
 sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_ibot.py --workdir=../test_
