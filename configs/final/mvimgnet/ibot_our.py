@@ -29,7 +29,7 @@ def get_config():
   config.int_train_last_layers = 2
 
   #Uncert loss
-  config.un_loss = True
+  config.un_loss = False
 
   
 
