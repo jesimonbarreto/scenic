@@ -13,7 +13,7 @@ def get_config():
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'reb_exp'
+  config.project = 'Local_crops'
   config.experiment_name = 'eval_co3b'
   config.extract_train = True
   config.transfer_learning = False
