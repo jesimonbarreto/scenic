@@ -25,10 +25,10 @@ cd /home/jesimonbarreto/scenic
 
 
 #tips pretrained
-sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_tips_base.py --workdir=../test_
+#sudo -E python -m knn_main --config=configs/final/co3d/knn_eval_tips_base.py --workdir=../test_
 
-sudo rm -rf /mnt/disks/stg_dataset/head_2
-sudo -E python -m main_dino --config=configs/final/co3d/tips_head.py --workdir=/mnt/disks/stg_dataset/head_2
+#sudo rm -rf /mnt/disks/stg_dataset/head_2
+#sudo -E python -m main_dino --config=configs/final/co3d/tips_head.py --workdir=/mnt/disks/stg_dataset/head_2
 
 sudo rm -rf /mnt/disks/stg_dataset/test_test2
 sudo -E python -m main_dino --config=configs/final/co3d/tips_our.py --workdir=/mnt/disks/stg_dataset/test_test2
