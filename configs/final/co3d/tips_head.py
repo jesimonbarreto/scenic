@@ -44,7 +44,7 @@ def get_config():
   config.dataset_configs = ml_collections.ConfigDict()
   config.dataset_configs.prefetch_to_device = 2
   config.dataset_configs.shuffle_buffer_size = 250_000
-  reference_resolution = 448
+  reference_resolution = 224
   n_queries = 10
   config.mode = 'video' #'video_crops' # video or frame
   
