@@ -124,8 +124,8 @@ def get_config():
         f'|copy("image2", "x2")'+
         ''.join([f'|copy("image{1 if i % 2 == 0 else 2}", "crop{i}")' for i in range(config.ncrops)]) +
 
-        f'|copy_resize_file(448, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
-        f'|copy_resize_file(448, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
+        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x1", "x1"), outkey=("x1", "image1"))' +
+        f'|copy_resize_file(224, {config.global_crops_scale}, inkey=("x2", "x2"), outkey=("x2", "image2"))' +
         '|value_range(0, 1, data_key="x1")' +
         '|random_color_jitter(0.8, 0.4, 0.4, 0.2, 0.1, data_key="x1")' +
         #'|random_color_jitter(0.8, 0.1, 0.1, 0.1, 0.1, data_key="x1")' +
