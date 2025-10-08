@@ -60,7 +60,7 @@ def get_config():
   config.gama_loss = 1
   config.teta_loss= 0.7
   config.max_grad_norm = 1
-  config.num_training_epochs = 10#400
+  config.num_training_epochs = 2#400
   config.batch_size = 128
   config.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.batch_size
   config.rng_seed = 42
@@ -72,7 +72,7 @@ def get_config():
   config.local_crops_scale = (0.05,0.25)
   config.student_temp = 0.1
   config.center_momentum = 0.9
-  config.ncrops = 0 #change other parameters
+  config.ncrops = 10 #change other parameters
   config.warmup_teacher_temp = 0.04
   config.teacher_temp = 0.07
   config.warmup_teacher_temp_epochs = 0
