@@ -292,7 +292,7 @@ def get_config():
   config.lr_configs.warmup_steps = config.steps_per_epoch * 15
   config.lr_configs.steps_per_cycle = total_steps
   config.lr_configs.base_learning_rate = config.lr * config.batch_size / 1024.
-  config.lr_configs.alpha = 0.01
+  config.lr_configs.alpha = 0.0001
 
   # Weight decay.
   config.weight_decay = 0.04
