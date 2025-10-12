@@ -1,8 +1,8 @@
 import ml_collections, os
 import jax.numpy as jnp
 VARIANT = 'B/14'
-_IMAGENET_TRAIN_SIZE = 20412 #237402 #20412 #177559 #9469 #1281167
-_IMAGENET_TEST_SIZE = 4535 #4535 #4535 #55823
+_IMAGENET_TRAIN_SIZE = 237402 #20412 #237402 #20412 #177559 #9469 #1281167
+_IMAGENET_TEST_SIZE = 55823 #4535 #4535 #55823
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 MEAN = [0.5]
@@ -34,7 +34,7 @@ def get_config():
   # For IMAGENET-1K
   #config.dataset_configs.dataset = 'imagenet2012'
   #for cifar 10
-  config.dataset_configs.dataset = 'co3dtest' #'co3dtest' #'mvimgnetest' #'co3dtest' #'imagenet2012'
+  config.dataset_configs.dataset = 'mvimgnetest' #'co3dtest' #'mvimgnetest' #'co3dtest' #'imagenet2012'
   config.dataset_configs.dataset_dir = '/mnt/disks/stg_dataset/dataset/imagenet/'
   config.dataset_configs.train_split = 'train'
   config.dataset_configs.test_split = 'validation'
