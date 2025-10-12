@@ -266,7 +266,7 @@ def get_config():
   config.query_max_seqlen = 70
 
   # Learning rate.
-  config.lr=0.000000001
+  config.lr=0.0000000001
   #cosine schedule lr
   config.lr_configs = ml_collections.ConfigDict()
   config.lr_configs.learning_rate_schedule = 'compound'
@@ -274,7 +274,7 @@ def get_config():
   config.lr_configs.warmup_steps = config.steps_per_epoch * 15
   config.lr_configs.steps_per_cycle = total_steps
   config.lr_configs.base_learning_rate = config.lr * config.batch_size / 1024.
-  config.lr_configs.alpha = 0.01
+  config.lr_configs.alpha = 0.0001
 
   # Weight decay.
   config.weight_decay = 0.04
