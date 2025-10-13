@@ -26,7 +26,7 @@ def get_config():
   config.lora_rank = 64
   
   # Dataset.
-  config.dataset_name = 'eval_dataset'
+  config.dataset_name = 'Test_tips'
   config.data_dtype_str = 'float32'
   config.dataset_configs = ml_collections.ConfigDict()
   config.dataset_configs.prefetch_to_device = 2
