@@ -30,8 +30,8 @@ cd /home/jesimonbarreto/scenic
 #sudo rm -rf /mnt/disks/stg_dataset/head_2
 #sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_head.py --workdir=/mnt/disks/stg_dataset/head_2
 
-#sudo rm -rf /mnt/disks/stg_dataset/test_test2
-#sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_our.py --workdir=/mnt/disks/stg_dataset/test_test2
+sudo rm -rf /mnt/disks/stg_datsaset/test_test2
+sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_our.py --workdir=/mnt/disks/stg_dataset/test_test2
 sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips.py --workdir=../test_
 
 #frame
