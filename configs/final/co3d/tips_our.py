@@ -5,7 +5,7 @@ import ml_collections
 
 VARIANT = 'B/14'
 _IMAGENET_TRAIN_SIZE = 237402 #20412 #40608 #237402 #19320 #377*50 #237402 #40608 #10152 (number of video filtered) * n pairs of each video #1281167
-_IMAGENET_TEST_SIZE = 4535 #4535
+_IMAGENET_TEST_SIZE = 55823 #4535
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 
@@ -284,7 +284,7 @@ def get_config():
   config.query_max_seqlen = 70
 
   # Learning rate.
-  config.lr=0.0000000000001
+  config.lr=0.001
   #cosine schedule lr
   config.lr_configs = ml_collections.ConfigDict()
   config.lr_configs.learning_rate_schedule = 'compound'
@@ -292,7 +292,7 @@ def get_config():
   config.lr_configs.warmup_steps = config.steps_per_epoch * 15
   config.lr_configs.steps_per_cycle = total_steps
   config.lr_configs.base_learning_rate = config.lr * config.batch_size / 1024.
-  config.lr_configs.alpha = 0.0001
+  config.lr_configs.alpha = 0.01
 
   # Weight decay.
   config.weight_decay = 0.04
@@ -344,7 +344,7 @@ def get_config():
   config.val.dataset_configs.batch_size_test = 64
   config.val.steps_per_epoch = _IMAGENET_TRAIN_SIZE // config.val.dataset_configs.batch_size_train
   config.val.steps_per_epoch_eval = _IMAGENET_TEST_SIZE // config.val.dataset_configs.batch_size_test
-  config.val.num_classes = 50
+  config.val.num_classes = 238
   reference_resolution = 224
   crop_size = 224
   config.val.T = 0.07
