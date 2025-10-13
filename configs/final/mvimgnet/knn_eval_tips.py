@@ -13,7 +13,7 @@ def get_config():
   """Returns the ViT experiment configuration."""
   config = ml_collections.ConfigDict()
   #WANDB
-  config.project = 'reb_exp'
+  config.project = 'Test_tips'
   config.experiment_name = 'eval_co3b_tips'
   config.extract_train = True
   config.transfer_learning = False
@@ -26,7 +26,7 @@ def get_config():
   config.lora_rank = 64
   
   # Dataset.
-  config.dataset_name = 'Test_tips'
+  config.dataset_name = 'eval_dataset'
   config.data_dtype_str = 'float32'
   config.dataset_configs = ml_collections.ConfigDict()
   config.dataset_configs.prefetch_to_device = 2
