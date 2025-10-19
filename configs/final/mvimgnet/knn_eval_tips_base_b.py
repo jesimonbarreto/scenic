@@ -71,10 +71,10 @@ def get_config():
       f'|onehot({config.num_classes_filter}, key="label", key_result="label_onehot")' +
       '|resize_small(224, method="bilinear", data_key="image")'+
       '|resize_small(224, method="bilinear", data_key="image_resized")'+
+      '|central_crop(224, data_key="image")'+
+      '|central_crop(224, data_key="image_resized")'+
       '|value_range(0, 1, data_key="image")' +
       '|value_range(0, 1, data_key="image_resized")' +
-      #'|central_crop(224, data_key="image")'+
-      #'|central_crop(224, data_key="image_resized")'+
       #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image")'+
       #f'|standardize({MEAN_RGB}, {STDDEV_RGB}, data_key="image_resized")'+
       '|keep("image", "image_resized", "label", "label_onehot")'
