@@ -9,8 +9,6 @@ _IMAGENET_TEST_SIZE = 55823 #4535 #55823
 MEAN_RGB = [0.485, 0.456, 0.406]
 STDDEV_RGB = [0.229, 0.224, 0.225]
 
-#variacoes
-# epocas, LR, mean_rgb, std_rgb, size [224, 448], numero de localcrops,outros paramtros preprocessing
 
 def get_config():
   global _IMAGENET_TRAIN_SIZE, _IMAGENET_TEST_SIZE
