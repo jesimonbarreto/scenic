@@ -28,7 +28,7 @@ sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_head.py --workd
 
 sudo rm -rf /mnt/disks/stg_datsaset/test_test2
 sudo -E python -m main_dino --config=configs/final/mvimgnet/tips_our.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips.py --workdir=../test_
+#sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_tips.py --workdir=../test_
 
 mkdir -p /mnt/disks/stg_datsaset/result_tips/
 sudo cp "$(ls /mnt/disks/stg_datsaset/test_test2/checkpoint_* | sort -t'_' -k2 -n | tail -n 1)" /mnt/disks/stg_datsaset/result_tips/
@@ -38,7 +38,7 @@ sudo -E python -m main_dino --config=configs/final/mvimgnet/dino_head.py --workd
 
 sudo rm -rf /mnt/disks/stg_datsaset/test_test2
 sudo -E python -m main_dino --config=configs/final/mvimgnet/dino_our.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dino.py --workdir=../test_
+#sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dino.py --workdir=../test_
 
 mkdir -p /mnt/disks/stg_datsaset/result_dino/
 sudo cp "$(ls /mnt/disks/stg_datsaset/test_test2/checkpoint_* | sort -t'_' -k2 -n | tail -n 1)" /mnt/disks/stg_datsaset/result_dino/
@@ -48,7 +48,7 @@ sudo -E python -m main_dino --config=configs/final/mvimgnet/dinov2_head.py --wor
 
 sudo rm -rf /mnt/disks/stg_datsaset/test_test2
 sudo -E python -m main_dino --config=configs/final/mvimgnet/dinov2_our.py --workdir=/mnt/disks/stg_dataset/test_test2
-sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dinov2.py --workdir=../test_
+#sudo -E python -m knn_main --config=configs/final/mvimgnet/knn_eval_dinov2.py --workdir=../test_
 
 mkdir -p /mnt/disks/stg_datsaset/result_dinov2/
 sudo cp "$(ls /mnt/disks/stg_datsaset/test_test2/checkpoint_* | sort -t'_' -k2 -n | tail -n 1)" /mnt/disks/stg_datsaset/result_dinov2/
